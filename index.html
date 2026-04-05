@@ -19,7 +19,7 @@
     --border:rgba(180,140,50,0.2);--text:#1A1714;--text-muted:#7A7268;--grey:#9CA3AF;
   }}
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:var(--tab-h);}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:var(--tab-h);overflow-x:hidden;}
   body::before{content:'';position:fixed;top:0;left:0;right:0;height:40%;background:radial-gradient(ellipse 80% 100% at 50% 0%,rgba(201,168,76,0.07) 0%,transparent 100%);pointer-events:none;z-index:0;}
 
   /* Tab bar */
@@ -201,7 +201,7 @@
 
 
 <!-- Password Screen -->
-<div id="passwordScreen" style="position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;">
+<div id="passwordScreen" style="position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;overflow:hidden;">
   <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;">Marriott Bonvoy</div>
   <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;">住宿追蹤</div>
   <input type="password" id="pwInput" placeholder="輸入密碼" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;text-align:center;width:200px;margin-top:10px;" onkeydown="if(event.key==='Enter')checkPw()">
