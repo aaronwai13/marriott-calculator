@@ -206,7 +206,7 @@
 <div id="passwordScreen" style="position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;overflow:hidden;">
   <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;">Marriott Bonvoy</div>
   <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;">住宿追蹤</div>
-  <input type="password" id="pwInput" placeholder="輸入密碼" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;text-align:center;width:200px;margin-top:10px;" onkeydown="if(event.key==='Enter')checkPw()">
+  <input type="password" id="pwInput" inputmode="numeric" placeholder="輸入密碼" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;text-align:center;width:200px;margin-top:10px;" onkeydown="if(event.key==='Enter')checkPw()">
   <button onclick="checkPw()" style="background:linear-gradient(135deg,#9A7A2E,#C9A84C);border:none;border-radius:11px;color:#0A0A0F;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:12px 32px;cursor:pointer;width:200px;">進入</button>
   <div id="pwError" style="color:#F87171;font-size:12px;font-family:'DM Mono',monospace;display:none;">密碼錯誤</div>
 </div>
