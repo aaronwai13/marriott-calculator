@@ -18,7 +18,9 @@
     --bg:#F5F3EE;--surface:#FFFFFF;--surface2:#EDE9E0;
     --border:rgba(180,140,50,0.2);--text:#1A1714;--text-muted:#7A7268;--grey:#9CA3AF;
   }}
-  *{margin:0;padding:0;box-sizing:border-box;}
+  *{margin:0;padding:0;box-sizing:border-box;max-width:100%;}
+  html{overflow:hidden;}
+  html.unlocked{overflow:unset;}
   body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:var(--tab-h);overflow-x:hidden;}
   body::before{content:'';position:fixed;top:0;left:0;right:0;height:40%;background:radial-gradient(ellipse 80% 100% at 50% 0%,rgba(201,168,76,0.07) 0%,transparent 100%);pointer-events:none;z-index:0;}
 
@@ -547,6 +549,7 @@ window.checkPw=function(){
   if(pw==='0530'){
     document.getElementById('passwordScreen').style.display='none';
     sessionStorage.setItem('auth','1');
+    document.documentElement.classList.add('unlocked');
   }else{
     document.getElementById('pwError').style.display='block';
     document.getElementById('pwInput').value='';
@@ -555,6 +558,7 @@ window.checkPw=function(){
 // Check if already authenticated this session
 if(sessionStorage.getItem('auth')==='1'){
   document.getElementById('passwordScreen').style.display='none';
+  document.documentElement.classList.add('unlocked');
 }
 
 // Tab switching
