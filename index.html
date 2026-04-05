@@ -577,7 +577,7 @@ import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-ap
 import{getDatabase,ref,onValue,push,remove,update}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 
-const CURRENT_VERSION='2026.04.05.1';
+const CURRENT_VERSION='2026.04.05.2';
 
 const firebaseConfig={apiKey:"AIzaSyArG04UcAi4oe4DdDJtJPrRCCv5e20cVVk",authDomain:"marriott-calculator.firebaseapp.com",databaseURL:"https://marriott-calculator-default-rtdb.firebaseio.com",projectId:"marriott-calculator",storageBucket:"marriott-calculator.firebasestorage.app",messagingSenderId:"983529900657",appId:"1:983529900657:web:52821f5d4677b85ef7e9d0"};
 
@@ -759,7 +759,7 @@ window.addStay=async function(){
   btn.disabled=false;
 };
 
-const UNDO_MS=5000;
+const UNDO_MS=3000;
 window.deleteStay=function(key,encodedName){
   if(!isAdmin)return;
   pendingDelete={key};if(undoTimer)clearTimeout(undoTimer);
