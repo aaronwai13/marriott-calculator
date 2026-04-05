@@ -200,9 +200,13 @@
 
 
 
-<div class="admin-bar" id="adminBar">
-  <div class="admin-info"><div class="admin-dot"></div><span id="adminEmail"></span></div>
-  <button class="btn-logout" onclick="doLogout()">登出</button>
+<!-- Password Screen -->
+<div id="passwordScreen" style="position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;">
+  <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;">Marriott Bonvoy</div>
+  <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;">住宿追蹤</div>
+  <input type="password" id="pwInput" placeholder="輸入密碼" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;text-align:center;width:200px;margin-top:10px;" onkeydown="if(event.key==='Enter')checkPw()">
+  <button onclick="checkPw()" style="background:linear-gradient(135deg,#9A7A2E,#C9A84C);border:none;border-radius:11px;color:#0A0A0F;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:12px 32px;cursor:pointer;width:200px;">進入</button>
+  <div id="pwError" style="color:#F87171;font-size:12px;font-family:'DM Mono',monospace;display:none;">密碼錯誤</div>
 </div>
 
 <!-- ========== PAGE 2025 ========== -->
@@ -350,7 +354,7 @@
   </button>
 </div>
 
-<button class="login-fab" id="loginFab" onclick="doLogin()">🔑 管理員登入</button>
+
 
 <!-- Edit Modal -->
 <div class="modal-overlay" id="modalOverlay">
@@ -537,6 +541,22 @@ function render2025(){
 }
 render2025();
 
+// Password check
+window.checkPw=function(){
+  const pw=document.getElementById('pwInput').value;
+  if(pw==='0530'){
+    document.getElementById('passwordScreen').style.display='none';
+    sessionStorage.setItem('auth','1');
+  }else{
+    document.getElementById('pwError').style.display='block';
+    document.getElementById('pwInput').value='';
+  }
+};
+// Check if already authenticated this session
+if(sessionStorage.getItem('auth')==='1'){
+  document.getElementById('passwordScreen').style.display='none';
+}
+
 // Tab switching
 let currentIsAdmin=false;
 function switchTab(year){
@@ -545,23 +565,21 @@ function switchTab(year){
   document.getElementById('tab2025').classList.toggle('active',year==='2025');
   document.getElementById('tab2026').classList.toggle('active',year==='2026');
   const on2026=year==='2026';
-  document.getElementById('adminBar').classList.toggle('show',currentIsAdmin&&on2026);
-  document.getElementById('loginFab').classList.toggle('show',!currentIsAdmin&&on2026);
 }
 </script>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getDatabase,ref,onValue,push,remove,update}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 
 const CURRENT_VERSION='2026.04.04.4';
-const ADMIN_EMAIL='nentivericfv@gmail.com';
+
 const firebaseConfig={apiKey:"AIzaSyArG04UcAi4oe4DdDJtJPrRCCv5e20cVVk",authDomain:"marriott-calculator.firebaseapp.com",databaseURL:"https://marriott-calculator-default-rtdb.firebaseio.com",projectId:"marriott-calculator",storageBucket:"marriott-calculator.firebasestorage.app",messagingSenderId:"983529900657",appId:"1:983529900657:web:52821f5d4677b85ef7e9d0"};
 
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
-const auth=getAuth(app);
+
 const staysRef=ref(db,'stays2026');
 const versionRef=ref(db,'appVersion');
 
@@ -606,23 +624,12 @@ const DEFAULT_STAYS=[
 
 let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=false,editKey=null,dbInitialized=false,pendingDelete=null,undoTimer=null,toastTimer=null;
 
-onAuthStateChanged(auth,(user)=>{
-  isAdmin=!!(user&&user.email===ADMIN_EMAIL);
-  currentIsAdmin=isAdmin;
-  document.getElementById('addForm').classList.toggle('show',isAdmin);
-  const on2026=document.getElementById('page2026').classList.contains('active');
-  document.getElementById('adminBar').classList.toggle('show',isAdmin&&on2026);
-  document.getElementById('loginFab').classList.toggle('show',!isAdmin&&on2026);
-  if(isAdmin){
-    document.getElementById('adminEmail').textContent=user.email;
-    document.getElementById('container2026').style.paddingTop='68px';
-  }else{
-    document.getElementById('container2026').style.paddingTop='28px';
-  }
-});
+// Password already verified, set as admin
+isAdmin=true;currentIsAdmin=true;
+document.getElementById('addForm').classList.add('show');
 
-window.doLogin=async function(){try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){showToast('登入失敗','#F87171');}};
-window.doLogout=async function(){await signOut(auth);showToast('已登出');};
+
+
 
 onValue(versionRef,(snap)=>{});
 
