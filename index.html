@@ -832,15 +832,15 @@ function render2026(stays){
     const monthStart=new Date(2026,parseInt(m),1),monthEnd=new Date(2026,parseInt(m)+1,0);
     const q1Ended=now>Q1_END;
     const hasQ1Stays=monthGroups[m].some(s=>isQ1Eligible(s));
+    const isQ1EndMonth=parseInt(m)===Q1_END.getMonth(); // 五月
     const hasNonQ1Stays=monthGroups[m].some(s=>!isQ1Eligible(s));
-    // 如果月份有Q1住宿，顯示tag；如果同時有Q1結束後嘅住宿，加「至5/10」
-    const q1EndInMonth=hasQ1Stays&&hasNonQ1Stays;
+    const q1EndInMonth=isQ1EndMonth&&hasQ1Stays&&hasNonQ1Stays;
     const q1TagText=q1EndInMonth?'Q1 期間（至 5/10）':(q1Ended?'Q1 已結束':'Q1 期間');
     const q1TagHtml=hasQ1Stays?`<span class="q1-tag">${q1TagText}</span>`:'';
     html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
     let q1DividerShown=false;
     for(const s of monthGroups[m]){
-      if(!q1DividerShown&&hasQ1Stays&&hasNonQ1Stays&&!isQ1Eligible(s)){
+      if(!q1DividerShown&&q1EndInMonth&&!isQ1Eligible(s)){
         q1DividerShown=true;
         html+=`<div class="q1-divider">── Q1 結束 ──</div>`;
       }
