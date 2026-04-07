@@ -635,7 +635,7 @@ let _pointsBaseStays=[];
 onValue(pointsBaseRef,(snap)=>{_pointsBase=snap.val()||0;});
 onValue(pointsBaseStaysRef,(snap)=>{_pointsBaseStays=snap.val()||[];});
 
-const TARGET=75,Q1_START=new Date('2026-02-25'),Q1_END=new Date('2026-05-10');
+const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 
 const BRAND_KEYWORDS=[
@@ -830,10 +830,9 @@ function render2026(stays){
   const now=new Date();let html='';
   for(const m of Object.keys(monthGroups).sort((a,b)=>a-b)){
     const monthStart=new Date(2026,parseInt(m),1),monthEnd=new Date(2026,parseInt(m)+1,0);
-    const inQ1=monthStart<=Q1_END&&monthEnd>=Q1_START,q1Ended=now>Q1_END;
-    // 只有整個月都係Q1期間先show tag，或者月份部分係Q1但未結束
-    const showQ1Tag=monthStart<=Q1_END&&monthStart>=Q1_START||monthEnd>=Q1_START&&monthStart<=Q1_END;
-    const q1TagHtml=showQ1Tag?`<span class="q1-tag${q1Ended?' ended':''}">${q1Ended?'Q1 已結束':'Q1 期間'}</span>`:'';
+    const q1Ended=now>Q1_END;
+    const hasQ1Stays=monthGroups[m].some(s=>isQ1Eligible(s));
+    const q1TagHtml=hasQ1Stays?`<span class="q1-tag${q1Ended?' ended':''}">${q1Ended?'Q1 已結束':'Q1 期間'}</span>`:'';
     html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
     for(const s of monthGroups[m]){
       const dateStr=s.date.slice(5).replace('-','/');
