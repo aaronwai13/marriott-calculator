@@ -760,12 +760,19 @@ function render2026(stays){
   const pointsBase=parseInt(localStorage.getItem('pointsBase'))||0;
   const pointsBaseStays=JSON.parse(localStorage.getItem('pointsBaseStayIds')||'[]');
   let netChange=0;
-  const netQ1Brands=new Set();
+  // 要知道每個品牌嘅「第一次Q1住宿」係咪喺pointsBase snapshot之前
+  // 先建立所有Q1住宿按日期排序，找出每個品牌第一次
+  const allQ1Sorted=[...stays].filter(s=>isQ1Eligible(s)).sort((a,b)=>a.date.localeCompare(b.date)||a._key.localeCompare(b._key));
+  const firstQ1KeyByBrand={};
+  for(const s of allQ1Sorted){
+    if(!firstQ1KeyByBrand[s.brand])firstQ1KeyByBrand[s.brand]=s._key;
+  }
   for(const s of stays){
     if(!pointsBaseStays.includes(s._key)){
       if(s.pointsEarned>0)netChange+=s.pointsEarned;
       if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
-      if(isQ1Eligible(s)&&usedBrands.has(s.brand)&&!netQ1Brands.has(s.brand)){netQ1Brands.add(s.brand);netChange+=2500;}
+      // 只有該品牌第一次Q1住宿先加2500
+      if(isQ1Eligible(s)&&firstQ1KeyByBrand[s.brand]===s._key)netChange+=2500;
     }
   }
   const currentPoints=pointsBase>0?pointsBase+netChange:0;
