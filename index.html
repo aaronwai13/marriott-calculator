@@ -753,17 +753,19 @@ function render2026(stays){
 
   let earned2026=0;
   for(const s of stays){if(s.pointsEarned>0)earned2026+=s.pointsEarned;}
+  // Q1 bonus: 每個品牌第一次入住先加 2500，usedBrands 已係唯一品牌 set
   earned2026+=usedBrands.size*2500;
   document.getElementById('statEarned').textContent=earned2026>0?earned2026.toLocaleString():'—';
 
   const pointsBase=parseInt(localStorage.getItem('pointsBase'))||0;
   const pointsBaseStays=JSON.parse(localStorage.getItem('pointsBaseStayIds')||'[]');
   let netChange=0;
+  const netQ1Brands=new Set();
   for(const s of stays){
     if(!pointsBaseStays.includes(s._key)){
       if(s.pointsEarned>0)netChange+=s.pointsEarned;
       if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
-      if(isQ1Eligible(s)&&usedBrands.has(s.brand))netChange+=2500;
+      if(isQ1Eligible(s)&&usedBrands.has(s.brand)&&!netQ1Brands.has(s.brand)){netQ1Brands.add(s.brand);netChange+=2500;}
     }
   }
   const currentPoints=pointsBase>0?pointsBase+netChange:0;
@@ -816,13 +818,18 @@ function render2026(stays){
       const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
       let pointsHtml='';
       const isQ1Bonus=isQ1Eligible(s)&&usedBrands.has(s.brand);
+      // 只有第一次入住該品牌先係Q1 bonus
+      const isFirstQ1ForBrand=isQ1Eligible(s)&&(()=>{
+        const earlier=sorted.filter(x=>x._key!==s._key&&isQ1Eligible(x)&&x.brand===s.brand&&x.date<=s.date&&!(x.date===s.date&&x._key>=s._key));
+        return earlier.length===0;
+      })();
       if(s.redeem){
         const redPart=s.redeemPoints>0?`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−${s.redeemPoints.toLocaleString()}</span>`:`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−?</span>`;
         const earnPart=s.pointsEarned>0?`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+${s.pointsEarned.toLocaleString()}</span>`:`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+?</span>`;
         pointsHtml=redPart+' '+earnPart;
       }else{
         const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
-        const q1Part=isQ1Bonus?` <span style="font-size:9px;color:var(--green);">(Q1+2,500)</span>`:'';
+        const q1Part=isFirstQ1ForBrand?` <span style="font-size:9px;color:var(--green);">(Q1+2,500)</span>`:'';
         pointsHtml=`<span style="color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;">${base}</span>${q1Part}`;
       }
       const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
