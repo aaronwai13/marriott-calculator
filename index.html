@@ -71,7 +71,7 @@
   .nights-remaining strong{color:var(--gold-light);font-size:14px;}
   .nights-remaining.achieved{color:var(--green);font-size:14px;font-weight:600;}
 
-  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}.stat-value.blue{color:#60A5FA;}.stat-value.purple{color:#C084FC;}
   .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;}
   .stat-icon{font-size:18px;margin-bottom:8px;display:block;}
   .stat-value{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;line-height:1;margin-bottom:4px;}
@@ -289,6 +289,13 @@
     <div class="stats-grid">
       <div class="stat-card"><span class="stat-icon">🏨</span><div class="stat-value gold" id="statActual">—</div><div class="stat-label">實際住宿晚數</div></div>
       <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value green" id="statQ1">—</div><div class="stat-label">Q1活動獎勵房晚</div></div>
+      <div class="stat-card"><span class="stat-icon">⭐</span><div class="stat-value blue" id="statEarned">—</div><div class="stat-label">2026已賺積分</div></div>
+      <div class="stat-card" style="position:relative;">
+        <span class="stat-icon">💎</span>
+        <div class="stat-value purple" id="statTotal">—</div>
+        <div class="stat-label">目前積分</div>
+        <button id="btnEditPoints" onclick="openPointsModal()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:4px;">✎</button>
+      </div>
     </div>
 
     <!-- Add form -->
@@ -385,6 +392,19 @@
       <div class="input-wrap"><input type="number" id="editPointsEarned" inputmode="numeric" placeholder="例如 4608" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEdit()">儲存</button></div>
+  </div>
+</div>
+
+<!-- Points Modal -->
+<div class="modal-overlay" id="pointsModalOverlay">
+  <div class="modal">
+    <div class="modal-title">更新積分餘額</div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>目前積分（手動設定）</label>
+      <div class="input-wrap"><input type="number" id="pointsBaseInput" inputmode="numeric" placeholder="例如 41300" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:14px;">設定後，之後新增住宿嘅積分變動會自動計算</div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closePointsModal()">取消</button><button class="btn-save" onclick="savePointsBase()">儲存</button></div>
   </div>
 </div>
 
@@ -687,6 +707,32 @@ function render2026(stays){
   document.getElementById('statQ1').textContent=bonus;
   setTimeout(()=>{document.getElementById('progressFill').style.width=pct+'%';},100);
 
+  // Calculate points
+  let earned2026=0,redeemed2026=0;
+  for(const s of stays){
+    if(s.pointsEarned>0)earned2026+=s.pointsEarned;
+    if(s.redeem&&s.redeemPoints>0)redeemed2026+=s.redeemPoints;
+  }
+  // Add Q1 bonuses (2500 per eligible brand)
+  earned2026+=usedBrands.size*2500;
+  document.getElementById('statEarned').textContent=earned2026>0?earned2026.toLocaleString():'—';
+  // Current points = base + earned - redeemed (only for stays added AFTER base was set)
+  const pointsBase=parseInt(localStorage.getItem('pointsBase'))||0;
+  const pointsBaseDate=localStorage.getItem('pointsBaseDate')||'';
+  let netChange=0;
+  if(pointsBaseDate){
+    for(const s of stays){
+      if(s.date>pointsBaseDate){
+        if(s.pointsEarned>0)netChange+=s.pointsEarned;
+        if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
+        // Q1 bonus for stays after base date
+        if(isQ1Eligible(s)&&usedBrands.has(s.brand))netChange+=2500;
+      }
+    }
+  }
+  const currentPoints=pointsBase>0?pointsBase+netChange:0;
+  document.getElementById('statTotal').textContent=pointsBase>0?currentPoints.toLocaleString():'—';
+
   const remainEl=document.getElementById('nightsRemainingEl');
   if(total>=TARGET){remainEl.className='nights-remaining achieved';remainEl.innerHTML='已達標 🎉';}
   else{remainEl.className='nights-remaining';remainEl.innerHTML=`距離75晚目標，仲需 <strong>${left}</strong> 晚`;}
@@ -859,6 +905,27 @@ window.saveEdit=async function(){
   catch(e){showToast('更新失敗','#F87171');}
 };
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+window.openPointsModal=function(){
+  const base=localStorage.getItem('pointsBase')||'';
+  document.getElementById('pointsBaseInput').value=base;
+  document.getElementById('pointsModalOverlay').classList.add('show');
+};
+window.closePointsModal=function(){document.getElementById('pointsModalOverlay').classList.remove('show');};
+window.savePointsBase=function(){
+  const val=parseInt(document.getElementById('pointsBaseInput').value);
+  if(!val||val<0){showToast('請輸入有效積分','#F87171');return;}
+  localStorage.setItem('pointsBase',val);
+  localStorage.setItem('pointsBaseDate',new Date().toISOString().slice(0,10));
+  closePointsModal();
+  showToast('✓ 積分餘額已更新');
+  // Re-render
+  onValue(staysRef,(snapshot)=>{
+    const data=snapshot.val();
+    if(data){render2026(Object.entries(data).map(([key,val])=>({...val,_key:key})));}
+  },{onlyOnce:true});
+};
+document.getElementById('pointsModalOverlay').addEventListener('click',function(e){if(e.target===this)closePointsModal();});
 
 function showToast(msg,color='#4ADE80'){
   const t=document.getElementById('toast');
