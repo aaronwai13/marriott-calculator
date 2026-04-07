@@ -705,7 +705,7 @@ function render2026(stays){
   const total=actualNights+bonus,left=Math.max(0,TARGET-total),pct=Math.min(100,(total/TARGET)*100);
 
   document.getElementById('totalDisplay').textContent=total;
-  document.getElementById('totalPct').textContent=pct>0?'.'+Math.round(pct)+'%':'';
+  document.getElementById('totalPct').textContent=pct>0?' '+Math.round(pct)+'%':'';
   document.getElementById('statActual').textContent=actualNights;
   document.getElementById('statQ1').textContent=bonus;
   setTimeout(()=>{document.getElementById('progressFill').style.width=pct+'%';},100);
