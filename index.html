@@ -297,18 +297,23 @@
     <div class="add-form" id="addForm">
       <div class="section-header" style="margin-bottom:16px;"><div class="section-title">新增住宿</div></div>
       <div class="form-grid">
-        <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="inputDate"></div></div>
+        <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="inputDate" onchange="checkQ1Hint()"></div></div>
         <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="btnMinus">−</button><div class="stepper-val" id="nightsVal">1</div><button class="stepper-btn" id="btnPlus">＋</button></div></div>
       </div>
       <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="inputName" oninput="onNameInput(this.value)"><button class="input-clear" id="clearName" onclick="clearName()">✕</button></div></div>
       <div class="form-group" style="margin-bottom:12px;">
         <label>品牌 <span id="brandHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
-        <select class="brand-select" id="inputBrand">
+        <select class="brand-select" id="inputBrand" onchange="checkQ1Hint()">
           <option value="">選擇品牌...</option>
           <option>Aloft</option><option>Autograph Collection</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option><option>其他</option>
         </select>
       </div>
       <div class="toggle-row" id="redeemToggle" onclick="toggleRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
+      <div class="form-group" id="redeemPointsGroup" style="margin-bottom:12px;display:none;">
+        <label>使用積分</label>
+        <div class="input-wrap"><input type="number" id="inputRedeemPoints" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      </div>
+      <div id="q1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 退房後將獲 +2,500 積分</div>
       <button class="btn-add" id="btnAdd" onclick="addStay()">＋ 新增住宿</button>
     </div>
 
@@ -372,6 +377,15 @@
       </select>
     </div>
     <div class="toggle-row" id="editRedeemToggle" onclick="toggleEditRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
+    <div class="form-group" id="editRedeemPointsGroup" style="margin-bottom:12px;display:none;">
+      <label>使用積分</label>
+      <div class="input-wrap"><input type="number" id="editRedeemPoints" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+    </div>
+    <div id="editQ1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · +2,500 積分</div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>賺取積分（退房後填寫）</label>
+      <div class="input-wrap"><input type="number" id="editPointsEarned" placeholder="例如 4608" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+    </div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEdit()">儲存</button></div>
   </div>
 </div>
@@ -667,6 +681,7 @@ function render2026(stays){
   const sorted=[...stays].sort((a,b)=>a.date.localeCompare(b.date));
   const actualNights=stays.reduce((s,x)=>s+x.nights,0);
   const{bonus,usedBrands}=calcQ1(stays);
+  window._q1UsedBrands=usedBrands;
   const total=actualNights+bonus,left=Math.max(0,TARGET-total),pct=Math.min(100,(total/TARGET)*100);
 
   document.getElementById('totalDisplay').textContent=total;
@@ -725,21 +740,50 @@ function render2026(stays){
     html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
     for(const s of monthGroups[m]){
       const dateStr=s.date.slice(5).replace('-','/');
-      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}',${s.nights},${s.redeem})">✎</button><button class="btn-icon del" onclick="deleteStay('${s._key}','${encodeURIComponent(s.name)}')">✕</button></div>`:'<div></div>';
-      html+=`<div class="stay-item ${s.redeem?'redeem':''}"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${s.name}</div><div class="stay-brand-tag">${s.brand}${s.redeem?' · 兌換':''}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="deleteStay('${s._key}','${encodeURIComponent(s.name)}')">✕</button></div>`:'<div></div>';
+      // Points display
+      let pointsHtml='';
+      if(s.redeem){
+        if(s.redeemPoints>0)pointsHtml+=`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−${s.redeemPoints.toLocaleString()}</span> `;
+        if(s.pointsEarned>0)pointsHtml+=`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+${s.pointsEarned.toLocaleString()}</span>`;
+      }else{
+        if(s.pointsEarned>0){
+          let total=s.pointsEarned;
+          const isQ1Bonus=isQ1Eligible(s)&&usedBrands.has(s.brand);
+          if(isQ1Bonus)total+=2500;
+          pointsHtml=`<span style="color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;">+${total.toLocaleString()}${isQ1Bonus?' (Q1+2,500)':''}</span>`;
+        }
+      }
+      html+=`<div class="stay-item ${s.redeem?'redeem':''}"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${s.name}</div><div class="stay-brand-tag">${s.brand}${s.redeem?' · 兌換':''}</div>${pointsHtml?`<div style="margin-top:2px;">${pointsHtml}</div>`:''}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
     }
   }
   stayList.innerHTML=html;
 }
 
 window.onNameInput=function(val){
+  setTimeout(checkQ1Hint,100);
   document.getElementById('clearName').classList.toggle('visible',val.length>0);
   if(val.length===0){document.getElementById('inputBrand').value='';document.getElementById('brandHint').textContent='';return;}
   for(const item of BRAND_KEYWORDS){if(item.keywords.some(k=>val.includes(k))){document.getElementById('inputBrand').value=item.brand;document.getElementById('brandHint').textContent='自動匹配';return;}}
   document.getElementById('brandHint').textContent='';
 };
 window.clearName=function(){document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';document.getElementById('brandHint').textContent='';document.getElementById('clearName').classList.remove('visible');};
-window.toggleRedeem=function(){isRedeem=!isRedeem;document.getElementById('redeemToggle').classList.toggle('active',isRedeem);};
+window.toggleRedeem=function(){
+  isRedeem=!isRedeem;
+  document.getElementById('redeemToggle').classList.toggle('active',isRedeem);
+  document.getElementById('redeemPointsGroup').style.display=isRedeem?'block':'none';
+  checkQ1Hint();
+};
+window.checkQ1Hint=function(){
+  if(!window._q1UsedBrands)return;
+  const date=document.getElementById('inputDate').value;
+  const brand=document.getElementById('inputBrand').value;
+  if(!date||!brand||isRedeem){document.getElementById('q1Hint').style.display='none';return;}
+  const d=new Date(date);
+  const inQ1=d>=Q1_START&&d<=Q1_END;
+  const brandUsed=window._q1UsedBrands.has(brand);
+  document.getElementById('q1Hint').style.display=(inQ1&&!brandUsed)?'block':'none';
+};
 
 window.addStay=async function(){
   if(!isAdmin)return;
@@ -747,12 +791,16 @@ window.addStay=async function(){
   if(!date||!name||!brand){showToast('請填寫日期、酒店名稱及品牌','#F87171');return;}
   const btn=document.getElementById('btnAdd');btn.disabled=true;
   try{
-    await push(staysRef,{date,name,brand,nights:nightsCount,redeem:isRedeem});
+    const redeemPts=isRedeem?parseInt(document.getElementById('inputRedeemPoints').value)||0:0;
+    await push(staysRef,{date,name,brand,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0});
     document.getElementById('inputDate').value=new Date().toISOString().slice(0,10);
     document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';
     document.getElementById('brandHint').textContent='';document.getElementById('clearName').classList.remove('visible');
     nightsCount=1;document.getElementById('nightsVal').textContent='1';
     isRedeem=false;document.getElementById('redeemToggle').classList.remove('active');
+    document.getElementById('redeemPointsGroup').style.display='none';
+    document.getElementById('inputRedeemPoints').value='';
+    document.getElementById('q1Hint').style.display='none';
     showToast('✓ 住宿已新增並同步');
   }catch(e){showToast('同步失敗','#F87171');}
   btn.disabled=false;
@@ -775,23 +823,38 @@ window.deleteStay=function(key,encodedName){
 };
 window.undoDelete=function(){if(undoTimer)clearTimeout(undoTimer);pendingDelete=null;document.getElementById('undoToast').classList.remove('show');};
 
-window.openEdit=function(key,date,name,brand,nights,redeem){
+window.openEdit=function(key,date,name,brand,nights,redeem,pointsEarned,redeemPoints){
   if(!isAdmin)return;
   editKey=key;editNightsCount=nights;editIsRedeem=redeem;
   document.getElementById('editDate').value=date;
   document.getElementById('editName').value=decodeURIComponent(name);
-  document.getElementById('editBrand').value=decodeURIComponent(brand);
+  const brandDecoded=decodeURIComponent(brand);
+  document.getElementById('editBrand').value=brandDecoded;
   document.getElementById('editNightsVal').textContent=nights;
   document.getElementById('editRedeemToggle').classList.toggle('active',redeem);
+  document.getElementById('editPointsEarned').value=pointsEarned||'';
+  document.getElementById('editRedeemPoints').value=redeemPoints||'';
+  document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
+  // Q1 hint for edit
+  const d=new Date(date);
+  const inQ1=d>=Q1_START&&d<=Q1_END;
+  const brandUsed=window._q1UsedBrands&&window._q1UsedBrands.has(brandDecoded);
+  document.getElementById('editQ1Hint').style.display=(inQ1&&!redeem&&(!brandUsed||pointsEarned>0))?'block':'none';
   document.getElementById('modalOverlay').classList.add('show');
 };
 window.closeModal=function(){document.getElementById('modalOverlay').classList.remove('show');editKey=null;};
-window.toggleEditRedeem=function(){editIsRedeem=!editIsRedeem;document.getElementById('editRedeemToggle').classList.toggle('active',editIsRedeem);};
+window.toggleEditRedeem=function(){
+  editIsRedeem=!editIsRedeem;
+  document.getElementById('editRedeemToggle').classList.toggle('active',editIsRedeem);
+  document.getElementById('editRedeemPointsGroup').style.display=editIsRedeem?'block':'none';
+};
 window.saveEdit=async function(){
   if(!isAdmin)return;
   const date=document.getElementById('editDate').value,name=document.getElementById('editName').value.trim(),brand=document.getElementById('editBrand').value;
   if(!date||!name||!brand){showToast('請填寫所有欄位','#F87171');return;}
-  try{await update(ref(db,`stays2026/${editKey}`),{date,name,brand,nights:editNightsCount,redeem:editIsRedeem});closeModal();showToast('✓ 已更新');}
+  const pointsEarned=parseInt(document.getElementById('editPointsEarned').value)||0;
+  const redeemPoints=editIsRedeem?parseInt(document.getElementById('editRedeemPoints').value)||0:0;
+  try{await update(ref(db,`stays2026/${editKey}`),{date,name,brand,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});closeModal();showToast('✓ 已更新');}
   catch(e){showToast('更新失敗','#F87171');}
 };
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
