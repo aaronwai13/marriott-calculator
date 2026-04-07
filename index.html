@@ -2,633 +2,1011 @@
 <html lang="zh-HK">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>境外撳錢免費指南</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Marriott Bonvoy 住宿追蹤</title>
 <link rel="apple-touch-icon" href="./icon-192.png">
-<meta name="theme-color" content="#F7F7F5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#111112" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="./manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="撳錢指南">
+<meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- VERSION: 2026.04.07.2 -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #F7F7F5;
-    --white: #FFFFFF;
-    --text: #111110;
-    --text-muted: #888884;
-    --text-light: #BBBBB8;
-    --border: #E5E5E2;
-    --border-strong: #D0D0CC;
-    --accent: #1A3C5E;
-    --accent-light: #E8EFF5;
-    --green: #1A6B45;
-    --green-light: #E8F5EE;
-    --red: #C0392B;
-    --red-light: #FDF0EE;
-    --amber: #8B5E00;
-    --amber-light: #FEF7E8;
-    --shadow: 0 2px 12px rgba(0,0,0,0.07);
-    --tab-h: 60px;
+  :root{
+    --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
+    --bg:#0A0A0F;--surface:#13131A;--surface2:#1C1C26;
+    --border:rgba(201,168,76,0.15);--text:#F0EDE8;--text-muted:#8A8580;
+    --green:#4ADE80;--red:#F87171;--grey:#6B7280;
+    --tab-h:60px;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #111112;
-      --white: #1C1C1E;
-      --text: #F2F2F0;
-      --text-muted: #888884;
-      --text-light: #48484A;
-      --border: #2A2A2C;
-      --border-strong: #3A3A3C;
-      --accent: #5B9BD5;
-      --accent-light: #1A2A3A;
-      --green: #4ADE80;
-      --green-light: #0A2016;
-      --red: #F87171;
-      --red-light: #2A1010;
-      --amber: #FCD34D;
-      --amber-light: #251A00;
-      --shadow: 0 2px 16px rgba(0,0,0,0.4);
-    }
+  @media(prefers-color-scheme:light){:root{
+    --bg:#F5F3EE;--surface:#FFFFFF;--surface2:#EDE9E0;
+    --border:rgba(180,140,50,0.2);--text:#1A1714;--text-muted:#7A7268;--grey:#9CA3AF;
+  }}
+  *{margin:0;padding:0;box-sizing:border-box;max-width:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:var(--tab-h);overflow-x:hidden;}
+  body::before{content:'';position:fixed;top:0;left:0;right:0;height:40%;background:radial-gradient(ellipse 80% 100% at 50% 0%,rgba(201,168,76,0.07) 0%,transparent 100%);pointer-events:none;z-index:0;}
+
+  /* Tab bar */
+  .tab-bar{position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:none;}
+  .tab-bar::after{content:'';position:absolute;bottom:calc(-1 * env(safe-area-inset-bottom, 0px));left:0;right:0;height:env(safe-area-inset-bottom, 0px);background:var(--surface);}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;-webkit-tap-highlight-color:transparent;transition:color 0.2s;position:relative;outline:none;}
+  .tab-btn.active{color:var(--gold);}
+  .tab-btn.active::before{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:var(--gold);border-radius:0 0 3px 3px;}
+  .tab-icon{font-size:20px;line-height:1;pointer-events:none;}
+  .tab-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.05em;pointer-events:none;}
+
+  /* Pages */
+  .page{display:none;min-height:calc(100vh - var(--tab-h));}
+  .page.active{display:block;}
+  .container{max-width:860px;margin:0 auto;padding:28px 20px 20px;position:relative;z-index:1;}
+
+  /* TOP BAR */
+  .top-bar{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;z-index:150;height:48px;}
+  .top-bar-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;}
+  .top-bar-right{display:flex;align-items:center;gap:10px;}
+
+  /* Login chip */
+  .login-chip{font-size:12px;font-weight:600;color:var(--gold);background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:20px;padding:5px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.15s;display:none;}
+  .login-chip:active{opacity:0.7;}
+  .login-chip.show{display:block;}
+
+  /* User avatar */
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:rgba(201,168,76,0.15);border:1.5px solid var(--border);display:none;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer;overflow:hidden;flex-shrink:0;}
+  .user-avatar.show{display:flex;}
+  .user-avatar img{width:100%;height:100%;object-fit:cover;}
+
+  .header{text-align:center;margin-bottom:24px;}
+  .header-eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+  .header h1{font-family:'Playfair Display',serif;font-size:clamp(24px,5vw,42px);font-weight:900;line-height:1.05;margin-bottom:6px;}
+  .header h1 span{color:var(--gold);}
+  .header-sub{font-size:13px;color:var(--text-muted);font-weight:300;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:14px;position:relative;overflow:hidden;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+
+  .progress-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .progress-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.25em;color:var(--gold);text-transform:uppercase;margin-bottom:4px;}
+  .progress-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
+  .nights-big{font-family:'Playfair Display',serif;font-size:46px;font-weight:900;color:var(--gold);line-height:1;letter-spacing:-2px;text-align:right;}
+  .nights-denom{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);text-align:right;}
+  .progress-track{background:var(--surface2);border-radius:100px;height:7px;overflow:hidden;margin-bottom:7px;}
+  .progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));transition:width 1s cubic-bezier(0.16,1,0.3,1);width:0%;}
+  .progress-ticks{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:10px;}
+  .nights-remaining{font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);}
+  .nights-remaining strong{color:var(--gold-light);font-size:14px;}
+  .nights-remaining.achieved{color:var(--green);font-size:14px;font-weight:600;}
+
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}.stat-value.blue{color:#60A5FA;}.stat-value.purple{color:#C084FC;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;}
+  .stat-icon{font-size:18px;margin-bottom:8px;display:block;}
+  .stat-value{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;line-height:1;margin-bottom:4px;}
+  .stat-value.gold{color:var(--gold);}
+  .stat-value.green{color:var(--green);}
+  .stat-label{font-size:11px;color:var(--text-muted);}
+
+  .section-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
+  .badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;padding:3px 9px;border-radius:100px;text-transform:uppercase;}
+  .badge-gold{background:rgba(201,168,76,0.12);color:var(--gold);border:1px solid rgba(201,168,76,0.25);}
+
+  /* Add form */
+  .add-form{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:14px;display:none;}
+  .add-form.show{display:block;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;}
+  .input-wrap{position:relative;display:flex;align-items:center;}
+  .input-wrap input[type="text"],.input-wrap input[type="date"]{background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 36px 10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;width:100%;-webkit-appearance:none;}
+  .input-wrap input:focus{border-color:var(--gold);}
+  .input-clear{position:absolute;right:10px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:4px;line-height:1;display:none;}
+  .input-clear.visible{display:block;}
+  .brand-select{background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 36px 10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8580' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+  .brand-select:focus{border-color:var(--gold);}
+  .stepper{display:flex;align-items:center;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;overflow:hidden;height:40px;user-select:none;}
+  .stepper-btn{background:none;border:none;color:var(--gold);font-size:20px;width:44px;height:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;outline:none;}
+  .stepper-btn:active{background:rgba(201,168,76,0.15);}
+  .stepper-val{flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--text);border-left:1px solid rgba(128,128,128,0.1);border-right:1px solid rgba(128,128,128,0.1);height:100%;display:flex;align-items:center;justify-content:center;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:11px 14px;margin-bottom:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .toggle-label{font-size:13px;color:var(--text-muted);}
+  .toggle-switch{width:42px;height:24px;background:var(--surface);border:1px solid rgba(128,128,128,0.2);border-radius:100px;position:relative;transition:background 0.2s;flex-shrink:0;}
+  .toggle-switch::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--text-muted);transition:transform 0.2s,background 0.2s;}
+  .toggle-row.active .toggle-switch{background:var(--gold);border-color:var(--gold);}
+  .toggle-row.active .toggle-switch::after{transform:translateX(18px);background:#fff;}
+  .toggle-row.active .toggle-label{color:var(--text);}
+  .btn-add{width:100%;padding:12px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;border-radius:11px;color:#0A0A0F;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .btn-add:active{transform:scale(0.98);opacity:0.88;}
+  .btn-add:disabled{opacity:0.5;}
+
+  /* Stay list */
+  .stay-list{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px;}
+  .month-header{padding:8px 16px;background:var(--surface2);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;border-bottom:1px solid rgba(128,128,128,0.06);display:flex;align-items:center;gap:8px;}
+  .q1-tag{font-size:9px;padding:2px 7px;border-radius:100px;background:rgba(201,168,76,0.12);color:var(--gold);border:1px solid rgba(201,168,76,0.2);}
+  .q1-divider{padding:6px 16px;background:rgba(201,168,76,0.06);border-bottom:1px solid rgba(201,168,76,0.15);border-top:1px solid rgba(201,168,76,0.15);font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:0.1em;text-align:center;}
+  .stay-item{display:grid;grid-template-columns:68px 1fr auto auto;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(128,128,128,0.05);}
+  .stay-item:last-child{border-bottom:none;}
+  .stay-item:hover{background:rgba(128,128,128,0.03);}
+  .stay-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);}
+  .stay-name{font-size:13px;font-weight:500;line-height:1.3;}
+  .stay-brand-tag{font-size:11px;color:var(--text-muted);margin-top:1px;}
+  .stay-nights-tag{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap;}
+  .stay-actions{display:flex;gap:4px;}
+  .btn-icon{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:4px 6px;border-radius:6px;-webkit-tap-highlight-color:transparent;outline:none;}
+  .btn-icon.edit:hover{color:var(--gold);background:rgba(201,168,76,0.08);}
+  .btn-icon.del:hover{color:var(--red);background:rgba(248,113,113,0.08);}
+
+  /* Milestone rows */
+  .milestone-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(128,128,128,0.05);}
+  .milestone-row.platinum{background:rgba(255,243,205,0.15);}
+  .milestone-row.titanium{background:rgba(212,237,218,0.15);}
+  .milestone-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;white-space:nowrap;}
+  .milestone-badge.platinum{background:rgba(255,243,205,0.4);color:#856404;}
+  .milestone-badge.titanium{background:rgba(212,237,218,0.4);color:#155724;}
+  @media(prefers-color-scheme:light){
+    .milestone-row.platinum{background:rgba(255,243,205,0.5);}
+    .milestone-row.titanium{background:rgba(212,237,218,0.5);}
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: 'Figtree', sans-serif;
-    min-height: 100vh; font-size: 15px;
-    padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
-  }
-  #app { max-width: 480px; margin: 0 auto; }
+  /* Stats table */
+  .stats-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .stats-table th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--gold);text-transform:uppercase;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);}
+  .stats-table th:first-child{text-align:left;}
+  .stats-table td{padding:8px 10px;text-align:right;border-bottom:1px solid rgba(128,128,128,0.05);color:var(--text);}
+  .stats-table td:first-child{text-align:left;font-weight:500;}
+  .stats-table tr:last-child td{border-bottom:none;font-weight:600;color:var(--gold);}
+  .stats-table tr:hover td{background:rgba(128,128,128,0.03);}
 
-  /* HEADER */
-  .header {
-    background: var(--white); padding: 20px 16px 0;
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 20;
-  }
-  .header-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
-  .header-title { font-family: 'DM Serif Display', serif; font-size: 22px; line-height: 1.15; }
-  .header-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+  /* Brand accordion */
+  .brand-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(128,128,128,0.05);-webkit-tap-highlight-color:transparent;}
+  .brand-row:hover{background:rgba(128,128,128,0.03);}
+  .brand-row:last-child{border-bottom:none;}
+  .brand-row-info{display:flex;align-items:center;gap:12px;}
+  .brand-row-name{font-size:13px;font-weight:500;}
+  .brand-row-meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);}
+  .brand-row-chevron{font-size:11px;color:var(--text-muted);transition:transform 0.2s;}
+  .brand-row.open .brand-row-chevron{transform:rotate(180deg);}
+  .brand-stays{display:none;background:var(--surface2);border-bottom:1px solid rgba(128,128,128,0.05);}
+  .brand-stays.show{display:block;}
+  .brand-stay-item{display:grid;grid-template-columns:68px 1fr auto;gap:10px;padding:9px 14px 9px 28px;border-bottom:1px solid rgba(128,128,128,0.04);font-size:12px;}
+  .brand-stay-item:last-child{border-bottom:none;}
+  .brand-stay-item.redeem{opacity:0.4;}
+  .brand-stay-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);}
+  .brand-stay-name{color:var(--text);}
+  .brand-stay-nights{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);text-align:right;}
 
+  /* Toast */
+  .toast{position:fixed;bottom:calc(var(--tab-h) + 16px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;font-family:'DM Mono',monospace;z-index:450;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
+  .toast.show{opacity:1;}
 
-  /* SEARCH */
-  .search-wrap { padding: 0 0 12px; position: relative; }
-  .search-input {
-    width: 100%; padding: 10px 14px 10px 36px;
-    border: 1.5px solid var(--border-strong); border-radius: 10px;
-    font-size: 14px; font-family: 'Figtree', sans-serif;
-    background: var(--bg); color: var(--text);
-    outline: none; transition: border-color 0.2s;
-  }
-  .search-input:focus { border-color: var(--accent); }
-  .search-icon {
-    position: absolute; left: 12px;
-    top: 0; bottom: 12px;
-    width: 14px;
-    margin: auto 0;
-    display: flex; align-items: center;
-    color: var(--text-light); pointer-events: none;
-  }
+  /* Modal shared */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+  .modal-overlay.show{opacity:1;pointer-events:all;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:480px;}
+  .modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:8px;}
+  .modal-body-text{font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.5;}
+  .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  .btn-cancel{padding:12px;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:11px;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-save{padding:12px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;border-radius:11px;color:#0A0A0F;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;}
+  .btn-danger{padding:12px;background:#C0392B;color:#fff;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
 
-  /* FILTER CHIPS */
-  .filter-row {
-    display: flex; gap: 8px; overflow-x: auto;
-    scrollbar-width: none; padding-bottom: 10px;
-  }
-  .filter-row::-webkit-scrollbar { display: none; }
-  .chip {
-    flex-shrink: 0; padding: 6px 14px; border-radius: 99px;
-    font-size: 12px; font-weight: 600;
-    border: 1.5px solid var(--border-strong);
-    background: transparent; color: var(--text-muted);
-    cursor: pointer; font-family: 'Figtree', sans-serif;
-    white-space: nowrap; transition: all 0.15s;
-  }
-  .chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  /* Google btn */
+  .google-btn{display:flex;align-items:center;gap:12px;padding:13px 20px;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--text);width:100%;justify-content:center;transition:opacity 0.15s;margin-bottom:0;}
+  .google-btn:active{opacity:0.7;}
+  .google-btn svg{width:18px;height:18px;flex-shrink:0;}
+  .login-error-msg{margin-top:10px;font-size:12px;color:#F87171;text-align:center;display:none;font-family:'DM Mono',monospace;}
+  .login-loading-msg{margin-top:10px;font-size:12px;color:var(--text-muted);text-align:center;display:none;font-family:'DM Mono',monospace;}
 
-  /* TAB BAR */
-  .tab-bar {
-    position: fixed; bottom: 0;
-    left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 480px;
-    height: var(--tab-h); background: var(--white);
-    border-top: 1px solid var(--border);
-    display: flex; z-index: 100;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .tab-bar::after {
-    content: ''; position: absolute;
-    bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
-    left: 0; right: 0;
-    height: env(safe-area-inset-bottom, 0px);
-    background: var(--white);
-  }
-  .tab-btn {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 3px;
-    cursor: pointer; border: none; background: none;
-    color: var(--text-muted); font-family: 'Figtree', sans-serif;
-    font-size: 10px; font-weight: 600;
-    transition: color 0.2s; outline: none; position: relative;
-  }
-  .tab-btn.active { color: var(--accent); }
-  .tab-btn.active::before {
-    content: ''; position: absolute; top: 0; left: 25%; right: 25%;
-    height: 2px; background: var(--accent); border-radius: 0 0 3px 3px;
-  }
-  .tab-icon { width: 22px; height: 22px; }
-
-  /* PAGES */
-  .page { display: none; }
-  .page.active { display: block; }
-
-  /* BANK CARDS */
-  .banks-list { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-  .bank-card {
-    background: var(--white); border-radius: 14px;
-    border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow);
-  }
-  .bank-card-header {
-    padding: 16px 16px 12px;
-    display: flex; align-items: flex-start; justify-content: space-between;
-    cursor: pointer;
-  }
-  .bank-name-row { display: flex; align-items: center; gap: 10px; }
-  .bank-avatar {
-    width: 38px; height: 38px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; overflow: hidden;
-  }
-  .bank-avatar svg { width: 20px; height: 20px; }
-  .bank-name { font-size: 15px; font-weight: 600; line-height: 1.2; }
-  .bank-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-  .bank-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  .badge {
-    font-size: 10px; font-weight: 600; padding: 3px 8px;
-    border-radius: 6px; font-family: 'DM Mono', monospace;
-    letter-spacing: 0.3px; white-space: nowrap;
-  }
-  .badge-green { background: var(--green-light); color: var(--green); }
-  .badge-amber { background: var(--amber-light); color: var(--amber); }
-  .badge-red { background: var(--red-light); color: var(--red); }
-  .badge-blue { background: var(--accent-light); color: var(--accent); }
-
-  .expand-btn {
-    color: var(--text-light); transition: transform 0.25s;
-    flex-shrink: 0; margin-top: 4px;
-    background: none; border: none; cursor: pointer; padding: 4px;
-  }
-  .bank-card.open .expand-btn { transform: rotate(180deg); }
-  .bank-body {
-    max-height: 0; overflow: hidden;
-    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
-    border-top: 0px solid var(--border);
-  }
-  .bank-card.open .bank-body { max-height: 800px; border-top-width: 1px; }
-  .bank-body-inner { padding: 14px 16px 16px; }
-
-  .detail-section { margin-bottom: 12px; }
-  .detail-section:last-child { margin-bottom: 0; }
-  .detail-label {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
-    text-transform: uppercase; color: var(--text-light); margin-bottom: 6px;
-  }
-  .detail-item {
-    display: flex; align-items: flex-start; gap: 8px;
-    font-size: 13px; color: var(--text); margin-bottom: 4px; line-height: 1.45;
-  }
-  .detail-item:last-child { margin-bottom: 0; }
-  .detail-dot { font-size: 13px; flex-shrink: 0; }
-  .detail-item.warn { color: var(--amber); }
-  .detail-item.good { color: var(--green); }
-  .detail-item.bad { color: var(--red); }
-
-  /* TIPS */
-  .tips-container { padding: 16px; }
-  .tips-card {
-    background: var(--white); border-radius: 14px;
-    border: 1px solid var(--border); padding: 18px;
-    margin-bottom: 12px; box-shadow: var(--shadow);
-  }
-  .tips-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 17px; margin-bottom: 12px;
-  }
-  .tips-list { display: flex; flex-direction: column; gap: 8px; }
-  .tip-item {
-    display: flex; align-items: flex-start; gap: 10px;
-    font-size: 13px; line-height: 1.5; color: var(--text);
-  }
-  .tip-num {
-    flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
-    background: var(--accent-light); color: var(--accent);
-    font-size: 11px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center; margin-top: 1px;
-  }
-
-  /* COMPARE */
-  .compare-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .compare-table { border-collapse: collapse; width: 100%; font-size: 12px; table-layout: fixed; }
-  .compare-table th:nth-child(1) { width: 34%; }
-  .compare-table th:nth-child(2) { width: 22%; }
-  .compare-table th:nth-child(3) { width: 22%; }
-  .compare-table th:nth-child(4) { width: 22%; }
-  .compare-table th {
-    font-family: 'DM Mono', monospace; font-size: 10px;
-    letter-spacing: 0.5px; text-transform: uppercase;
-    color: var(--text-muted); padding: 8px 10px;
-    text-align: left; border-bottom: 1.5px solid var(--border-strong);
-    background: var(--white);
-  }
-  .compare-table td {
-    padding: 10px; border-bottom: 1px solid var(--border);
-    color: var(--text); vertical-align: top;
-  }
-  .compare-table tr:last-child td { border-bottom: none; }
-  .cell-good { color: var(--green); font-weight: 600; }
-  .cell-warn { color: var(--amber); font-weight: 600; }
-  .cell-bad { color: var(--red); }
-
-  .empty-state {
-    text-align: center; padding: 48px 20px;
-    color: var(--text-muted); font-size: 14px; line-height: 2;
-  }
+  .empty-state{text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px;font-style:italic;}
+  @media(max-width:540px){.form-grid{grid-template-columns:1fr}.nights-big{font-size:38px}.card,.add-form{padding:18px}}
 </style>
 </head>
 <body>
-<div id="app">
 
-  <div class="header">
-    <div class="header-top">
-      <div>
-        <div class="header-title">境外撳錢<br>免費指南</div>
-        <div class="header-sub">ATM / 免手續費查詢</div>
-      </div>
-
-    </div>
-    <div class="search-wrap" id="searchWrap">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <input class="search-input" id="searchInput" placeholder="搜尋銀行或地區…" oninput="filterBanks()">
-    </div>
-    <div class="filter-row" id="filterRow">
-      <button class="chip active" onclick="setFilter('all',this)">全部</button>
-      <button class="chip" onclick="setFilter('unlimited',this)">無限次</button>
-      <button class="chip" onclick="setFilter('hk',this)">香港銀行</button>
-      <button class="chip" onclick="setFilter('mainland',this)">內地銀行</button>
-      <button class="chip" onclick="setFilter('digital',this)">數字平台</button>
-    </div>
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-bar-title">Marriott Bonvoy</div>
+  <div class="top-bar-right">
+    <button class="login-chip" id="loginChip" onclick="showLoginModal()">登入</button>
+    <div class="user-avatar" id="userAvatar" onclick="showLogoutModal()"></div>
   </div>
-
-  <div class="page active" id="pageCards">
-    <div class="banks-list" id="banksList"></div>
-  </div>
-
-  <div class="page" id="pageCompare">
-    <div class="tips-container">
-      <div class="tips-card">
-        <div class="tips-title">📊 快速比較</div>
-        <div class="compare-scroll">
-          <table class="compare-table">
-            <thead><tr><th>銀行</th><th>ATM費</th><th>外幣費</th><th>次數</th></tr></thead>
-            <tbody>
-              <tr><td><b>興業銀行</b></td><td class="cell-good">免</td><td class="cell-good">免</td><td class="cell-warn">3筆/月</td></tr>
-              <tr><td><b>上海銀行</b></td><td class="cell-good">免</td><td class="cell-good">免</td><td class="cell-good">無限</td></tr>
-              <tr><td><b>長沙銀行</b></td><td class="cell-good">免</td><td class="cell-good">免</td><td class="cell-good">無限</td></tr>
-              <tr><td><b>中信萬事達</b></td><td class="cell-good">免</td><td class="cell-good">免</td><td class="cell-warn">3筆/月</td></tr>
-              <tr><td><b>Wise</b></td><td class="cell-warn">2筆/月免</td><td class="cell-good">免</td><td class="cell-warn">2筆/月</td></tr>
-              <tr><td><b>中銀扣賬卡</b></td><td class="cell-warn">單免</td><td class="cell-good">免</td><td class="cell-good">無限</td></tr>
-              <tr><td><b>匯豐扣賬卡</b></td><td class="cell-warn">匯豐免</td><td class="cell-good">免</td><td class="cell-good">無限</td></tr>
-              <tr><td><b>恒生扣賬卡</b></td><td class="cell-warn">單免</td><td class="cell-good">免</td><td class="cell-good">無限</td></tr>
-              <tr><td><b>東亞扣賬卡</b></td><td class="cell-good">免</td><td class="cell-bad">1.95%</td><td class="cell-good">無限</td></tr>
-              <tr><td><b>信銀扣賬卡</b></td><td class="cell-good">免</td><td class="cell-bad">1.95%</td><td class="cell-good">無限</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="page" id="pageTips">
-    <div class="tips-container">
-      <div class="tips-card">
-        <div class="tips-title">💡 使用貼士</div>
-        <div class="tips-list">
-          <div class="tip-item"><div class="tip-num">1</div><div>ATM 問「帳戶貨幣」定「當地貨幣」——<b>一律揀當地貨幣</b>，避免 ATM 自行換匯（DCC），匯率極差。</div></div>
-          <div class="tip-item"><div class="tip-num">2</div><div>興業 / 中信萬事達每月只有 3 筆免費，計劃好提款次數，避免超額。</div></div>
-          <div class="tip-item"><div class="tip-num">3</div><div>Wise 每月 2 筆免費（上限 350 CAD），超額後每筆 1.50 CAD + 超出部分 1.75%。</div></div>
-          <div class="tip-item"><div class="tip-num">4</div><div>泰國 ATM 一般收 220 泰銖機器費，用中銀扣賬卡喺泰國中銀 ATM 可完全豁免。</div></div>
-          <div class="tip-item"><div class="tip-num">5</div><div>匯豐/恒生扣賬卡喺非匯豐 ATM 每筆收 40 港幣 + ATM 費，出行前確認目的地有無匯豐 ATM。</div></div>
-          <div class="tip-item"><div class="tip-num">6</div><div>推薦配搭：日常用上海/長沙（無限次）+ 泰國用中銀扣賬卡 + 備用 Wise 多幣兌換。</div></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
 </div>
 
+<!-- ========== PAGE 2025 ========== -->
+<div class="page" id="page2025">
+  <div class="container" style="padding-top:68px;">
+    <div class="header">
+      <h1>2025 住宿<span>回顧</span></h1>
+      <div class="header-sub">全年住宿記錄</div>
+    </div>
+
+    <div class="card">
+      <div class="progress-header">
+        <div><div class="progress-label">年度總計</div><div class="progress-title">鈦金精英達標</div></div>
+        <div><div class="nights-big">95</div><div class="nights-denom">總晚數</div></div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="progress-ticks"><span>0</span><span>75</span></div>
+      <div class="nights-remaining achieved">已達標 🎉 超額完成</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><span class="stat-icon">🏨</span><div class="stat-value gold">66</div><div class="stat-label">實際住宿晚數</div></div>
+      <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value green">29</div><div class="stat-label">獎勵房晚（Q1+年度）</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-header"><div class="section-title">月度統計</div></div>
+      <table class="stats-table">
+        <thead><tr><th>月份</th><th>次數</th><th>房晚</th><th>Q1獎勵</th><th>佔全年%</th></tr></thead>
+        <tbody>
+          <tr><td>一月</td><td>5</td><td>6</td><td>—</td><td>9.1%</td></tr>
+          <tr><td>二月</td><td>3</td><td>3</td><td>1</td><td>4.5%</td></tr>
+          <tr><td>三月</td><td>9</td><td>13</td><td>13</td><td>19.7%</td></tr>
+          <tr><td>四月</td><td>8</td><td>12</td><td>10</td><td>18.2%</td></tr>
+          <tr><td>五月</td><td>8</td><td>10</td><td>—</td><td>15.2%</td></tr>
+          <tr><td>六月</td><td>7</td><td>7</td><td>—</td><td>10.6%</td></tr>
+          <tr><td>七月</td><td>1</td><td>1</td><td>—</td><td>1.5%</td></tr>
+          <tr><td>八月</td><td>2</td><td>2</td><td>—</td><td>3.0%</td></tr>
+          <tr><td>九月</td><td>2</td><td>2</td><td>—</td><td>3.0%</td></tr>
+          <tr><td>十月</td><td>4</td><td>4</td><td>—</td><td>6.1%</td></tr>
+          <tr><td>十一月</td><td>3</td><td>3</td><td>—</td><td>4.5%</td></tr>
+          <tr><td>十二月</td><td>3</td><td>3</td><td>—</td><td>4.5%</td></tr>
+          <tr><td>50晚年度福利</td><td>—</td><td>—</td><td>5</td><td>—</td></tr>
+          <tr><td>合計</td><td>55</td><td>66</td><td>29</td><td>100%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="section-header"><div class="section-title">品牌統計</div></div>
+      <div id="brandAccordion2025"></div>
+    </div>
+
+    <div>
+      <div class="section-header"><div class="section-title">住宿明細</div><div class="badge badge-gold">2025年</div></div>
+      <div class="stay-list" id="stayList2025"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PAGE 2026 ========== -->
+<div class="page active" id="page2026">
+  <div class="container" id="container2026" style="padding-top:68px;">
+    <div class="header">
+      <h1>2026 住宿<span>追蹤</span></h1>
+      <div class="header-sub">鈦金保級目標 · 75晚</div>
+    </div>
+
+    <div class="card">
+      <div class="progress-header">
+        <div><div class="progress-label">年度進度</div><div class="progress-title">鈦金精英保級</div></div>
+        <div><div class="nights-big" id="totalDisplay">—</div><div class="nights-denom">/ 75 晚</div></div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-ticks"><span>0</span><span>75</span></div>
+      <div class="nights-remaining" id="nightsRemainingEl">距離75晚目標，仲需 <strong>—</strong> 晚</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><span class="stat-icon">🏨</span><div class="stat-value gold" id="statActual">—</div><div class="stat-label">實際住宿晚數</div></div>
+      <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value green" id="statQ1">—</div><div class="stat-label">Q1活動獎勵房晚</div></div>
+      <div class="stat-card"><span class="stat-icon">⭐</span><div class="stat-value blue" id="statEarned">—</div><div class="stat-label">2026已賺積分</div></div>
+      <div class="stat-card" style="position:relative;">
+        <span class="stat-icon">💎</span>
+        <div class="stat-value purple" id="statTotal">—</div>
+        <div class="stat-label">目前積分</div>
+        <button id="btnEditPoints" onclick="openPointsModal()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:4px;">✎</button>
+      </div>
+    </div>
+
+    <!-- Add form -->
+    <div class="add-form" id="addForm">
+      <div class="section-header" style="margin-bottom:16px;"><div class="section-title">新增住宿</div></div>
+      <div class="form-grid">
+        <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="inputDate" onchange="checkQ1Hint()"></div></div>
+        <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="btnMinus">−</button><div class="stepper-val" id="nightsVal">1</div><button class="stepper-btn" id="btnPlus">＋</button></div></div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="inputName" oninput="onNameInput(this.value)"><button class="input-clear" id="clearName" onclick="clearName()">✕</button></div></div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>品牌 <span id="brandHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
+        <select class="brand-select" id="inputBrand" onchange="checkQ1Hint()">
+          <option value="">選擇品牌...</option><option>AC Hotels</option><option>Aloft</option><option>Autograph Collection</option><option>Bvlgari Hotels</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option>
+        </select>
+      </div>
+      <div class="toggle-row" id="redeemToggle" onclick="toggleRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
+      <div class="form-group" id="redeemPointsGroup" style="margin-bottom:12px;display:none;">
+        <label>使用積分</label>
+        <div class="input-wrap"><input type="number" id="inputRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      </div>
+      <div id="q1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 退房後將獲 +2,500 積分</div>
+      <button class="btn-add" id="btnAdd" onclick="addStay()">＋ 新增住宿</button>
+    </div>
+
+    <!-- Q1 brands -->
+    <div class="card">
+      <div class="section-header"><div class="section-title">Q1 品牌追蹤</div></div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span></div>
+      <div id="brandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+    </div>
+
+    <!-- 月度統計 2026 -->
+    <div class="card">
+      <div class="section-header"><div class="section-title">月度統計</div></div>
+      <table class="stats-table" id="monthTable2026">
+        <thead><tr><th>月份</th><th>次數</th><th>房晚</th><th>Q1獎勵</th><th>佔全年%</th></tr></thead>
+        <tbody id="monthTableBody2026"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:16px;">載入中...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- 品牌統計 2026 -->
+    <div class="card">
+      <div class="section-header"><div class="section-title">品牌統計</div></div>
+      <div id="brandAccordion2026"><div class="empty-state">載入中...</div></div>
+    </div>
+
+    <!-- 住宿明細 -->
+    <div>
+      <div class="section-header"><div class="section-title">住宿明細</div><div class="badge badge-gold">2026年</div></div>
+      <div class="stay-list" id="stayList"><div class="empty-state">載入中...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab bar -->
 <div class="tab-bar">
-  <button class="tab-btn active" id="tabCards" onclick="switchTab('Cards')">
-    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="3"/>
-      <path d="M3 9h18M9 21V9"/>
-    </svg>
-    <span>銀行</span>
+  <button class="tab-btn active" id="tab2026" onclick="switchTab('2026')">
+    <span class="tab-icon">📍</span><span class="tab-label">2026</span>
   </button>
-  <button class="tab-btn" id="tabCompare" onclick="switchTab('Compare')">
-    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/>
-    </svg>
-    <span>比較</span>
-  </button>
-  <button class="tab-btn" id="tabTips" onclick="switchTab('Tips')">
-    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>
-    </svg>
-    <span>貼士</span>
+  <button class="tab-btn" id="tab2025" onclick="switchTab('2025')">
+    <span class="tab-icon">📋</span><span class="tab-label">2025</span>
   </button>
 </div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <div class="modal-title">登入</div>
+    <div class="modal-body-text">使用授權嘅 Google 帳號登入，方可新增或刪除記錄。</div>
+    <button class="google-btn" onclick="doLogin()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      使用 Google 登入
+    </button>
+    <div class="login-error-msg" id="loginError">此帳號無存取權限</div>
+    <div class="login-loading-msg" id="loginLoading">登入中…</div>
+  </div>
+</div>
+
+<!-- LOGOUT MODAL -->
+<div class="modal-overlay" id="logoutModal">
+  <div class="modal">
+    <div class="modal-title">登出</div>
+    <div class="modal-body-text" id="logoutBody">確定要登出？</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAllModals()">取消</button>
+      <button class="btn-save" onclick="doLogout()">登出</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal">
+    <div class="modal-title">刪除記錄</div>
+    <div class="modal-body-text">確定要刪除這筆住宿記錄？所有人都會看到此更改。</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAllModals()">取消</button>
+      <button class="btn-danger" onclick="confirmDelete()">刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">編輯住宿</div>
+    <div class="form-grid" style="margin-bottom:12px;">
+      <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="editDate"></div></div>
+      <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="editBtnMinus">−</button><div class="stepper-val" id="editNightsVal">1</div><button class="stepper-btn" id="editBtnPlus">＋</button></div></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="editName"></div></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>品牌</label>
+      <select class="brand-select" id="editBrand">
+        <option value="">選擇品牌...</option><option>AC Hotels</option><option>Aloft</option><option>Autograph Collection</option><option>Bvlgari Hotels</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option>
+      </select>
+    </div>
+    <div class="toggle-row" id="editRedeemToggle" onclick="toggleEditRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
+    <div class="form-group" id="editRedeemPointsGroup" style="margin-bottom:12px;display:none;">
+      <label>使用積分</label>
+      <div class="input-wrap"><input type="number" id="editRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+    </div>
+    <div id="editQ1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · +2,500 積分</div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>賺取積分（退房後填寫）</label>
+      <div class="input-wrap"><input type="number" id="editPointsEarned" inputmode="numeric" placeholder="例如 4608" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+    </div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEdit()">儲存</button></div>
+  </div>
+</div>
+
+<!-- Points Modal -->
+<div class="modal-overlay" id="pointsModalOverlay">
+  <div class="modal">
+    <div class="modal-title">更新積分餘額</div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>目前積分（手動設定）</label>
+      <div class="input-wrap"><input type="number" id="pointsBaseInput" inputmode="numeric" placeholder="例如 41300" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:14px;">設定後，之後新增住宿嘅積分變動會自動計算</div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closePointsModal()">取消</button><button class="btn-save" onclick="savePointsBase()">儲存</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-const LOGOS = {
-  xinye:    {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>`, bg:'#E8EFF5', color:'#1A3C5E'},
-  shanghai: {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>`, bg:'#E8F5EE', color:'#1A6B45'},
-  changsha: {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>`, bg:'#E8F5EE', color:'#1A6B45'},
-  citic:    {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>`, bg:'#FEF7E8', color:'#8B5E00'},
-  wise:     {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>`, bg:'#E8F5EE', color:'#1A6B45'},
-  boc:      {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>`, bg:'#FEF7E8', color:'#8B5E00'},
-  hsbc:     {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>`, bg:'#E8EFF5', color:'#1A3C5E'},
-  hangseng: {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>`, bg:'#E8EFF5', color:'#1A3C5E'},
-  bea:      {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>`, bg:'#F0F0EE', color:'#888884'},
-  chiyu:    {icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>`, bg:'#F0F0EE', color:'#888884'},
-};
-
-const BANKS = [
-  {
-    id:'xinye', name:'興業銀行', subtitle:'大陸銀行',
-    tags:['mainland'],
-    badges:[{t:'3筆/月',c:'badge-amber'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'⚠',c:'warn',t:'每月限 3 筆免費'},
-      ]},
-      {label:'支援地區 / ATM 網絡',items:[
-        {i:'—',c:'',t:'韓國（樂天）'},{i:'—',c:'',t:'泰國（BOC）'},
-        {i:'—',c:'',t:'香港（全部）'},{i:'—',c:'',t:'台灣（台灣銀行、國泰世華、兆豐）'},
-        {i:'—',c:'',t:'越南（BIDV）'},{i:'—',c:'',t:'新加坡（UOB）'},
-        {i:'—',c:'',t:'馬來西亞（Maybank）'},{i:'—',c:'',t:'印尼（BCA、BNI）'},
-        {i:'—',c:'',t:'迪拜（NBD）'},{i:'—',c:'',t:'格魯吉亞（BOG）'},
-      ]},
-    ],
-  },
-  {
-    id:'shanghai', name:'上海銀行', subtitle:'大陸銀行',
-    tags:['unlimited','mainland'],
-    badges:[{t:'無限次',c:'badge-green'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'✓',c:'good',t:'次數無限制'},
-      ]},
-      {label:'支援地區 / ATM 網絡',items:[
-        {i:'—',c:'',t:'韓國（樂天）'},{i:'—',c:'',t:'泰國（BOC）'},
-        {i:'—',c:'',t:'香港（全部）'},{i:'—',c:'',t:'台灣（台灣銀行、國泰世華、兆豐）'},
-        {i:'—',c:'',t:'越南（BIDV）'},{i:'—',c:'',t:'新加坡（UOB）'},
-        {i:'—',c:'',t:'馬來西亞（Maybank）'},{i:'—',c:'',t:'印尼（BCA、BNI）'},
-        {i:'—',c:'',t:'迪拜（NBD）'},{i:'—',c:'',t:'格魯吉亞（BOG）'},
-        {i:'—',c:'',t:'日本（7 Bank）'},
-      ]},
-    ],
-  },
-  {
-    id:'changsha', name:'長沙銀行', subtitle:'大陸銀行',
-    tags:['unlimited','mainland'],
-    badges:[{t:'無限次',c:'badge-green'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'✓',c:'good',t:'次數無限制'},
-      ]},
-      {label:'支援地區 / ATM 網絡',items:[
-        {i:'—',c:'',t:'韓國（樂天）'},{i:'—',c:'',t:'泰國（BOC）'},
-        {i:'—',c:'',t:'香港（全部）'},{i:'—',c:'',t:'台灣（台灣銀行、國泰世華、兆豐）'},
-        {i:'—',c:'',t:'越南（BIDV）'},{i:'—',c:'',t:'新加坡（UOB）'},
-        {i:'—',c:'',t:'馬來西亞（Maybank）'},{i:'—',c:'',t:'印尼（BCA、BNI）'},
-        {i:'—',c:'',t:'迪拜（NBD）'},{i:'—',c:'',t:'格魯吉亞（BOG）'},
-        {i:'—',c:'',t:'日本（7 Bank）'},
-      ]},
-    ],
-  },
-  {
-    id:'citic', name:'中信萬事達', subtitle:'大陸銀行',
-    tags:['mainland'],
-    badges:[{t:'3筆/月',c:'badge-amber'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'⚠',c:'warn',t:'每月限 3 筆'},
-        {i:'✓',c:'good',t:'日本 7-Bank ATM 免費'},
-      ]},
-      {label:'支援地區 / ATM 網絡',items:[
-        {i:'—',c:'',t:'中銀'},{i:'—',c:'',t:'中東'},
-        {i:'—',c:'',t:'信銀'},{i:'—',c:'',t:'日本（7 Bank）'},
-      ]},
-    ],
-  },
-  {
-    id:'wise', name:'Wise', subtitle:'數字匯款平台',
-    tags:['digital'],
-    badges:[{t:'2筆/月免費',c:'badge-amber'},{t:'多幣兌換',c:'badge-blue'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'✓',c:'good',t:'每月首 2 筆、總額不超過 350 CAD 免費'},
-        {i:'⚠',c:'warn',t:'超額後每筆 1.50 CAD；超出 350 CAD 部分另收 1.75%'},
-        {i:'✓',c:'good',t:'免外幣手續費（中間匯率）'},
-      ]},
-      {label:'支援地區 / ATM 網絡',items:[
-        {i:'—',c:'',t:'日本（Aeon）'},{i:'—',c:'',t:'台灣（台灣銀行、國泰世華、兆豐）'},
-        {i:'—',c:'',t:'越南（Viet、TP、VP）'},{i:'—',c:'',t:'新加坡（UOB、Maybank）'},
-        {i:'—',c:'',t:'馬來西亞（CIMB、Maybank、Alliance、Public、Affin、BSN）'},
-        {i:'—',c:'',t:'印尼（BCA、BNI、Mandiri、BRI）'},
-        {i:'—',c:'',t:'格魯吉亞（BOG、Credo、Basisbank、Cartu、Ziraat）'},
-      ]},
-      {label:'備註',items:[
-        {i:'⚠',c:'warn',t:'適合偶爾提款；頻繁使用超額費用高'},
-      ]},
-    ],
-  },
-  {
-    id:'boc', name:'中銀扣賬卡', subtitle:'香港銀行 · 中國銀行（香港）',
-    tags:['unlimited','hk'],
-    badges:[{t:'全球單免',c:'badge-green'},{t:'泰國全免',c:'badge-green'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'✓',c:'good',t:'澳門用呢張先免'},
-        {i:'✓',c:'good',t:'泰國中銀 ATM 全免'},
-        {i:'✓',c:'good',t:'全球其他 ATM 單免（ATM 機器費另計）'},
-        {i:'✓',c:'good',t:'日本 7-Bank ATM 免費'},
-        {i:'✓',c:'good',t:'免外幣手續費'},
-      ]},
-      {label:'支援貨幣',items:[
-        {i:'—',c:'',t:'港元、美元、人民幣、英鎊、日圓、澳元、新加坡元、歐元、加元、瑞士法郎、紐西蘭元及泰銖'},
-      ]},
-    ],
-  },
-  {
-    id:'hsbc', name:'匯豐扣賬卡', subtitle:'香港銀行 · 匯豐',
-    tags:['unlimited','hk'],
-    badges:[{t:'無限次',c:'badge-green'},{t:'全球匯豐免',c:'badge-green'},{t:'非匯豐收費',c:'badge-amber'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'✓',c:'good',t:'澳門用呢張先免'},
-        {i:'✓',c:'good',t:'全球匯豐 ATM 全免'},
-        {i:'⚠',c:'warn',t:'非匯豐 ATM 每筆收 40 港幣 + ATM 費用'},
-        {i:'✓',c:'good',t:'免外幣手續費'},
-      ]},
-      {label:'支援貨幣',items:[
-        {i:'—',c:'',t:'澳元、加元、瑞士法郎、歐元、英鎊、港元、日元、新西蘭元、人民幣、新加坡元、美元及泰銖'},
-      ]},
-      {label:'備註',items:[
-        {i:'⚠',c:'warn',t:'出行前確認目的地有無匯豐 ATM'},
-      ]},
-    ],
-  },
-  {
-    id:'hangseng', name:'恒生扣賬卡', subtitle:'香港銀行 · 恒生',
-    tags:['unlimited','hk'],
-    badges:[{t:'無限次',c:'badge-green'},{t:'全球匯豐免',c:'badge-green'},{t:'非匯豐收費',c:'badge-amber'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'✓',c:'good',t:'澳門用呢張先免'},
-        {i:'✓',c:'good',t:'全球匯豐 ATM 全免'},
-        {i:'⚠',c:'warn',t:'非匯豐 ATM 每筆收 40 港幣 + ATM 費用'},
-        {i:'✓',c:'good',t:'免外幣手續費'},
-      ]},
-      {label:'支援貨幣',items:[
-        {i:'—',c:'',t:'澳元、加拿大元、瑞士法郎、歐元、英鎊、港幣、日圓、紐西蘭元、人民幣、泰銖、美元和南非蘭特'},
-      ]},
-      {label:'備註',items:[
-        {i:'⚠',c:'warn',t:'出行前確認目的地有無匯豐 ATM'},
-      ]},
-    ],
-  },
-  {
-    id:'bea', name:'東亞扣賬卡', subtitle:'香港銀行 · 東亞',
-    tags:['unlimited','hk'],
-    badges:[{t:'無限次',c:'badge-green'},{t:'全球單免',c:'badge-green'},{t:'非支援外幣1.95%',c:'badge-red'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'✓',c:'good',t:'ATM 提款全球單免（ATM 機器費另計）'},
-        {i:'✗',c:'bad',t:'非支援外幣收 1.95% 手續費'},
-        {i:'✓',c:'good',t:'日本 7-Bank ATM 免費'},
-      ]},
-      {label:'支援貨幣',items:[
-        {i:'—',c:'',t:'澳元、加拿大元、瑞士法郎、歐元、英鎊、港元、日元、紐西蘭元、新加坡元及美元'},
-      ]},
-    ],
-  },
-  {
-    id:'chiyu', name:'信銀扣賬卡', subtitle:'香港銀行 · 信銀',
-    tags:['unlimited','hk'],
-    badges:[{t:'無限次',c:'badge-green'},{t:'全球單免',c:'badge-green'},{t:'非支援外幣1.95%',c:'badge-red'}],
-    sections:[
-      {label:'特點',items:[
-        {i:'✓',c:'good',t:'ATM 提款全球單免（ATM 機器費另計）'},
-        {i:'✗',c:'bad',t:'非支援外幣收 1.95% 手續費'},
-        {i:'✓',c:'good',t:'日本 7-Bank ATM 免費'},
-      ]},
-      {label:'支援貨幣',items:[
-        {i:'—',c:'',t:'港元、人民幣、澳門元、加元、歐羅、日圓、紐元、英鎊、新加坡元及美元'},
-      ]},
-    ],
-  },
+// ===== 2025 STATIC DATA =====
+const STAYS_2025=[
+  {date:'2025-01-03',name:'杭州武林万怡酒店',brand:'Courtyard',nights:1,redeem:false},
+  {date:'2025-01-04',name:'上海西藏大厦万怡酒店',brand:'Courtyard',nights:2,redeem:false},
+  {date:'2025-01-17',name:'深圳益田威斯汀酒店',brand:'Westin',nights:1,redeem:false},
+  {date:'2025-01-18',name:'深圳益田威斯汀酒店',brand:'Westin',nights:1,redeem:false},
+  {date:'2025-01-20',name:'深圳宝安福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
+  {date:'2025-02-05',name:'Courtyard Casablanca Downtown',brand:'Courtyard',nights:1,redeem:false},
+  {date:'2025-02-07',name:'伊斯坦布尔波拉特博斯普鲁斯万丽酒店',brand:'Renaissance',nights:1,redeem:false},
+  {date:'2025-02-15',name:'深圳宝安福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
+  {date:'2025-03-02',name:'贵阳喜来登贵航酒店',brand:'Sheraton',nights:2,redeem:false},
+  {date:'2025-03-04',name:'重庆北站福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
+  {date:'2025-03-06',name:'曼谷苏坤22福朋喜来登酒店',brand:'Four Points',nights:2,redeem:false},
+  {date:'2025-03-09',name:'广州海航威斯汀酒店',brand:'Westin',nights:1,redeem:false},
+  {date:'2025-03-11',name:'柳州三江万怡酒店',brand:'Courtyard',nights:1,redeem:false},
+  {date:'2025-03-18',name:'沈阳万豪酒店',brand:'Marriott',nights:2,redeem:false},
+  {date:'2025-03-20',name:'北京瑞吉酒店',brand:'St. Regis',nights:2,redeem:false},
+  {date:'2025-03-24',name:'南岸奥华酒店（Design Hotels）',brand:'Design Hotels',nights:1,redeem:false},
+  {date:'2025-03-30',name:'香港东涌福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
+  {date:'2025-04-03',name:'札幌万怡酒店',brand:'Courtyard',nights:4,redeem:false},
+  {date:'2025-04-09',name:'深圳宝安万枫酒店',brand:'Fairfield',nights:1,redeem:false},
+  {date:'2025-04-19',name:'广交会万怡酒店',brand:'Courtyard',nights:1,redeem:false},
+  {date:'2025-04-20',name:'珠海中海万丽酒店',brand:'Renaissance',nights:1,redeem:false},
+  {date:'2025-04-21',name:'香港东涌福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
+  {date:'2025-04-23',name:'深圳前海华侨城艾美酒店',brand:'Le Meridien',nights:1,redeem:false},
+  {date:'2025-04-28',name:'广州粤海喜来登酒店',brand:'Sheraton',nights:1,redeem:false},
+  {date:'2025-04-30',name:'昆明德尔塔酒店',brand:'Delta Hotels',nights:2,redeem:false},
+  {date:'2025-05-04',name:'北京大兴机场万枫酒店',brand:'Fairfield',nights:1,redeem:false},
+  {date:'2025-05-06',name:'广交会威斯汀酒店',brand:'Westin',nights:1,redeem:false},
+  {date:'2025-05-10',name:'新加坡 Duxton 精品酒店，傲途格精选',brand:'Autograph Collection',nights:2,redeem:false},
+  {date:'2025-05-12',name:'深圳同泰万怡酒店',brand:'Courtyard',nights:1,redeem:false},
+  {date:'2025-05-13',name:'香港问月酒店（Design Hotels）',brand:'Design Hotels',nights:1,redeem:false},
+  {date:'2025-05-18',name:'曼谷拉差阿帕森购物区万丽酒店',brand:'Renaissance',nights:1,redeem:true},
+  {date:'2025-05-26',name:'香港东涌福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
+  {date:'2025-05-27',name:'雅加达泛太平洋傲途格精选酒店',brand:'Autograph Collection',nights:2,redeem:false},
+  {date:'2025-06-01',name:'深圳彭年万丽酒店',brand:'Renaissance',nights:1,redeem:false},
+  {date:'2025-06-05',name:'深圳前海华侨城 JW 万豪酒店',brand:'JW Marriott',nights:1,redeem:false},
+  {date:'2025-06-09',name:'曼谷玛迪派迪酒店，傲途格精选',brand:'Autograph Collection',nights:1,redeem:true},
+  {date:'2025-06-10',name:'曼谷艾美酒店',brand:'Le Meridien',nights:1,redeem:false},
+  {date:'2025-06-19',name:'深圳湾万丽酒店',brand:'Renaissance',nights:1,redeem:false},
+  {date:'2025-06-24',name:'汕头龙光喜来登酒店',brand:'Sheraton',nights:1,redeem:false},
+  {date:'2025-06-28',name:'上海浦西万怡酒店',brand:'Courtyard',nights:1,redeem:false},
+  {date:'2025-07-06',name:'福州天元国际威斯汀酒店',brand:'Westin',nights:1,redeem:false},
+  {date:'2025-08-20',name:'东京银座万怡酒店',brand:'Courtyard',nights:1,redeem:true},
+  {date:'2025-08-30',name:'香港柏宁酒店，傲途格精选',brand:'Autograph Collection',nights:1,redeem:false},
+  {date:'2025-09-05',name:'曼谷玛迪派迪酒店，傲途格精选',brand:'Autograph Collection',nights:1,redeem:false},
+  {date:'2025-09-21',name:'深圳湾福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
+  {date:'2025-10-06',name:'西安万丽酒店',brand:'Renaissance',nights:1,redeem:false},
+  {date:'2025-10-24',name:'首尔万枫酒店',brand:'Fairfield',nights:1,redeem:true},
+  {date:'2025-10-25',name:'沈阳威斯汀酒店',brand:'Westin',nights:1,redeem:false},
+  {date:'2025-10-26',name:'沈阳和平艾美酒店',brand:'Le Meridien',nights:1,redeem:false},
+  {date:'2025-11-02',name:'郑州建业艾美酒店',brand:'Le Meridien',nights:1,redeem:false},
+  {date:'2025-11-12',name:'曼谷苏坤 11 雅乐轩酒店',brand:'Aloft',nights:1,redeem:false},
+  {date:'2025-11-13',name:'曼谷苏坤22福朋喜来登酒店',brand:'Four Points',nights:1,redeem:true},
+  {date:'2025-12-07',name:'深圳宝安福朋喜来登酒店',brand:'Four Points',nights:1,redeem:true},
+  {date:'2025-12-11',name:'珠海万怡酒店',brand:'Courtyard',nights:1,redeem:false},
+  {date:'2025-12-26',name:'顺德美的万怡酒店',brand:'Courtyard',nights:1,redeem:false},
 ];
 
-let curFilter='all', curSearch='', openSet=new Set();
+const PLATINUM_DATE='2025-04-21';
+const TITANIUM_DATE='2025-06-05';
+const Q1_START_2025=new Date('2025-02-11');
+const Q1_END_2025=new Date('2025-04-28');
 
-function setFilter(f,el){
-  curFilter=f;
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  renderBanks();
-}
-function filterBanks(){
-  curSearch=document.getElementById('searchInput').value.toLowerCase();
-  renderBanks();
-}
-function renderBanks(){
-  const list=document.getElementById('banksList');
-  const filtered=BANKS.filter(b=>{
-    if(curFilter!=='all'&&!b.tags.includes(curFilter))return false;
-    if(curSearch){
-      const hay=(b.name+b.subtitle+b.sections.map(s=>s.items.map(i=>i.t).join(' ')).join(' ')).toLowerCase();
-      if(!hay.includes(curSearch))return false;
-    }
-    return true;
-  });
-  if(!filtered.length){
-    list.innerHTML='<div class="empty-state">🔍<br><br>搵唔到相關銀行</div>';
-    return;
+function buildBrandAccordion(stays, containerId) {
+  const brandMap={};
+  for(const s of stays){
+    if(!brandMap[s.brand])brandMap[s.brand]={nights:0,stays:[]};
+    brandMap[s.brand].nights+=s.nights;
+    brandMap[s.brand].stays.push(s);
   }
-  list.innerHTML=filtered.map(b=>{
-    const isOpen=openSet.has(b.id);
-    const bdg=b.badges.map(x=>`<span class="badge ${x.c}">${x.t}</span>`).join('');
-    const secs=b.sections.map(s=>`
-      <div class="detail-section">
-        <div class="detail-label">${s.label}</div>
-        ${s.items.map(i=>`<div class="detail-item ${i.c}"><span class="detail-dot">${i.i}</span><span>${i.t}</span></div>`).join('')}
+  const totalNights=stays.reduce((s,x)=>s+x.nights,0);
+  const sorted=Object.entries(brandMap).sort((a,b)=>b[1].nights-a[1].nights);
+  const container=document.getElementById(containerId);
+  let html='';
+  sorted.forEach(([brand,data],idx)=>{
+    const pct=totalNights>0?Math.round(data.nights/totalNights*100)+'%':'—';
+    const staysHtml=data.stays.map(s=>`
+      <div class="brand-stay-item">
+        <div class="brand-stay-date">${s.date.slice(5).replace('-','/')}</div>
+        <div class="brand-stay-name">${s.name}</div>
+        <div class="brand-stay-nights">${s.nights}晚</div>
       </div>`).join('');
-    return `
-    <div class="bank-card${isOpen?' open':''}" id="card-${b.id}">
-      <div class="bank-card-header" onclick="toggle('${b.id}')">
-        <div>
-          <div class="bank-name-row">
-            <div class="bank-avatar" style="background:${LOGOS[b.id]?LOGOS[b.id].bg:'#eee'};color:${LOGOS[b.id]?LOGOS[b.id].color:'#888'};">${LOGOS[b.id]?LOGOS[b.id].icon:''}</div>
-            <div><div class="bank-name">${b.name}</div><div class="bank-subtitle">${b.subtitle}</div></div>
-          </div>
-          <div class="bank-badges">${bdg}</div>
+    html+=`
+      <div class="brand-row" onclick="toggleBrand(this)" id="brandRow_${containerId}_${idx}">
+        <div class="brand-row-info">
+          <div class="brand-row-name">${brand}</div>
+          <div class="brand-row-meta">${data.stays.length}次 · ${data.nights}晚 · ${pct}</div>
         </div>
-        <button class="expand-btn" onclick="toggle('${b.id}');event.stopPropagation()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
+        <span class="brand-row-chevron">▼</span>
       </div>
-      <div class="bank-body"><div class="bank-body-inner">${secs}</div></div>
-    </div>`;
-  }).join('');
-}
-function toggle(id){
-  openSet.has(id)?openSet.delete(id):openSet.add(id);
-  const c=document.getElementById('card-'+id);
-  if(c)c.classList.toggle('open',openSet.has(id));
-}
-function switchTab(tab){
-  ['Cards','Compare','Tips'].forEach(t=>{
-    document.getElementById('page'+t).classList.toggle('active',t===tab);
-    document.getElementById('tab'+t).classList.toggle('active',t===tab);
+      <div class="brand-stays" id="brandStays_${containerId}_${idx}">${staysHtml}</div>`;
   });
-  const show=tab==='Cards';
-  document.getElementById('searchWrap').style.display=show?'':'none';
-  document.getElementById('filterRow').style.display=show?'':'none';
+  html+=`<div style="padding:10px 14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);border-top:1px solid var(--border);">合計 ${stays.length} 次 · ${totalNights} 晚</div>`;
+  container.innerHTML=html;
 }
-renderBanks();
+
+window.toggleBrand=function(row){
+  const idx=row.id.split('_').pop();
+  const containerId=row.id.split('_').slice(1,-1).join('_');
+  const stays=document.getElementById(`brandStays_${containerId}_${idx}`);
+  const isOpen=stays.classList.contains('show');
+  stays.classList.toggle('show',!isOpen);
+  row.classList.toggle('open',!isOpen);
+};
+
+function render2025(){
+  const monthNames=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  const grouped={};
+  for(const s of STAYS_2025){const m=parseInt(s.date.split('-')[1])-1;if(!grouped[m])grouped[m]=[];grouped[m].push(s);}
+  let html='';
+  let q1Started=false,q1Ended=false;
+  for(const m of Object.keys(grouped).sort((a,b)=>a-b)){
+    const mInt=parseInt(m);
+    let q1Tag='';
+    if(mInt===1)q1Tag='<span class="q1-tag">Q1 期間（2/11起）</span>';
+    else if(mInt===2)q1Tag='<span class="q1-tag">Q1 期間</span>';
+    else if(mInt===3)q1Tag='<span class="q1-tag">Q1 期間（至4/28）</span>';
+    html+=`<div class="month-header">${monthNames[m]}${q1Tag}</div>`;
+    for(const s of grouped[m]){
+      const d=new Date(s.date);
+      if(!q1Started && d>=Q1_START_2025){q1Started=true;html+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
+      if(!q1Ended && q1Started && d>Q1_END_2025){q1Ended=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
+      const dateStr=s.date.slice(5).replace('-','/');
+      html+=`<div class="stay-item"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${s.name}</div><div class="stay-brand-tag">${s.brand}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
+      if(s.date===PLATINUM_DATE){html+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;}
+      if(s.date===TITANIUM_DATE){html+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;}
+    }
+  }
+  document.getElementById('stayList2025').innerHTML=html;
+  buildBrandAccordion(STAYS_2025,'brandAccordion2025');
+}
+render2025();
+
+// Tab switching
+let currentIsAdmin=false;
+function switchTab(year){
+  document.getElementById('page2025').classList.toggle('active',year==='2025');
+  document.getElementById('page2026').classList.toggle('active',year==='2026');
+  document.getElementById('tab2025').classList.toggle('active',year==='2025');
+  document.getElementById('tab2026').classList.toggle('active',year==='2026');
+  const on2026=year==='2026';
+  // 只有 2026 頁先顯示登入/頭像
+  document.getElementById('loginChip').style.visibility=on2026?'':'hidden';
+  document.getElementById('userAvatar').style.visibility=on2026?'':'hidden';
+}
+
+// Modal helpers
+window.showLoginModal=function(){
+  document.getElementById('loginError').style.display='none';
+  document.getElementById('loginLoading').style.display='none';
+  document.getElementById('loginModal').classList.add('show');
+};
+window.showLogoutModal=function(){
+  document.getElementById('logoutModal').classList.add('show');
+};
+window.closeAllModals=function(){
+  document.querySelectorAll('.modal-overlay').forEach(el=>el.classList.remove('show'));
+};
+['loginModal','logoutModal','delModal','modalOverlay','pointsModalOverlay'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeAllModals();});
+});
 </script>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,onValue,push,remove,update}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const ADMIN_EMAIL='nentivericfv@gmail.com';
+const ADMIN_EMAILS=['nentivericfv@gmail.com','1252719751@qq.com'];
+const firebaseConfig={apiKey:"AIzaSyArG04UcAi4oe4DdDJtJPrRCCv5e20cVVk",authDomain:"marriott-calculator.firebaseapp.com",databaseURL:"https://marriott-calculator-default-rtdb.firebaseio.com",projectId:"marriott-calculator",storageBucket:"marriott-calculator.firebasestorage.app",messagingSenderId:"983529900657",appId:"1:983529900657:web:52821f5d4677b85ef7e9d0"};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+const auth=getAuth(app);
+const staysRef=ref(db,'stays2026');
+const pointsBaseRef=ref(db,'config/pointsBase');
+const pointsBaseStaysRef=ref(db,'config/pointsBaseStayIds');
+
+let _pointsBase=0;
+let _pointsBaseStays=[];
+
+onValue(pointsBaseRef,(snap)=>{_pointsBase=snap.val()||0;});
+onValue(pointsBaseStaysRef,(snap)=>{_pointsBaseStays=snap.val()||[];});
+
+const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
+const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+
+const BRAND_KEYWORDS=[
+  {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
+  {brand:'Aloft',keywords:['雅乐轩','雅樂軒','Aloft']},
+  {brand:'Autograph Collection',keywords:['傲途格','柏宁','柏寧','Autograph']},
+  {brand:'Bvlgari Hotels',keywords:['宝格丽','寶格麗','Bvlgari']},
+  {brand:'Courtyard',keywords:['万怡','萬怡','Courtyard']},
+  {brand:'Delta Hotels',keywords:['德尔塔','德爾塔','Delta']},
+  {brand:'Design Hotels',keywords:['设计酒店','設計酒店','Design Hotels','NOA','noa']},
+  {brand:'Edition',keywords:['艾迪逊','艾迪遜','EDITION','Edition']},
+  {brand:'Element',keywords:['源宿','Element']},
+  {brand:'Fairfield',keywords:['万枫','萬楓','Fairfield']},
+  {brand:'Four Points',keywords:['福朋','Four Points']},
+  {brand:'JW Marriott',keywords:['JW万豪','JW萬豪','jw万豪','JW Marriott']},
+  {brand:'Le Meridien',keywords:['艾美','Le Meridien']},
+  {brand:'Luxury Collection',keywords:['豪华精选','豪華精選','Luxury Collection']},
+  {brand:'Marriott',keywords:['万豪酒店','萬豪酒店','Marriott Hotel','Marriott Resort','Marriott ']},
+  {brand:'Moxy',keywords:['莫克斯','Moxy']},
+  {brand:'Renaissance',keywords:['万丽','萬麗','Renaissance']},
+  {brand:'Ritz-Carlton',keywords:['丽思卡尔顿','麗思卡爾頓','Ritz-Carlton','Ritz Carlton']},
+  {brand:'Sheraton',keywords:['喜来登','喜達屋','Sheraton']},
+  {brand:'St. Regis',keywords:['瑞吉','St. Regis','St Regis']},
+  {brand:'Tribute Portfolio',keywords:['臻品之选','臻品之選','Tribute Portfolio']},
+  {brand:'W Hotels',keywords:['W酒店','W Hotel','W Hotels']},
+  {brand:'Westin',keywords:['威斯汀','Westin']},
+];
+
+const DEFAULT_STAYS=[
+  {date:'2026-01-09',name:'香港柏宁酒店，傲途格精选',brand:'Autograph Collection',nights:1,redeem:false},
+  {date:'2026-01-25',name:'广州空港万豪万枫酒店',brand:'Fairfield',nights:1,redeem:false},
+  {date:'2026-03-03',name:'深圳NOA酒店（Design Hotels）',brand:'Design Hotels',nights:1,redeem:false},
+  {date:'2026-03-06',name:'广州粤海喜来登酒店',brand:'Sheraton',nights:1,redeem:false},
+  {date:'2026-03-07',name:'珠海瑞吉酒店',brand:'St. Regis',nights:1,redeem:false},
+  {date:'2026-03-16',name:'广交会万怡酒店',brand:'Courtyard',nights:1,redeem:true},
+  {date:'2026-03-22',name:'佛山万豪酒店',brand:'Marriott',nights:1,redeem:true},
+  {date:'2026-03-28',name:'东莞松山湖雅乐轩酒店',brand:'Aloft',nights:1,redeem:false},
+  {date:'2026-03-30',name:'广州白云国际会议中心越秀源宿酒店',brand:'Element',nights:1,redeem:false},
+  {date:'2026-04-02',name:'广州天河合景福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
+];
+
+let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=false,editKey=null,dbInitialized=false,deleteTargetKey=null,toastTimer=null;
+
+onAuthStateChanged(auth,(user)=>{
+  isAdmin=!!(user&&ADMIN_EMAILS.includes(user.email));
+  currentIsAdmin=isAdmin;
+  document.getElementById('addForm').classList.toggle('show',isAdmin);
+
+  const chip=document.getElementById('loginChip');
+  const avatar=document.getElementById('userAvatar');
+
+  if(isAdmin&&user){
+    chip.classList.remove('show');
+    avatar.classList.add('show');
+    if(user.photoURL){
+      avatar.innerHTML=`<img src="${user.photoURL}" alt="">`;
+    }else{
+      avatar.textContent=(user.displayName||user.email)[0].toUpperCase();
+    }
+    document.getElementById('logoutBody').textContent=`確定要登出 ${user.email}？`;
+    // Close login modal if open
+    document.getElementById('loginModal').classList.remove('show');
+  }else{
+    chip.classList.add('show');
+    avatar.classList.remove('show');
+    avatar.innerHTML='';
+  }
+});
+
+window.doLogin=async function(){
+  document.getElementById('loginError').style.display='none';
+  document.getElementById('loginLoading').style.display='block';
+  try{
+    await signInWithPopup(auth,new GoogleAuthProvider());
+  }catch(e){
+    document.getElementById('loginLoading').style.display='none';
+    if(e.code!=='auth/popup-closed-by-user'){
+      document.getElementById('loginError').style.display='block';
+      document.getElementById('loginError').textContent='登入失敗，請重試';
+    }
+  }
+};
+window.doLogout=async function(){
+  closeAllModals();
+  await signOut(auth);
+  showToast('已登出');
+};
+
+function setupStepper(mId,pId,vId,getV,setV){
+  const bM=document.getElementById(mId),bP=document.getElementById(pId),vEl=document.getElementById(vId);
+  function dec(e){e.preventDefault();setV(Math.max(1,getV()-1));vEl.textContent=getV();}
+  function inc(e){e.preventDefault();setV(Math.min(30,getV()+1));vEl.textContent=getV();}
+  bM.addEventListener('touchstart',dec,{passive:false});bP.addEventListener('touchstart',inc,{passive:false});
+  bM.addEventListener('click',dec);bP.addEventListener('click',inc);
+}
+setupStepper('btnMinus','btnPlus','nightsVal',()=>nightsCount,v=>{nightsCount=v;});
+setupStepper('editBtnMinus','editBtnPlus','editNightsVal',()=>editNightsCount,v=>{editNightsCount=v;});
+
+onValue(staysRef,(snapshot)=>{
+  const data=snapshot.val();let stays=[];
+  if(data){stays=Object.entries(data).map(([key,val])=>({...val,_key:key}));}
+  else if(!dbInitialized){dbInitialized=true;DEFAULT_STAYS.forEach(s=>push(staysRef,s));return;}
+  dbInitialized=true;
+  render2026(stays);
+},()=>{});
+
+function isQ1Eligible(stay){if(stay.redeem)return false;const d=new Date(stay.date);return d>=Q1_START&&d<=Q1_END;}
+
+function calcQ1(stays){
+  const usedBrands=new Set();let bonus=0;
+  const sorted=[...stays].sort((a,b)=>a.date.localeCompare(b.date));
+  for(const s of sorted){if(isQ1Eligible(s)&&!usedBrands.has(s.brand)){usedBrands.add(s.brand);bonus+=s.nights;}}
+  return{bonus,usedBrands};
+}
+
+function render2026(stays){
+  window._currentStays=stays;
+  const sorted=[...stays].sort((a,b)=>a.date.localeCompare(b.date));
+  const actualNights=stays.reduce((s,x)=>s+x.nights,0);
+  const{bonus,usedBrands}=calcQ1(stays);
+  window._q1UsedBrands=usedBrands;
+  const total=actualNights+bonus,left=Math.max(0,TARGET-total),pct=Math.min(100,(total/TARGET)*100);
+
+  document.getElementById('totalDisplay').textContent=total;
+  document.getElementById('statActual').textContent=actualNights;
+  document.getElementById('statQ1').textContent=bonus;
+  setTimeout(()=>{document.getElementById('progressFill').style.width=pct+'%';},100);
+
+  let earned2026=0;
+  for(const s of stays){if(s.pointsEarned>0)earned2026+=s.pointsEarned;}
+  // Q1 bonus: 每個品牌第一次入住先加 2500，usedBrands 已係唯一品牌 set
+  earned2026+=usedBrands.size*2500;
+  document.getElementById('statEarned').textContent=earned2026>0?earned2026.toLocaleString():'—';
+
+  const pointsBase=_pointsBase;
+  const pointsBaseStays=_pointsBaseStays;
+  let netChange=0;
+  // 要知道每個品牌嘅「第一次Q1住宿」係咪喺pointsBase snapshot之前
+  // 先建立所有Q1住宿按日期排序，找出每個品牌第一次
+  const allQ1Sorted=[...stays].filter(s=>isQ1Eligible(s)).sort((a,b)=>a.date.localeCompare(b.date)||a._key.localeCompare(b._key));
+  const firstQ1KeyByBrand={};
+  for(const s of allQ1Sorted){
+    if(!firstQ1KeyByBrand[s.brand])firstQ1KeyByBrand[s.brand]=s._key;
+  }
+  for(const s of stays){
+    if(!pointsBaseStays.includes(s._key)){
+      if(s.pointsEarned>0)netChange+=s.pointsEarned;
+      if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
+      // 只有該品牌第一次Q1住宿先加2500
+      if(isQ1Eligible(s)&&firstQ1KeyByBrand[s.brand]===s._key)netChange+=2500;
+    }
+  }
+  const currentPoints=pointsBase>0?pointsBase+netChange:0;
+  document.getElementById('statTotal').textContent=pointsBase>0?currentPoints.toLocaleString():'—';
+
+  const remainEl=document.getElementById('nightsRemainingEl');
+  if(total>=TARGET){remainEl.className='nights-remaining achieved';remainEl.innerHTML='已達標 🎉';}
+  else{remainEl.className='nights-remaining';remainEl.innerHTML=`距離75晚目標，仲需 <strong>${left}</strong> 晚 · <span style="color:var(--gold);">${Math.round(pct)}%</span>`;}
+
+  const q1Stays=stays.filter(s=>isQ1Eligible(s));
+  const q1BrandsList=[...new Set(q1Stays.map(s=>s.brand))].sort();
+  document.getElementById('brandCount').textContent=`已用 ${usedBrands.size} 個品牌獎勵`;
+  const brandsGrid=document.getElementById('brandsGrid');
+  brandsGrid.innerHTML=q1BrandsList.length===0?'<div style="color:var(--text-muted);font-size:12px;grid-column:1/-1;">暫無Q1期間住宿</div>':q1BrandsList.map(b=>`<div style="background:var(--surface2);border:1px solid rgba(128,128,128,0.1);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--text);${usedBrands.has(b)?'text-decoration:line-through;opacity:0.45;':''}">${b}</div>`).join('');
+
+  const monthGroups={};
+  for(const s of sorted){const m=parseInt(s.date.split('-')[1])-1;if(!monthGroups[m])monthGroups[m]=[];monthGroups[m].push(s);}
+  const q1BonusByMonth={};
+  const usedForBonus=new Set();
+  for(const s of sorted){
+    if(isQ1Eligible(s)&&!usedForBonus.has(s.brand)){
+      usedForBonus.add(s.brand);
+      const m=parseInt(s.date.split('-')[1])-1;
+      q1BonusByMonth[m]=(q1BonusByMonth[m]||0)+s.nights;
+    }
+  }
+  let tbody='';
+  for(const m of Object.keys(monthGroups).sort((a,b)=>a-b)){
+    const n=monthGroups[m].reduce((s,x)=>s+x.nights,0);
+    const cnt=monthGroups[m].length;
+    const pctM=actualNights>0?Math.round(n/actualNights*100)+'%':'—';
+    const q1b=q1BonusByMonth[m]||0;
+    tbody+=`<tr><td>${MONTH_NAMES[m]}</td><td>${cnt}</td><td>${n}</td><td>${q1b||'—'}</td><td>${pctM}</td></tr>`;
+  }
+  tbody+=`<tr><td>合計</td><td>${stays.length}</td><td>${actualNights}</td><td>${bonus}</td><td>100%</td></tr>`;
+  document.getElementById('monthTableBody2026').innerHTML=tbody;
+
+  buildBrandAccordion(stays,'brandAccordion2026');
+
+  const stayList=document.getElementById('stayList');
+  if(sorted.length===0){stayList.innerHTML='<div class="empty-state">未有住宿記錄</div>';return;}
+  const now=new Date();let html='';
+  for(const m of Object.keys(monthGroups).sort((a,b)=>a-b)){
+    const monthStart=new Date(2026,parseInt(m),1),monthEnd=new Date(2026,parseInt(m)+1,0);
+    const q1Ended=now>Q1_END;
+    const hasQ1Stays=monthGroups[m].some(s=>isQ1Eligible(s));
+    const isQ1EndMonth=parseInt(m)===Q1_END.getMonth(); // 五月
+    const hasNonQ1Stays=monthGroups[m].some(s=>!isQ1Eligible(s));
+    const q1EndInMonth=isQ1EndMonth&&hasQ1Stays&&hasNonQ1Stays;
+    const q1TagText=q1EndInMonth?'Q1 期間（至 5/10）':(q1Ended?'Q1 已結束':'Q1 期間');
+    const q1TagHtml=hasQ1Stays?`<span class="q1-tag">${q1TagText}</span>`:'';
+    html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
+    let q1DividerShown=false;
+    for(const s of monthGroups[m]){
+      if(!q1DividerShown&&q1EndInMonth&&!isQ1Eligible(s)){
+        q1DividerShown=true;
+        html+=`<div class="q1-divider">── Q1 結束 ──</div>`;
+      }
+      const dateStr=s.date.slice(5).replace('-','/');
+      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
+      let pointsHtml='';
+      const isQ1Bonus=isQ1Eligible(s)&&usedBrands.has(s.brand);
+      // 只有第一次入住該品牌先係Q1 bonus
+      const isFirstQ1ForBrand=isQ1Eligible(s)&&(()=>{
+        const earlier=sorted.filter(x=>x._key!==s._key&&isQ1Eligible(x)&&x.brand===s.brand&&x.date<=s.date&&!(x.date===s.date&&x._key>=s._key));
+        return earlier.length===0;
+      })();
+      if(s.redeem){
+        const redPart=s.redeemPoints>0?`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−${s.redeemPoints.toLocaleString()}</span>`:`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−?</span>`;
+        const earnPart=s.pointsEarned>0?`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+${s.pointsEarned.toLocaleString()}</span>`:`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+?</span>`;
+        pointsHtml=redPart+' '+earnPart;
+      }else{
+        const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
+        const q1Part=isFirstQ1ForBrand?` <span style="font-size:9px;color:var(--green);">(Q1+2,500)</span>`:'';
+        pointsHtml=`<span style="color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;">${base}</span>${q1Part}`;
+      }
+      const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
+      const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
+      const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
+      html+=`<div class="stay-item" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${s.name}</div><div class="stay-brand-tag">${s.brand}${s.redeem?' · 兌換':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+    }
+  }
+  stayList.innerHTML=html;
+}
+
+window.onNameInput=function(val){
+  setTimeout(checkQ1Hint,100);
+  document.getElementById('clearName').classList.toggle('visible',val.length>0);
+  if(val.length===0){document.getElementById('inputBrand').value='';document.getElementById('brandHint').textContent='';return;}
+  for(const item of BRAND_KEYWORDS){if(item.keywords.some(k=>val.includes(k))){document.getElementById('inputBrand').value=item.brand;document.getElementById('brandHint').textContent='自動匹配';return;}}
+  document.getElementById('brandHint').textContent='';
+};
+window.clearName=function(){document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';document.getElementById('brandHint').textContent='';document.getElementById('clearName').classList.remove('visible');};
+window.toggleRedeem=function(){
+  isRedeem=!isRedeem;
+  document.getElementById('redeemToggle').classList.toggle('active',isRedeem);
+  document.getElementById('redeemPointsGroup').style.display=isRedeem?'block':'none';
+  checkQ1Hint();
+};
+window.checkQ1Hint=function(){
+  if(!window._q1UsedBrands)return;
+  const date=document.getElementById('inputDate').value;
+  const brand=document.getElementById('inputBrand').value;
+  if(!date||!brand||isRedeem){document.getElementById('q1Hint').style.display='none';return;}
+  const d=new Date(date);
+  const inQ1=d>=Q1_START&&d<=Q1_END;
+  const brandUsed=window._q1UsedBrands.has(brand);
+  document.getElementById('q1Hint').style.display=(inQ1&&!brandUsed)?'block':'none';
+};
+
+window.addStay=async function(){
+  if(!isAdmin)return;
+  const date=document.getElementById('inputDate').value,name=document.getElementById('inputName').value.trim(),brand=document.getElementById('inputBrand').value;
+  if(!date||!name||!brand){showToast('請填寫日期、酒店名稱及品牌','#F87171');return;}
+  const btn=document.getElementById('btnAdd');btn.disabled=true;
+  try{
+    const redeemPts=isRedeem?parseInt(document.getElementById('inputRedeemPoints').value)||0:0;
+    await push(staysRef,{date,name,brand,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0});
+    document.getElementById('inputDate').value=new Date().toISOString().slice(0,10);
+    document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';
+    document.getElementById('brandHint').textContent='';document.getElementById('clearName').classList.remove('visible');
+    nightsCount=1;document.getElementById('nightsVal').textContent='1';
+    isRedeem=false;document.getElementById('redeemToggle').classList.remove('active');
+    document.getElementById('redeemPointsGroup').style.display='none';
+    document.getElementById('inputRedeemPoints').value='';
+    document.getElementById('q1Hint').style.display='none';
+    showToast('✓ 住宿已新增並同步');
+  }catch(e){showToast('同步失敗','#F87171');}
+  btn.disabled=false;
+};
+
+// Delete with modal
+window._askDelete=function(key){
+  deleteTargetKey=key;
+  document.getElementById('delModal').classList.add('show');
+};
+window.confirmDelete=async function(){
+  closeAllModals();
+  if(deleteTargetKey){
+    try{await remove(ref(db,`stays2026/${deleteTargetKey}`));showToast('✓ 已刪除');}
+    catch(e){showToast('刪除失敗','#F87171');}
+    deleteTargetKey=null;
+  }
+};
+
+window.openEdit=function(key,date,name,brand,nights,redeem,pointsEarned,redeemPoints){
+  if(!isAdmin)return;
+  editKey=key;editNightsCount=nights;editIsRedeem=redeem;
+  document.getElementById('editDate').value=date;
+  document.getElementById('editName').value=decodeURIComponent(name);
+  const brandDecoded=decodeURIComponent(brand);
+  document.getElementById('editBrand').value=brandDecoded;
+  document.getElementById('editNightsVal').textContent=nights;
+  document.getElementById('editRedeemToggle').classList.toggle('active',redeem);
+  document.getElementById('editPointsEarned').value=pointsEarned||'';
+  document.getElementById('editRedeemPoints').value=redeemPoints||'';
+  document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
+  const d=new Date(date);
+  const inQ1=d>=Q1_START&&d<=Q1_END;
+  const brandUsed=window._q1UsedBrands&&window._q1UsedBrands.has(brandDecoded);
+  document.getElementById('editQ1Hint').style.display=(inQ1&&!redeem&&(!brandUsed||pointsEarned>0))?'block':'none';
+  document.getElementById('modalOverlay').classList.add('show');
+};
+window.closeModal=function(){document.getElementById('modalOverlay').classList.remove('show');editKey=null;};
+window.toggleEditRedeem=function(){
+  editIsRedeem=!editIsRedeem;
+  document.getElementById('editRedeemToggle').classList.toggle('active',editIsRedeem);
+  document.getElementById('editRedeemPointsGroup').style.display=editIsRedeem?'block':'none';
+};
+window.saveEdit=async function(){
+  if(!isAdmin)return;
+  const date=document.getElementById('editDate').value,name=document.getElementById('editName').value.trim(),brand=document.getElementById('editBrand').value;
+  if(!date||!name||!brand){showToast('請填寫所有欄位','#F87171');return;}
+  const pointsEarned=parseInt(document.getElementById('editPointsEarned').value)||0;
+  const redeemPoints=editIsRedeem?parseInt(document.getElementById('editRedeemPoints').value)||0:0;
+  try{await update(ref(db,`stays2026/${editKey}`),{date,name,brand,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});closeModal();showToast('✓ 已更新');}
+  catch(e){showToast('更新失敗','#F87171');}
+};
+
+window.openPointsModal=function(){
+  const base=localStorage.getItem('pointsBase')||'';
+  document.getElementById('pointsBaseInput').value=base;
+  document.getElementById('pointsModalOverlay').classList.add('show');
+};
+window.closePointsModal=function(){document.getElementById('pointsModalOverlay').classList.remove('show');};
+window.savePointsBase=async function(){
+  const val=parseInt(document.getElementById('pointsBaseInput').value);
+  if(!val||val<0){showToast('請輸入有效積分','#F87171');return;}
+  try{
+    const ids=window._currentStays?window._currentStays.map(s=>s._key).filter(Boolean):[];
+    await update(ref(db,'config'),{pointsBase:val,pointsBaseStayIds:ids});
+    closePointsModal();
+    showToast('✓ 積分餘額已更新並同步');
+  }catch(e){showToast('更新失敗','#F87171');}
+};
+
+function showToast(msg,color='#4ADE80'){
+  const t=document.getElementById('toast');
+  if(toastTimer){clearTimeout(toastTimer);toastTimer=null;}
+  t.textContent=msg;t.style.color=color;
+  t.classList.remove('show');void t.offsetWidth;t.classList.add('show');
+  toastTimer=setTimeout(()=>{t.classList.remove('show');toastTimer=null;},2500);
+}
+
+document.getElementById('inputDate').value=new Date().toISOString().slice(0,10);
+</script>
+
 <script>
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').then(reg => {
-    reg.update();
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+  navigator.serviceWorker.register('./sw.js').then(reg=>{
+    reg.addEventListener('updatefound',()=>{
+      const newWorker=reg.installing;
+      newWorker.addEventListener('statechange',()=>{
+        if(newWorker.state==='installed'&&navigator.serviceWorker.controller){
+          navigator.serviceWorker.controller.postMessage({type:'SKIP_WAITING'});
           window.location.reload();
         }
       });
     });
   });
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload();
-  });
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{window.location.reload();});
 }
 </script>
 </body>
