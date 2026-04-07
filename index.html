@@ -626,6 +626,14 @@ const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 const auth=getAuth(app);
 const staysRef=ref(db,'stays2026');
+const pointsBaseRef=ref(db,'config/pointsBase');
+const pointsBaseStaysRef=ref(db,'config/pointsBaseStayIds');
+
+let _pointsBase=0;
+let _pointsBaseStays=[];
+
+onValue(pointsBaseRef,(snap)=>{_pointsBase=snap.val()||0;});
+onValue(pointsBaseStaysRef,(snap)=>{_pointsBaseStays=snap.val()||[];});
 
 const TARGET=75,Q1_START=new Date('2026-02-25'),Q1_END=new Date('2026-05-10');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
@@ -762,8 +770,8 @@ function render2026(stays){
   earned2026+=usedBrands.size*2500;
   document.getElementById('statEarned').textContent=earned2026>0?earned2026.toLocaleString():'—';
 
-  const pointsBase=parseInt(localStorage.getItem('pointsBase'))||0;
-  const pointsBaseStays=JSON.parse(localStorage.getItem('pointsBaseStayIds')||'[]');
+  const pointsBase=_pointsBase;
+  const pointsBaseStays=_pointsBaseStays;
   let netChange=0;
   // 要知道每個品牌嘅「第一次Q1住宿」係咪喺pointsBase snapshot之前
   // 先建立所有Q1住宿按日期排序，找出每個品牌第一次
@@ -823,7 +831,9 @@ function render2026(stays){
   for(const m of Object.keys(monthGroups).sort((a,b)=>a-b)){
     const monthStart=new Date(2026,parseInt(m),1),monthEnd=new Date(2026,parseInt(m)+1,0);
     const inQ1=monthStart<=Q1_END&&monthEnd>=Q1_START,q1Ended=now>Q1_END;
-    const q1TagHtml=inQ1?`<span class="q1-tag${q1Ended?' ended':''}">${q1Ended?'Q1 已結束':'Q1 期間'}</span>`:'';
+    // 只有整個月都係Q1期間先show tag，或者月份部分係Q1但未結束
+    const showQ1Tag=monthStart<=Q1_END&&monthStart>=Q1_START||monthEnd>=Q1_START&&monthStart<=Q1_END;
+    const q1TagHtml=showQ1Tag?`<span class="q1-tag${q1Ended?' ended':''}">${q1Ended?'Q1 已結束':'Q1 期間'}</span>`:'';
     html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
     for(const s of monthGroups[m]){
       const dateStr=s.date.slice(5).replace('-','/');
@@ -953,20 +963,15 @@ window.openPointsModal=function(){
   document.getElementById('pointsModalOverlay').classList.add('show');
 };
 window.closePointsModal=function(){document.getElementById('pointsModalOverlay').classList.remove('show');};
-window.savePointsBase=function(){
+window.savePointsBase=async function(){
   const val=parseInt(document.getElementById('pointsBaseInput').value);
   if(!val||val<0){showToast('請輸入有效積分','#F87171');return;}
-  localStorage.setItem('pointsBase',val);
-  if(window._currentStays){
-    const ids=window._currentStays.map(s=>s._key).filter(Boolean);
-    localStorage.setItem('pointsBaseStayIds',JSON.stringify(ids));
-  }
-  closePointsModal();
-  showToast('✓ 積分餘額已更新');
-  onValue(staysRef,(snapshot)=>{
-    const data=snapshot.val();
-    if(data){render2026(Object.entries(data).map(([key,val])=>({...val,_key:key})));}
-  },{onlyOnce:true});
+  try{
+    const ids=window._currentStays?window._currentStays.map(s=>s._key).filter(Boolean):[];
+    await update(ref(db,'config'),{pointsBase:val,pointsBaseStayIds:ids});
+    closePointsModal();
+    showToast('✓ 積分餘額已更新並同步');
+  }catch(e){showToast('更新失敗','#F87171');}
 };
 
 function showToast(msg,color='#4ADE80'){
