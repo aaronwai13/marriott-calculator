@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Marriott Bonvoy 住宿追蹤</title>
-<!-- VERSION: 2026.04.04.4 -->
+<!-- VERSION: 2026.04.07.2 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -24,7 +24,6 @@
 
   /* Tab bar */
   .tab-bar{position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:none;}
-  /* Cover the bottom area below tab bar for safe area */
   .tab-bar::after{content:'';position:absolute;bottom:calc(-1 * env(safe-area-inset-bottom, 0px));left:0;right:0;height:env(safe-area-inset-bottom, 0px);background:var(--surface);}
   .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;-webkit-tap-highlight-color:transparent;transition:color 0.2s;position:relative;outline:none;}
   .tab-btn.active{color:var(--gold);}
@@ -37,18 +36,20 @@
   .page.active{display:block;}
   .container{max-width:860px;margin:0 auto;padding:28px 20px 20px;position:relative;z-index:1;}
 
-  /* Admin bar */
-  .admin-bar{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:none;align-items:center;justify-content:space-between;z-index:150;}
-  .admin-bar.show{display:flex;}
-  .admin-info{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);display:flex;align-items:center;gap:8px;}
-  .admin-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);}
-  .btn-logout{background:none;border:1px solid rgba(128,128,128,0.2);border-radius:6px;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;cursor:pointer;}
+  /* TOP BAR */
+  .top-bar{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;z-index:150;height:48px;}
+  .top-bar-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;}
+  .top-bar-right{display:flex;align-items:center;gap:10px;}
 
-  /* Login FAB */
-  .login-fab{position:fixed;bottom:calc(var(--tab-h) + 12px);right:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);cursor:pointer;z-index:200;display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
-  .login-fab.show{display:flex;}
+  /* Login chip */
+  .login-chip{font-size:12px;font-weight:600;color:var(--gold);background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:20px;padding:5px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.15s;display:none;}
+  .login-chip:active{opacity:0.7;}
+  .login-chip.show{display:block;}
 
-
+  /* User avatar */
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:rgba(201,168,76,0.15);border:1.5px solid var(--border);display:none;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer;overflow:hidden;flex-shrink:0;}
+  .user-avatar.show{display:flex;}
+  .user-avatar img{width:100%;height:100%;object-fit:cover;}
 
   .header{text-align:center;margin-bottom:24px;}
   .header-eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
@@ -168,27 +169,27 @@
   .brand-stay-name{color:var(--text);}
   .brand-stay-nights{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);text-align:right;}
 
-  /* Undo toast */
-  .undo-toast{position:fixed;bottom:var(--tab-h);left:0;right:0;background:var(--surface);border-top:1px solid var(--border);font-size:12px;font-family:'DM Mono',monospace;z-index:99;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);overflow:hidden;}
-  .undo-toast.show{transform:translateY(0);}
-  .undo-toast-body{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;}
-  .undo-msg{color:var(--text-muted);}
-  .undo-btn{background:none;border:1px solid var(--gold);border-radius:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;padding:4px 12px;cursor:pointer;white-space:nowrap;}
-  .undo-progress-track{height:3px;background:var(--surface2);}
-  .undo-progress-fill{height:100%;background:var(--gold);width:100%;}
-
   /* Toast */
-  .toast{position:fixed;bottom:calc(var(--tab-h) + 70px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;font-family:'DM Mono',monospace;z-index:450;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
+  .toast{position:fixed;bottom:calc(var(--tab-h) + 16px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;font-family:'DM Mono',monospace;z-index:450;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
   .toast.show{opacity:1;}
 
-  /* Modal */
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+  /* Modal shared */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s;}
   .modal-overlay.show{opacity:1;pointer-events:all;}
   .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:480px;}
-  .modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:18px;}
-  .modal-actions{display:flex;gap:10px;margin-top:14px;}
-  .btn-cancel{flex:1;padding:11px;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:11px;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
-  .btn-save{flex:2;padding:11px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;border-radius:11px;color:#0A0A0F;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;}
+  .modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:8px;}
+  .modal-body-text{font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.5;}
+  .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  .btn-cancel{padding:12px;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:11px;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-save{padding:12px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;border-radius:11px;color:#0A0A0F;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;}
+  .btn-danger{padding:12px;background:#C0392B;color:#fff;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+
+  /* Google btn */
+  .google-btn{display:flex;align-items:center;gap:12px;padding:13px 20px;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--text);width:100%;justify-content:center;transition:opacity 0.15s;margin-bottom:0;}
+  .google-btn:active{opacity:0.7;}
+  .google-btn svg{width:18px;height:18px;flex-shrink:0;}
+  .login-error-msg{margin-top:10px;font-size:12px;color:#F87171;text-align:center;display:none;font-family:'DM Mono',monospace;}
+  .login-loading-msg{margin-top:10px;font-size:12px;color:var(--text-muted);text-align:center;display:none;font-family:'DM Mono',monospace;}
 
   .empty-state{text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px;font-style:italic;}
   @media(max-width:540px){.form-grid{grid-template-columns:1fr}.nights-big{font-size:38px}.card,.add-form{padding:18px}}
@@ -196,18 +197,18 @@
 </head>
 <body>
 
-
-
-
-
-<div class="admin-bar" id="adminBar">
-  <div class="admin-info"><div class="admin-dot"></div><span id="adminEmail"></span></div>
-  <button class="btn-logout" onclick="doLogout()">登出</button>
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-bar-title">Marriott Bonvoy</div>
+  <div class="top-bar-right">
+    <button class="login-chip" id="loginChip" onclick="showLoginModal()">登入</button>
+    <div class="user-avatar" id="userAvatar" onclick="showLogoutModal()"></div>
+  </div>
 </div>
 
 <!-- ========== PAGE 2025 ========== -->
 <div class="page" id="page2025">
-  <div class="container">
+  <div class="container" style="padding-top:68px;">
     <div class="header">
       <div class="header-eyebrow">Marriott Bonvoy</div>
       <h1>2025 住宿<span>回顧</span></h1>
@@ -229,7 +230,6 @@
       <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value green">29</div><div class="stat-label">獎勵房晚（Q1+年度）</div></div>
     </div>
 
-    <!-- 月度統計 -->
     <div class="card">
       <div class="section-header"><div class="section-title">月度統計</div></div>
       <table class="stats-table">
@@ -253,13 +253,11 @@
       </table>
     </div>
 
-    <!-- 品牌統計 -->
     <div class="card">
       <div class="section-header"><div class="section-title">品牌統計</div></div>
       <div id="brandAccordion2025"></div>
     </div>
 
-    <!-- 住宿明細 -->
     <div>
       <div class="section-header"><div class="section-title">住宿明細</div><div class="badge badge-gold">2025年</div></div>
       <div class="stay-list" id="stayList2025"></div>
@@ -269,7 +267,7 @@
 
 <!-- ========== PAGE 2026 ========== -->
 <div class="page active" id="page2026">
-  <div class="container" id="container2026">
+  <div class="container" id="container2026" style="padding-top:68px;">
     <div class="header">
       <div class="header-eyebrow">Marriott Bonvoy</div>
       <h1>2026 住宿<span>追蹤</span></h1>
@@ -361,9 +359,48 @@
   </button>
 </div>
 
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <div class="modal-title">登入</div>
+    <div class="modal-body-text">使用授權嘅 Google 帳號登入，方可新增或刪除記錄。</div>
+    <button class="google-btn" onclick="doLogin()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      使用 Google 登入
+    </button>
+    <div class="login-error-msg" id="loginError">此帳號無存取權限</div>
+    <div class="login-loading-msg" id="loginLoading">登入中…</div>
+  </div>
+</div>
 
+<!-- LOGOUT MODAL -->
+<div class="modal-overlay" id="logoutModal">
+  <div class="modal">
+    <div class="modal-title">登出</div>
+    <div class="modal-body-text" id="logoutBody">確定要登出？</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAllModals()">取消</button>
+      <button class="btn-save" onclick="doLogout()">登出</button>
+    </div>
+  </div>
+</div>
 
-<button class="login-fab" id="loginFab" onclick="doLogin()">🔑 管理員登入</button>
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal">
+    <div class="modal-title">刪除記錄</div>
+    <div class="modal-body-text">確定要刪除這筆住宿記錄？所有人都會看到此更改。</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAllModals()">取消</button>
+      <button class="btn-danger" onclick="confirmDelete()">刪除</button>
+    </div>
+  </div>
+</div>
 
 <!-- Edit Modal -->
 <div class="modal-overlay" id="modalOverlay">
@@ -406,10 +443,6 @@
   </div>
 </div>
 
-<div class="undo-toast" id="undoToast">
-  <div class="undo-progress-track"><div class="undo-progress-fill" id="undoProgressFill"></div></div>
-  <div class="undo-toast-body"><span class="undo-msg" id="undoMsg">已刪除</span><button class="undo-btn" onclick="undoDelete()">撤銷</button></div>
-</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -477,7 +510,6 @@ const TITANIUM_DATE='2025-06-05';
 const Q1_START_2025=new Date('2025-02-11');
 const Q1_END_2025=new Date('2025-04-28');
 
-// Build brand accordion
 function buildBrandAccordion(stays, containerId) {
   const brandMap={};
   for(const s of stays){
@@ -520,15 +552,12 @@ window.toggleBrand=function(row){
   row.classList.toggle('open',!isOpen);
 };
 
-// Render 2025 stay list
 function render2025(){
   const monthNames=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
   const grouped={};
   for(const s of STAYS_2025){const m=parseInt(s.date.split('-')[1])-1;if(!grouped[m])grouped[m]=[];grouped[m].push(s);}
-
   let html='';
   let q1Started=false,q1Ended=false;
-
   for(const m of Object.keys(grouped).sort((a,b)=>a-b)){
     const mInt=parseInt(m);
     let q1Tag='';
@@ -536,34 +565,14 @@ function render2025(){
     else if(mInt===2)q1Tag='<span class="q1-tag">Q1 期間</span>';
     else if(mInt===3)q1Tag='<span class="q1-tag">Q1 期間（至4/28）</span>';
     html+=`<div class="month-header">${monthNames[m]}${q1Tag}</div>`;
-
     for(const s of grouped[m]){
       const d=new Date(s.date);
-      if(!q1Started && d>=Q1_START_2025){
-        q1Started=true;
-        html+=`<div class="q1-divider">── Q1 開始 ──</div>`;
-      }
-      if(!q1Ended && q1Started && d>Q1_END_2025){
-        q1Ended=true;
-        html+=`<div class="q1-divider">── Q1 結束 ──</div>`;
-      }
-
+      if(!q1Started && d>=Q1_START_2025){q1Started=true;html+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
+      if(!q1Ended && q1Started && d>Q1_END_2025){q1Ended=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
       const dateStr=s.date.slice(5).replace('-','/');
-      // No redeem styling for 2025 - all stays look the same
-      html+=`<div class="stay-item">
-        <div class="stay-date">${dateStr}</div>
-        <div><div class="stay-name">${s.name}</div><div class="stay-brand-tag">${s.brand}</div></div>
-        <div class="stay-nights-tag">${s.nights}晚</div>
-        <div></div>
-      </div>`;
-
-      // Milestone AFTER the stay
-      if(s.date===PLATINUM_DATE){
-        html+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;
-      }
-      if(s.date===TITANIUM_DATE){
-        html+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;
-      }
+      html+=`<div class="stay-item"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${s.name}</div><div class="stay-brand-tag">${s.brand}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
+      if(s.date===PLATINUM_DATE){html+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;}
+      if(s.date===TITANIUM_DATE){html+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;}
     }
   }
   document.getElementById('stayList2025').innerHTML=html;
@@ -578,10 +587,23 @@ function switchTab(year){
   document.getElementById('page2026').classList.toggle('active',year==='2026');
   document.getElementById('tab2025').classList.toggle('active',year==='2025');
   document.getElementById('tab2026').classList.toggle('active',year==='2026');
-  const on2026=year==='2026';
-  document.getElementById('adminBar').classList.toggle('show',currentIsAdmin&&on2026);
-  document.getElementById('loginFab').classList.toggle('show',!currentIsAdmin&&on2026);
 }
+
+// Modal helpers
+window.showLoginModal=function(){
+  document.getElementById('loginError').style.display='none';
+  document.getElementById('loginLoading').style.display='none';
+  document.getElementById('loginModal').classList.add('show');
+};
+window.showLogoutModal=function(){
+  document.getElementById('logoutModal').classList.add('show');
+};
+window.closeAllModals=function(){
+  document.querySelectorAll('.modal-overlay').forEach(el=>el.classList.remove('show'));
+};
+['loginModal','logoutModal','delModal','modalOverlay','pointsModalOverlay'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeAllModals();});
+});
 </script>
 
 <script type="module">
@@ -589,18 +611,13 @@ import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-ap
 import{getDatabase,ref,onValue,push,remove,update}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-
-const CURRENT_VERSION='2026.04.07.1';
 const ADMIN_EMAIL='nentivericfv@gmail.com';
-
 const firebaseConfig={apiKey:"AIzaSyArG04UcAi4oe4DdDJtJPrRCCv5e20cVVk",authDomain:"marriott-calculator.firebaseapp.com",databaseURL:"https://marriott-calculator-default-rtdb.firebaseio.com",projectId:"marriott-calculator",storageBucket:"marriott-calculator.firebasestorage.app",messagingSenderId:"983529900657",appId:"1:983529900657:web:52821f5d4677b85ef7e9d0"};
 
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
-
 const auth=getAuth(app);
 const staysRef=ref(db,'stays2026');
-const versionRef=ref(db,'appVersion');
 
 const TARGET=75,Q1_START=new Date('2026-02-25'),Q1_END=new Date('2026-05-10');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
@@ -644,30 +661,52 @@ const DEFAULT_STAYS=[
   {date:'2026-04-02',name:'广州天河合景福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
 ];
 
-let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=false,editKey=null,dbInitialized=false,pendingDelete=null,undoTimer=null,toastTimer=null;
+let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=false,editKey=null,dbInitialized=false,deleteTargetKey=null,toastTimer=null;
 
 onAuthStateChanged(auth,(user)=>{
   isAdmin=!!(user&&user.email===ADMIN_EMAIL);
   currentIsAdmin=isAdmin;
   document.getElementById('addForm').classList.toggle('show',isAdmin);
-  const on2026=document.getElementById('page2026').classList.contains('active');
-  document.getElementById('adminBar').classList.toggle('show',isAdmin&&on2026);
-  document.getElementById('loginFab').classList.toggle('show',!isAdmin&&on2026);
-  if(isAdmin){
-    document.getElementById('adminEmail').textContent=user.email;
-    document.getElementById('container2026').style.paddingTop='68px';
+
+  const chip=document.getElementById('loginChip');
+  const avatar=document.getElementById('userAvatar');
+
+  if(isAdmin&&user){
+    chip.classList.remove('show');
+    avatar.classList.add('show');
+    if(user.photoURL){
+      avatar.innerHTML=`<img src="${user.photoURL}" alt="">`;
+    }else{
+      avatar.textContent=(user.displayName||user.email)[0].toUpperCase();
+    }
+    document.getElementById('logoutBody').textContent=`確定要登出 ${user.email}？`;
+    // Close login modal if open
+    document.getElementById('loginModal').classList.remove('show');
   }else{
-    document.getElementById('container2026').style.paddingTop='28px';
+    chip.classList.add('show');
+    avatar.classList.remove('show');
+    avatar.innerHTML='';
   }
 });
 
-
-
-
-window.doLogin=async function(){try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){showToast('登入失敗','#F87171');}};
-window.doLogout=async function(){await signOut(auth);showToast('已登出');};
-
-onValue(versionRef,(snap)=>{});
+window.doLogin=async function(){
+  document.getElementById('loginError').style.display='none';
+  document.getElementById('loginLoading').style.display='block';
+  try{
+    await signInWithPopup(auth,new GoogleAuthProvider());
+  }catch(e){
+    document.getElementById('loginLoading').style.display='none';
+    if(e.code!=='auth/popup-closed-by-user'){
+      document.getElementById('loginError').style.display='block';
+      document.getElementById('loginError').textContent='登入失敗，請重試';
+    }
+  }
+};
+window.doLogout=async function(){
+  closeAllModals();
+  await signOut(auth);
+  showToast('已登出');
+};
 
 function setupStepper(mId,pId,vId,getV,setV){
   const bM=document.getElementById(mId),bP=document.getElementById(pId),vEl=document.getElementById(vId);
@@ -709,20 +748,13 @@ function render2026(stays){
   document.getElementById('statQ1').textContent=bonus;
   setTimeout(()=>{document.getElementById('progressFill').style.width=pct+'%';},100);
 
-  // Calculate points
-  let earned2026=0,redeemed2026=0;
-  for(const s of stays){
-    if(s.pointsEarned>0)earned2026+=s.pointsEarned;
-    if(s.redeem&&s.redeemPoints>0)redeemed2026+=s.redeemPoints;
-  }
-  // Add Q1 bonuses (2500 per eligible brand)
+  let earned2026=0;
+  for(const s of stays){if(s.pointsEarned>0)earned2026+=s.pointsEarned;}
   earned2026+=usedBrands.size*2500;
   document.getElementById('statEarned').textContent=earned2026>0?earned2026.toLocaleString():'—';
-  // Current points = base + all earned - all redeemed
-  // (base already reflects full history up to when it was set)
+
   const pointsBase=parseInt(localStorage.getItem('pointsBase'))||0;
   const pointsBaseStays=JSON.parse(localStorage.getItem('pointsBaseStayIds')||'[]');
-  // Only count stays NOT included in the base snapshot
   let netChange=0;
   for(const s of stays){
     if(!pointsBaseStays.includes(s._key)){
@@ -738,18 +770,14 @@ function render2026(stays){
   if(total>=TARGET){remainEl.className='nights-remaining achieved';remainEl.innerHTML='已達標 🎉';}
   else{remainEl.className='nights-remaining';remainEl.innerHTML=`距離75晚目標，仲需 <strong>${left}</strong> 晚 · <span style="color:var(--gold);">${Math.round(pct)}%</span>`;}
 
-  // Q1 brands
   const q1Stays=stays.filter(s=>isQ1Eligible(s));
   const q1BrandsList=[...new Set(q1Stays.map(s=>s.brand))].sort();
   document.getElementById('brandCount').textContent=`已用 ${usedBrands.size} 個品牌獎勵`;
   const brandsGrid=document.getElementById('brandsGrid');
   brandsGrid.innerHTML=q1BrandsList.length===0?'<div style="color:var(--text-muted);font-size:12px;grid-column:1/-1;">暫無Q1期間住宿</div>':q1BrandsList.map(b=>`<div style="background:var(--surface2);border:1px solid rgba(128,128,128,0.1);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--text);${usedBrands.has(b)?'text-decoration:line-through;opacity:0.45;':''}">${b}</div>`).join('');
 
-  // Monthly stats with Q1 bonus
   const monthGroups={};
   for(const s of sorted){const m=parseInt(s.date.split('-')[1])-1;if(!monthGroups[m])monthGroups[m]=[];monthGroups[m].push(s);}
-
-  // Calculate Q1 bonus per month
   const q1BonusByMonth={};
   const usedForBonus=new Set();
   for(const s of sorted){
@@ -759,7 +787,6 @@ function render2026(stays){
       q1BonusByMonth[m]=(q1BonusByMonth[m]||0)+s.nights;
     }
   }
-
   let tbody='';
   for(const m of Object.keys(monthGroups).sort((a,b)=>a-b)){
     const n=monthGroups[m].reduce((s,x)=>s+x.nights,0);
@@ -771,10 +798,8 @@ function render2026(stays){
   tbody+=`<tr><td>合計</td><td>${stays.length}</td><td>${actualNights}</td><td>${bonus}</td><td>100%</td></tr>`;
   document.getElementById('monthTableBody2026').innerHTML=tbody;
 
-  // Brand accordion 2026
   buildBrandAccordion(stays,'brandAccordion2026');
 
-  // Stay list
   const stayList=document.getElementById('stayList');
   if(sorted.length===0){stayList.innerHTML='<div class="empty-state">未有住宿記錄</div>';return;}
   const now=new Date();let html='';
@@ -785,8 +810,7 @@ function render2026(stays){
     html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
     for(const s of monthGroups[m]){
       const dateStr=s.date.slice(5).replace('-','/');
-      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="deleteStay('${s._key}','${encodeURIComponent(s.name)}')">✕</button></div>`:'<div></div>';
-      // Points display
+      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
       let pointsHtml='';
       const isQ1Bonus=isQ1Eligible(s)&&usedBrands.has(s.brand);
       if(s.redeem){
@@ -853,22 +877,19 @@ window.addStay=async function(){
   btn.disabled=false;
 };
 
-const UNDO_MS=3000;
-window.deleteStay=function(key,encodedName){
-  if(!isAdmin)return;
-  pendingDelete={key};if(undoTimer)clearTimeout(undoTimer);
-  const name=decodeURIComponent(encodedName),short=name.length>12?name.slice(0,12)+'…':name;
-  document.getElementById('undoMsg').textContent=`已刪除「${short}」`;
-  const fill=document.getElementById('undoProgressFill');
-  fill.style.transition='none';fill.style.width='100%';
-  document.getElementById('undoToast').classList.add('show');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{fill.style.transition=`width ${UNDO_MS}ms linear`;fill.style.width='0%';}));
-  undoTimer=setTimeout(async()=>{
-    document.getElementById('undoToast').classList.remove('show');
-    if(pendingDelete){try{await remove(ref(db,`stays2026/${pendingDelete.key}`));}catch(e){}pendingDelete=null;}
-  },UNDO_MS);
+// Delete with modal
+window._askDelete=function(key){
+  deleteTargetKey=key;
+  document.getElementById('delModal').classList.add('show');
 };
-window.undoDelete=function(){if(undoTimer)clearTimeout(undoTimer);pendingDelete=null;document.getElementById('undoToast').classList.remove('show');};
+window.confirmDelete=async function(){
+  closeAllModals();
+  if(deleteTargetKey){
+    try{await remove(ref(db,`stays2026/${deleteTargetKey}`));showToast('✓ 已刪除');}
+    catch(e){showToast('刪除失敗','#F87171');}
+    deleteTargetKey=null;
+  }
+};
 
 window.openEdit=function(key,date,name,brand,nights,redeem,pointsEarned,redeemPoints){
   if(!isAdmin)return;
@@ -882,7 +903,6 @@ window.openEdit=function(key,date,name,brand,nights,redeem,pointsEarned,redeemPo
   document.getElementById('editPointsEarned').value=pointsEarned||'';
   document.getElementById('editRedeemPoints').value=redeemPoints||'';
   document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
-  // Q1 hint for edit
   const d=new Date(date);
   const inQ1=d>=Q1_START&&d<=Q1_END;
   const brandUsed=window._q1UsedBrands&&window._q1UsedBrands.has(brandDecoded);
@@ -904,7 +924,6 @@ window.saveEdit=async function(){
   try{await update(ref(db,`stays2026/${editKey}`),{date,name,brand,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});closeModal();showToast('✓ 已更新');}
   catch(e){showToast('更新失敗','#F87171');}
 };
-document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
 window.openPointsModal=function(){
   const base=localStorage.getItem('pointsBase')||'';
@@ -916,7 +935,6 @@ window.savePointsBase=function(){
   const val=parseInt(document.getElementById('pointsBaseInput').value);
   if(!val||val<0){showToast('請輸入有效積分','#F87171');return;}
   localStorage.setItem('pointsBase',val);
-  // Save current stay IDs as snapshot - these are already reflected in the base
   if(window._currentStays){
     const ids=window._currentStays.map(s=>s._key).filter(Boolean);
     localStorage.setItem('pointsBaseStayIds',JSON.stringify(ids));
@@ -928,7 +946,6 @@ window.savePointsBase=function(){
     if(data){render2026(Object.entries(data).map(([key,val])=>({...val,_key:key})));}
   },{onlyOnce:true});
 };
-document.getElementById('pointsModalOverlay').addEventListener('click',function(e){if(e.target===this)closePointsModal();});
 
 function showToast(msg,color='#4ADE80'){
   const t=document.getElementById('toast');
@@ -948,17 +965,13 @@ if('serviceWorker' in navigator){
       const newWorker=reg.installing;
       newWorker.addEventListener('statechange',()=>{
         if(newWorker.state==='installed'&&navigator.serviceWorker.controller){
-          // New version available, force reload
           navigator.serviceWorker.controller.postMessage({type:'SKIP_WAITING'});
           window.location.reload();
         }
       });
     });
   });
-  // When new SW takes over, reload
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    window.location.reload();
-  });
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{window.location.reload();});
 }
 </script>
 </body>
