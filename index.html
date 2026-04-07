@@ -279,7 +279,7 @@
     <div class="card">
       <div class="progress-header">
         <div><div class="progress-label">年度進度</div><div class="progress-title">鈦金精英保級</div></div>
-        <div style="text-align:right;"><div style="display:flex;align-items:baseline;justify-content:flex-end;gap:2px;"><div class="nights-big" id="totalDisplay">—</div><div id="totalPct" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--text-muted);line-height:1;"></div></div><div class="nights-denom">/ 75 晚</div></div>
+        <div><div class="nights-big" id="totalDisplay">—</div><div class="nights-denom">/ 75 晚</div></div>
       </div>
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-ticks"><span>0</span><span>75</span></div>
@@ -705,7 +705,6 @@ function render2026(stays){
   const total=actualNights+bonus,left=Math.max(0,TARGET-total),pct=Math.min(100,(total/TARGET)*100);
 
   document.getElementById('totalDisplay').textContent=total;
-  document.getElementById('totalPct').textContent=pct>0?' '+Math.round(pct)+'%':'';
   document.getElementById('statActual').textContent=actualNights;
   document.getElementById('statQ1').textContent=bonus;
   setTimeout(()=>{document.getElementById('progressFill').style.width=pct+'%';},100);
@@ -737,7 +736,7 @@ function render2026(stays){
 
   const remainEl=document.getElementById('nightsRemainingEl');
   if(total>=TARGET){remainEl.className='nights-remaining achieved';remainEl.innerHTML='已達標 🎉';}
-  else{remainEl.className='nights-remaining';remainEl.innerHTML=`距離75晚目標，仲需 <strong>${left}</strong> 晚`;}
+  else{remainEl.className='nights-remaining';remainEl.innerHTML=`距離75晚目標，仲需 <strong>${left}</strong> 晚 · <span style="color:var(--gold);">${Math.round(pct)}%</span>`;}
 
   // Q1 brands
   const q1Stays=stays.filter(s=>isQ1Eligible(s));
