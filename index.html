@@ -311,7 +311,7 @@
       <div class="toggle-row" id="redeemToggle" onclick="toggleRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
       <div class="form-group" id="redeemPointsGroup" style="margin-bottom:12px;display:none;">
         <label>使用積分</label>
-        <div class="input-wrap"><input type="number" id="inputRedeemPoints" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+        <div class="input-wrap"><input type="number" id="inputRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
       <div id="q1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 退房後將獲 +2,500 積分</div>
       <button class="btn-add" id="btnAdd" onclick="addStay()">＋ 新增住宿</button>
@@ -379,12 +379,12 @@
     <div class="toggle-row" id="editRedeemToggle" onclick="toggleEditRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
     <div class="form-group" id="editRedeemPointsGroup" style="margin-bottom:12px;display:none;">
       <label>使用積分</label>
-      <div class="input-wrap"><input type="number" id="editRedeemPoints" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div class="input-wrap"><input type="number" id="editRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
     <div id="editQ1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · +2,500 積分</div>
     <div class="form-group" style="margin-bottom:14px;">
       <label>賺取積分（退房後填寫）</label>
-      <div class="input-wrap"><input type="number" id="editPointsEarned" placeholder="例如 4608" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div class="input-wrap"><input type="number" id="editPointsEarned" inputmode="numeric" placeholder="例如 4608" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEdit()">儲存</button></div>
   </div>
