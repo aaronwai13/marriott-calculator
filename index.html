@@ -269,7 +269,6 @@
 <div class="page active" id="page2026">
   <div class="container" id="container2026" style="padding-top:68px;">
     <div class="header">
-      <div class="header-eyebrow">Marriott Bonvoy</div>
       <h1>2026 住宿<span>追蹤</span></h1>
       <div class="header-sub">鈦金保級目標 · 75晚</div>
     </div>
@@ -587,6 +586,10 @@ function switchTab(year){
   document.getElementById('page2026').classList.toggle('active',year==='2026');
   document.getElementById('tab2025').classList.toggle('active',year==='2025');
   document.getElementById('tab2026').classList.toggle('active',year==='2026');
+  const on2026=year==='2026';
+  // 只有 2026 頁先顯示登入/頭像
+  document.getElementById('loginChip').style.visibility=on2026?'':'hidden';
+  document.getElementById('userAvatar').style.visibility=on2026?'':'hidden';
 }
 
 // Modal helpers
