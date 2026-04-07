@@ -309,8 +309,7 @@
       <div class="form-group" style="margin-bottom:12px;">
         <label>品牌 <span id="brandHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
         <select class="brand-select" id="inputBrand" onchange="checkQ1Hint()">
-          <option value="">選擇品牌...</option>
-          <option>Aloft</option><option>Autograph Collection</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option><option>其他</option>
+          <option value="">選擇品牌...</option><option>AC Hotels</option><option>Aloft</option><option>Autograph Collection</option><option>Bvlgari Hotels</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option>
         </select>
       </div>
       <div class="toggle-row" id="redeemToggle" onclick="toggleRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
@@ -377,8 +376,7 @@
     <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="editName"></div></div>
     <div class="form-group" style="margin-bottom:12px;"><label>品牌</label>
       <select class="brand-select" id="editBrand">
-        <option value="">選擇品牌...</option>
-        <option>Aloft</option><option>Autograph Collection</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option><option>其他</option>
+        <option value="">選擇品牌...</option><option>AC Hotels</option><option>Aloft</option><option>Autograph Collection</option><option>Bvlgari Hotels</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option>
       </select>
     </div>
     <div class="toggle-row" id="editRedeemToggle" onclick="toggleEditRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
@@ -608,26 +606,29 @@ const TARGET=75,Q1_START=new Date('2026-02-25'),Q1_END=new Date('2026-05-10');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 
 const BRAND_KEYWORDS=[
-  {brand:'Four Points',keywords:['福朋']},
-  {brand:'JW Marriott',keywords:['JW万豪','JW萬豪','jw万豪']},
-  {brand:'Autograph Collection',keywords:['傲途格','柏宁','柏寧']},
-  {brand:'Design Hotels',keywords:['Design Hotels','NOA','noa']},
-  {brand:'Sheraton',keywords:['喜来登','喜達屋']},
-  {brand:'Westin',keywords:['威斯汀']},
-  {brand:'Marriott',keywords:['万豪','萬豪']},
-  {brand:'Courtyard',keywords:['万怡','萬怡']},
-  {brand:'Fairfield',keywords:['万枫','萬楓']},
-  {brand:'Renaissance',keywords:['万丽','萬麗']},
-  {brand:'Le Meridien',keywords:['艾美']},
-  {brand:'St. Regis',keywords:['瑞吉']},
-  {brand:'W Hotels',keywords:['W酒店']},
-  {brand:'Aloft',keywords:['雅乐轩','雅樂軒']},
-  {brand:'Ritz-Carlton',keywords:['丽思卡尔顿','麗思卡爾頓']},
-  {brand:'Luxury Collection',keywords:['豪华精选','豪華精選']},
-  {brand:'Element',keywords:['源宿']},
-  {brand:'Edition',keywords:['艾迪逊','艾迪遜']},
-  {brand:'Tribute Portfolio',keywords:['臻品之选','臻品之選']},
-  {brand:'Delta Hotels',keywords:['德尔塔','德爾塔']},
+  {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
+  {brand:'Aloft',keywords:['雅乐轩','雅樂軒','Aloft']},
+  {brand:'Autograph Collection',keywords:['傲途格','柏宁','柏寧','Autograph']},
+  {brand:'Bvlgari Hotels',keywords:['宝格丽','寶格麗','Bvlgari']},
+  {brand:'Courtyard',keywords:['万怡','萬怡','Courtyard']},
+  {brand:'Delta Hotels',keywords:['德尔塔','德爾塔','Delta']},
+  {brand:'Design Hotels',keywords:['设计酒店','設計酒店','Design Hotels','NOA','noa']},
+  {brand:'Edition',keywords:['艾迪逊','艾迪遜','EDITION','Edition']},
+  {brand:'Element',keywords:['源宿','Element']},
+  {brand:'Fairfield',keywords:['万枫','萬楓','Fairfield']},
+  {brand:'Four Points',keywords:['福朋','Four Points']},
+  {brand:'JW Marriott',keywords:['JW万豪','JW萬豪','jw万豪','JW Marriott']},
+  {brand:'Le Meridien',keywords:['艾美','Le Meridien']},
+  {brand:'Luxury Collection',keywords:['豪华精选','豪華精選','Luxury Collection']},
+  {brand:'Marriott',keywords:['万豪酒店','萬豪酒店','Marriott Hotel','Marriott Resort','Marriott ']},
+  {brand:'Moxy',keywords:['莫克斯','Moxy']},
+  {brand:'Renaissance',keywords:['万丽','萬麗','Renaissance']},
+  {brand:'Ritz-Carlton',keywords:['丽思卡尔顿','麗思卡爾頓','Ritz-Carlton','Ritz Carlton']},
+  {brand:'Sheraton',keywords:['喜来登','喜達屋','Sheraton']},
+  {brand:'St. Regis',keywords:['瑞吉','St. Regis','St Regis']},
+  {brand:'Tribute Portfolio',keywords:['臻品之选','臻品之選','Tribute Portfolio']},
+  {brand:'W Hotels',keywords:['W酒店','W Hotel','W Hotels']},
+  {brand:'Westin',keywords:['威斯汀','Westin']},
 ];
 
 const DEFAULT_STAYS=[
