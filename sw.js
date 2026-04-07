@@ -1,10 +1,8 @@
-const CACHE_NAME = 'marriott-v2026.04.05.1';
+const CACHE = 'marriott-v2026.04.07.1';
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(['./', './index.html']);
-    })
+    caches.open(CACHE).then(c => c.addAll(['./', './index.html', './manifest.json']))
   );
   self.skipWaiting();
 });
@@ -12,27 +10,35 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
-  // Always fetch index.html from network first, fall back to cache
-  if (e.request.url.includes('index.html') || e.request.mode === 'navigate') {
+  // index.html 永遠網絡優先（確保取到最新版）
+  if (e.request.mode === 'navigate' || e.request.url.includes('index.html')) {
     e.respondWith(
-      fetch(e.request).then(res => {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-        return res;
-      }).catch(() => caches.match(e.request))
+      fetch(e.request)
+        .then(res => {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+          return res;
+        })
+        .catch(() => caches.match(e.request))
     );
-  } else {
-    e.respondWith(
-      caches.match(e.request).then(cached => cached || fetch(e.request))
-    );
+    return;
   }
+  // Firebase / Google Fonts 等外部請求直接網絡
+  if (e.request.url.includes('firebase') || e.request.url.includes('googleapis')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+  // 其他靜態資源：緩存優先
+  e.respondWith(
+    caches.match(e.request).then(cached => cached || fetch(e.request))
+  );
 });
 
 self.addEventListener('message', e => {
