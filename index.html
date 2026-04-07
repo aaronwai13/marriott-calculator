@@ -697,6 +697,7 @@ function calcQ1(stays){
 }
 
 function render2026(stays){
+  window._currentStays=stays;
   const sorted=[...stays].sort((a,b)=>a.date.localeCompare(b.date));
   const actualNights=stays.reduce((s,x)=>s+x.nights,0);
   const{bonus,usedBrands}=calcQ1(stays);
@@ -717,18 +718,17 @@ function render2026(stays){
   // Add Q1 bonuses (2500 per eligible brand)
   earned2026+=usedBrands.size*2500;
   document.getElementById('statEarned').textContent=earned2026>0?earned2026.toLocaleString():'—';
-  // Current points = base + earned - redeemed (only for stays added AFTER base was set)
+  // Current points = base + all earned - all redeemed
+  // (base already reflects full history up to when it was set)
   const pointsBase=parseInt(localStorage.getItem('pointsBase'))||0;
-  const pointsBaseDate=localStorage.getItem('pointsBaseDate')||'';
+  const pointsBaseStays=JSON.parse(localStorage.getItem('pointsBaseStayIds')||'[]');
+  // Only count stays NOT included in the base snapshot
   let netChange=0;
-  if(pointsBaseDate){
-    for(const s of stays){
-      if(s.date>pointsBaseDate){
-        if(s.pointsEarned>0)netChange+=s.pointsEarned;
-        if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
-        // Q1 bonus for stays after base date
-        if(isQ1Eligible(s)&&usedBrands.has(s.brand))netChange+=2500;
-      }
+  for(const s of stays){
+    if(!pointsBaseStays.includes(s._key)){
+      if(s.pointsEarned>0)netChange+=s.pointsEarned;
+      if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
+      if(isQ1Eligible(s)&&usedBrands.has(s.brand))netChange+=2500;
     }
   }
   const currentPoints=pointsBase>0?pointsBase+netChange:0;
@@ -788,21 +788,20 @@ function render2026(stays){
       const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="deleteStay('${s._key}','${encodeURIComponent(s.name)}')">✕</button></div>`:'<div></div>';
       // Points display
       let pointsHtml='';
+      const isQ1Bonus=isQ1Eligible(s)&&usedBrands.has(s.brand);
       if(s.redeem){
-        if(s.redeemPoints>0)pointsHtml+=`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−${s.redeemPoints.toLocaleString()}</span> `;
-        if(s.pointsEarned>0)pointsHtml+=`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+${s.pointsEarned.toLocaleString()}</span>`;
+        const redPart=s.redeemPoints>0?`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−${s.redeemPoints.toLocaleString()}</span>`:`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−?</span>`;
+        const earnPart=s.pointsEarned>0?`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+${s.pointsEarned.toLocaleString()}</span>`:`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+?</span>`;
+        pointsHtml=redPart+' '+earnPart;
       }else{
-        if(s.pointsEarned>0){
-          let total=s.pointsEarned;
-          const isQ1Bonus=isQ1Eligible(s)&&usedBrands.has(s.brand);
-          if(isQ1Bonus)total+=2500;
-          pointsHtml=`<span style="color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;">+${total.toLocaleString()}${isQ1Bonus?' (Q1+2,500)':''}</span>`;
-        }
+        const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
+        const q1Part=isQ1Bonus?` <span style="font-size:9px;color:var(--green);">(Q1+2,500)</span>`:'';
+        pointsHtml=`<span style="color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;">${base}</span>${q1Part}`;
       }
       const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
       const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
       const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-      html+=`<div class="stay-item" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${s.name}</div><div class="stay-brand-tag">${s.brand}${s.redeem?' · 兌換':''}</div>${pointsHtml?`<div style="margin-top:2px;">${pointsHtml}</div>`:''}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+      html+=`<div class="stay-item" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${s.name}</div><div class="stay-brand-tag">${s.brand}${s.redeem?' · 兌換':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
     }
   }
   stayList.innerHTML=html;
@@ -917,10 +916,13 @@ window.savePointsBase=function(){
   const val=parseInt(document.getElementById('pointsBaseInput').value);
   if(!val||val<0){showToast('請輸入有效積分','#F87171');return;}
   localStorage.setItem('pointsBase',val);
-  localStorage.setItem('pointsBaseDate',new Date().toISOString().slice(0,10));
+  // Save current stay IDs as snapshot - these are already reflected in the base
+  if(window._currentStays){
+    const ids=window._currentStays.map(s=>s._key).filter(Boolean);
+    localStorage.setItem('pointsBaseStayIds',JSON.stringify(ids));
+  }
   closePointsModal();
   showToast('✓ 積分餘額已更新');
-  // Re-render
   onValue(staysRef,(snapshot)=>{
     const data=snapshot.val();
     if(data){render2026(Object.entries(data).map(([key,val])=>({...val,_key:key})));}
