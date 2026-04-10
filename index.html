@@ -289,8 +289,8 @@
 
     <div class="stats-grid">
       <div class="stat-card"><span class="stat-icon">🏨</span><div class="stat-value gold" id="statActual">—</div><div class="stat-label">實際住宿晚數</div></div>
-      <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value green" id="statQ1">—</div><div class="stat-label">Q1活動獎勵房晚</div></div>
-      <div class="stat-card"><span class="stat-icon">⭐</span><div class="stat-value blue" id="statEarned">—</div><div class="stat-label">2026已賺積分</div></div>
+      <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value blue" id="statQ1">—</div><div class="stat-label">Q1活動獎勵房晚</div></div>
+      <div class="stat-card"><span class="stat-icon">⭐</span><div class="stat-value green" id="statEarned">—</div><div class="stat-label">2026已賺積分</div></div>
       <div class="stat-card" style="position:relative;">
         <span class="stat-icon">💎</span>
         <div class="stat-value purple" id="statTotal">—</div>
@@ -854,20 +854,20 @@ function render2026(stays){
         return earlier.length===0;
       })();
       if(s.redeem){
-        const redPart=s.redeemPoints>0?`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−${s.redeemPoints.toLocaleString()}</span>`:`<span style="color:var(--red);font-size:10px;font-family:'DM Mono',monospace;">−?</span>`;
-        const earnPart=s.pointsEarned>0?`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+${s.pointsEarned.toLocaleString()}</span>`:`<span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">+?</span>`;
+        const redPart=s.redeemPoints>0?`<span style="color:var(--red);font-size:10px;">−${s.redeemPoints.toLocaleString()}</span>`:`<span style="color:var(--red);font-size:10px;">−?</span>`;
+        const earnPart=s.pointsEarned>0?`<span style="color:var(--green);font-size:10px;">+${s.pointsEarned.toLocaleString()}</span>`:`<span style="color:var(--green);font-size:10px;">+?</span>`;
         pointsHtml=redPart+' '+earnPart;
       }else{
         if(isFirstQ1ForBrand){
           if(s.pointsEarned>0){
             const total=s.pointsEarned+2500;
-            pointsHtml=`<span style="color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;">+${total.toLocaleString()}</span> <span style="font-size:9px;color:var(--text-muted);">(住宿 ${s.pointsEarned.toLocaleString()} · Q1 2,500)</span>`;
+            pointsHtml=`<span style="color:var(--green);font-size:10px;">+${total.toLocaleString()}</span> <span style="font-size:9px;color:#0071e3;">住宿 +${s.pointsEarned.toLocaleString()} · Q1 積分 +2,500</span>`;
           }else{
-            pointsHtml=`<span style="color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;">+?</span> <span style="font-size:9px;color:var(--text-muted);">(另加 Q1 2,500)</span>`;
+            pointsHtml=`<span style="color:var(--green);font-size:10px;">+?</span> <span style="font-size:9px;color:#0071e3;">+ Q1 積分 +2,500</span>`;
           }
         }else{
           const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
-          pointsHtml=`<span style="color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;">${base}</span>`;
+          pointsHtml=`<span style="color:var(--green);font-size:10px;">${base}</span>`;
         }
       }
       const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
