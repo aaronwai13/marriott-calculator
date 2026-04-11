@@ -861,7 +861,7 @@ function render2026(stays){
         if(isFirstQ1ForBrand){
           if(s.pointsEarned>0){
             const total=s.pointsEarned+2500;
-            pointsHtml=`<span style="color:var(--green);font-size:10px;">+${total.toLocaleString()}</span> <span style="font-size:9px;color:var(--green);">住宿 +${s.pointsEarned.toLocaleString()}</span><span style="font-size:9px;color:#0071e3;"> · Q1 積分 +2,500</span>`;
+            pointsHtml=`<span style="color:var(--green);font-size:10px;">+${total.toLocaleString()}</span><br><span style="font-size:9px;color:var(--green);">住宿 +${s.pointsEarned.toLocaleString()}</span><span style="font-size:9px;color:#0071e3;"> · Q1 積分 +2,500</span>`;
           }else{
             pointsHtml=`<span style="color:var(--green);font-size:10px;">+?</span> <span style="font-size:9px;color:#0071e3;">+ Q1 積分 +2,500</span>`;
           }
