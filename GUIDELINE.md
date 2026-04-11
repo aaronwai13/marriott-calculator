@@ -61,7 +61,6 @@ Firebase SDK 直接從 CDN 引入，唔需要 `npm install`。
 
 ### JavaScript
 - 供 HTML `onclick` 呼叫的函數：掛在 `window` 上（`window.fnName = function(){}`）
-- 因為 `type="module"` 的 `<script>` 係 scoped，HTML 的 `onclick="fn()"` 搵唔到 module scope 入面的函數，所以必須明確掛係 `window` 上
 - 內部函數：camelCase，唔需要掛 `window`
 - Firebase refs：語意命名（`staysRef`、`configRef`）
 
@@ -88,10 +87,10 @@ from PIL import Image, ImageDraw, ImageFont
 
 SIZE = 192
 RADIUS = 40
-BG = "#1A3C5E"
+BG = "#1A3C5E"   # 固定深藍，唔需要改
 TEXT = "萬"       # 換成 app 名稱第一個字
 FONT_SIZE = 96
-FONT_PATH = "/System/Library/Fonts/PingFang.ttc"
+FONT_PATH = "/System/Library/Fonts/PingFang.ttc"  # 固定 PingFang，唔需要改
 
 img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 draw = ImageDraw.Draw(img)
@@ -105,10 +104,12 @@ def rounded_rect(draw, xy, radius, fill):
         draw.ellipse([cx-radius, cy-radius, cx+radius, cy+radius], fill=fill)
 
 rounded_rect(draw, [0, 0, SIZE, SIZE], RADIUS, BG)
+
 font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
 bbox = draw.textbbox((0, 0), TEXT, font=font)
 w, h = bbox[2]-bbox[0], bbox[3]-bbox[1]
 draw.text(((SIZE-w)/2 - bbox[0], (SIZE-h)/2 - bbox[1]), TEXT, font=font, fill="white")
+
 img.save("icon-192.png")
 print("Done: icon-192.png")
 ```
@@ -139,22 +140,32 @@ print("Done: icon-192.png")
 
 ```css
 :root {
+  /* 背景層次 */
   --bg:       #F7F7F5;
-  --white:    #FFFFFF;      /* 卡片、header、tab bar 表面色 */
-  --surface2: #F0F0EE;      /* 次級面板、input 背景 */
+  --white:    #FFFFFF;
+  --surface2: #F0F0EE;
+
+  /* 文字 */
   --text:       #111110;
   --text-muted: #888884;
   --text-light: #BBBBB8;
+
+  /* 邊框 */
   --border:        #E5E5E2;
   --border-strong: #D0D0CC;
+
+  /* 強調色（唯一，全 app 統一） */
   --accent:       #1A3C5E;
   --accent-light: #E8EFF5;
+
+  /* 語義色（固定代表好/警告/壞，不可挪作裝飾） */
   --green:       #1A6B45;
   --green-light: #E8F5EE;
   --amber:       #8B5E00;
   --amber-light: #FEF7E8;
   --red:         #C0392B;
   --red-light:   #FDF0EE;
+
   --shadow: 0 2px 12px rgba(0,0,0,0.07);
 }
 
@@ -168,7 +179,7 @@ print("Done: icon-192.png")
     --text-light: #48484A;
     --border:        #2A2A2C;
     --border-strong: #3A3A3C;
-    --accent:       #5B9BD5;
+    --accent:       #5B9BD5;  /* dark mode 要比 light mode 調淺 */
     --accent-light: #1A2A3A;
     --green:       #4ADE80;
     --green-light: #0A2016;
@@ -188,14 +199,14 @@ print("Done: icon-192.png")
 
 ### 字型
 
-中文 app 優先使用系統字體棧：
+中文 app 優先使用系統字體棧，無需引入外部字型：
 
 ```css
 font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue',
              'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
 ```
 
-如需要更強烈設計感，可選用 Google Fonts（DM Serif Display / DM Mono / Figtree）。
+如需要更強烈嘅設計感，可選用 Google Fonts（DM Serif Display / DM Mono / Figtree）。
 
 ### 字階
 
@@ -211,7 +222,10 @@ font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue',
 ### 佈局基礎
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 body {
   background: var(--bg); color: var(--text);
   font-family: -apple-system, 'PingFang TC', sans-serif;
@@ -226,55 +240,39 @@ body {
 **Sticky Header：**
 ```css
 .header {
-  background: var(--white); padding: 20px 16px 0;
+  background: var(--white);
+  padding: 20px 16px 0;
   border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 20;
 }
 ```
 
-**Top Bar（固定頂部，帶登入控制）：**
-```css
-.top-bar {
-  position: fixed; top: 0; left: 0; right: 0;
-  background: var(--white); border-bottom: 1px solid var(--border);
-  padding: 0 16px; display: flex; align-items: center;
-  justify-content: space-between; z-index: 150; height: 48px;
-}
-.login-chip {
-  font-size: 12px; font-weight: 600; color: var(--accent);
-  background: var(--accent-light); border: 1px solid var(--accent);
-  border-radius: 20px; padding: 5px 14px; cursor: pointer;
-}
-.user-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--accent-light); border: 1.5px solid var(--border);
-  display: none; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; color: var(--accent);
-  cursor: pointer; overflow: hidden;
-}
-.user-avatar.show { display: flex; }
-.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-```
-
-**Tab Bar：**
+**Tab Bar（底部固定，3 個頁面或以上才用）：**
 ```css
 .tab-bar {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px; height: 60px; background: var(--white);
-  border-top: 1px solid var(--border); display: flex; z-index: 100;
+  position: fixed; bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  height: 60px; background: var(--white);
+  border-top: 1px solid var(--border);
+  display: flex; z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .tab-bar::after {
   content: ''; position: absolute;
   bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
-  left: 0; right: 0; height: env(safe-area-inset-bottom, 0px);
+  left: 0; right: 0;
+  height: env(safe-area-inset-bottom, 0px);
   background: var(--white);
 }
 ```
 
-**Badge：**
+**Badge（狀態標籤）：**
 ```css
-.badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+.badge {
+  font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 6px;
+}
 .badge-green { background: var(--green-light); color: var(--green); }
 .badge-amber { background: var(--amber-light); color: var(--amber); }
 .badge-red   { background: var(--red-light);   color: var(--red); }
@@ -283,68 +281,16 @@ body {
 
 **Filter Chips：**
 ```css
-.filter-row { display: flex; gap: 6px; padding-bottom: 10px; overflow-x: auto; }
+.filter-row { display: flex; gap: 6px; padding-bottom: 10px; }
 .chip {
-  flex-shrink: 0; padding: 6px 12px; border-radius: 99px;
+  flex: 1; text-align: center;
+  padding: 6px 4px; border-radius: 99px;
   font-size: 12px; font-weight: 600;
   border: 1.5px solid var(--border-strong);
   background: transparent; color: var(--text-muted);
   cursor: pointer; transition: all 0.15s;
 }
 .chip.active { background: var(--accent); color: white; border-color: var(--accent); }
-```
-
-**Toast 通知：**
-```css
-.toast {
-  position: fixed; bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 16px);
-  left: 50%; transform: translateX(-50%);
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: 10px; padding: 10px 18px;
-  font-size: 12px; font-weight: 600; z-index: 450;
-  white-space: nowrap; box-shadow: var(--shadow);
-  opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
-}
-.toast.show { opacity: 1; }
-```
-
-```javascript
-let toastTimer = null;
-function showToast(msg, color = 'var(--green)') {
-  const t = document.getElementById('toast');
-  if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
-  t.textContent = msg; t.style.color = color;
-  t.classList.remove('show');
-  void t.offsetWidth; // 強制 reflow，重置動畫
-  t.classList.add('show');
-  toastTimer = setTimeout(() => { t.classList.remove('show'); toastTimer = null; }, 2500);
-}
-```
-
-HTML：`<div class="toast" id="toast"></div>`
-
-**Modal 對話框：**
-```css
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
-  z-index: 300; display: flex; align-items: center; justify-content: center;
-  padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-}
-.modal-overlay.show { opacity: 1; pointer-events: all; }
-.modal {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: 20px; padding: 24px; width: 100%; max-width: 480px;
-}
-.modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-```
-
-```javascript
-window.closeAllModals = function() {
-  document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('show'));
-};
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeAllModals(); });
-});
 ```
 
 ---
@@ -360,37 +306,18 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 ```
 /records          ← 業務資料（用 push key）
   /-Nxxx: { date, name, nights, ... }
-/config           ← 系統配置
+/config           ← 系統配置（唔係業務資料）
   /baseline: 1000
   /lastUpdated: "2026.04.10"
 ```
 
-### Firebase SDK 引入方式
-
-```html
-<script type="module">
-import { initializeApp } from "<https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js>";
-import { getDatabase, ref, onValue, push, update, remove }
-  from "<https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js>";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-  from "<https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js>";
-
-const firebaseConfig = {
-  apiKey: "...", authDomain: "...", databaseURL: "...",
-  projectId: "...", storageBucket: "...",
-  messagingSenderId: "...", appId: "..."
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-</script>
-```
-
-Firebase config 唔係 secret，可以放喺前端（靠 Security Rules 控制存取）。
-
 ### 讀寫模式
 
 ```javascript
+import { getDatabase, ref, onValue, push, update, remove }
+  from 'https://www.gstatic.com/firebasejs/10.x.x/firebase-database.js';
+
+// 即時監聽（推薦）：每次資料變動自動觸發 render
 onValue(ref(db, 'records'), (snapshot) => {
   const data = snapshot.val();
   const items = data
@@ -399,15 +326,23 @@ onValue(ref(db, 'records'), (snapshot) => {
   render(items);
 });
 
+// 新增
 push(ref(db, 'records'), newItem);
+
+// 修改
 update(ref(db, `records/${key}`), changes);
+
+// 刪除
 remove(ref(db, `records/${key}`));
 ```
 
 ### 初始化保護
 
+防止空資料庫首次載入時重複插入預設值：
+
 ```javascript
 let dbInitialized = false;
+
 onValue(staysRef, (snapshot) => {
   if (!snapshot.val() && !dbInitialized) {
     dbInitialized = true;
@@ -421,6 +356,8 @@ onValue(staysRef, (snapshot) => {
 
 ### Security Rules 最低配置
 
+訪客只讀、登入用戶可寫（配合前端白名單）：
+
 ```json
 {
   "rules": {
@@ -430,55 +367,45 @@ onValue(staysRef, (snapshot) => {
 }
 ```
 
-前端 `ADMIN_EMAILS` 係 UI 控制，唔係安全措施；真正嘅安全靠 Security Rules。
-
 ---
 
 ## 8. Google Auth 整合
 
 ```javascript
-const ADMIN_EMAILS = ['your@email.com'];
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.x.x/firebase-auth.js';
+
+const ADMIN_EMAILS = ['your@email.com']; // 換成你的 Gmail
 
 onAuthStateChanged(auth, (user) => {
   const isAdmin = !!(user && ADMIN_EMAILS.includes(user.email));
+  // 根據 isAdmin 顯示/隱藏寫入 UI
   document.querySelectorAll('.admin-only').forEach(el => {
     el.style.display = isAdmin ? '' : 'none';
   });
-  const chip = document.getElementById('loginChip');
-  const avatar = document.getElementById('userAvatar');
-  if (user && isAdmin) {
-    chip.style.display = 'none';
-    avatar.classList.add('show');
-    avatar.innerHTML = user.photoURL
-      ? `<img src="${user.photoURL}" alt="">`
-      : (user.displayName || user.email)[0].toUpperCase();
-  } else {
-    chip.style.display = '';
-    avatar.classList.remove('show');
-  }
 });
 
-window.doLogin = async function() {
+// 登入
+window.login = async function() {
   try {
     await signInWithPopup(auth, new GoogleAuthProvider());
   } catch (e) {
     if (e.code !== 'auth/popup-closed-by-user') {
-      showToast('登入失敗，請重試', 'var(--red)');
+      console.error(e); // 手動關閉彈窗唔算錯誤，靜默處理
     }
   }
 };
 
-window.doLogout = async function() {
-  closeAllModals();
+// 登出
+window.logout = async function() {
   await signOut(auth);
-  showToast('已登出');
 };
 ```
 
 **設計模式：**
-- 管理員才顯示新增/編輯/刪除按鈕（`.admin-only` class 控制）
-- 非管理員登入時顯示「無存取權限」提示
-- `auth/popup-closed-by-user` 唔算錯誤，靜默處理
+- 管理員才顯示新增/編輯/刪除按鈕（用 `.admin-only` class 控制）
+- 非管理員用 Google 帳號登入時顯示「無存取權限」提示
+- 彈窗被用戶手動關閉（`auth/popup-closed-by-user`）唔算錯誤，靜默處理
 
 ---
 
@@ -510,7 +437,7 @@ window.doLogout = async function() {
 ### sw.js（Firebase 請求唔快取）
 
 ```javascript
-const CACHE = 'app-name-v2026.01.01.0';
+const CACHE = 'app-name-v2026.01.01.0'; // 版本號同 index.html 頂部保持一致
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -528,15 +455,15 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-self.addEventListener('message', e => {
-  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
-});
-
 self.addEventListener('fetch', e => {
-  if (e.request.url.includes('<firebaseio.com>') ||
-      e.request.url.includes('<googleapis.com>') ||
-      e.request.url.includes('<gstatic.com>')) return;
+  // Firebase 同 googleapis 請求：直接網絡，唔快取
+  if (e.request.url.includes('firebaseio.com') ||
+      e.request.url.includes('googleapis.com') ||
+      e.request.url.includes('gstatic.com')) {
+    return;
+  }
   if (e.request.mode === 'navigate') {
+    // 主頁面：網絡優先（確保拿到最新版）
     e.respondWith(
       fetch(e.request).then(res => {
         caches.open(CACHE).then(c => c.put(e.request, res.clone()));
@@ -545,6 +472,7 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
+  // 其他靜態資源：緩存優先
   e.respondWith(
     caches.match(e.request).then(cached =>
       cached || fetch(e.request).then(res => {
@@ -574,15 +502,17 @@ self.addEventListener('fetch', e => {
    const CACHE = 'app-name-v2026.04.10.0';
    ```
 
+更新 cache 名稱會觸發 Service Worker 重新安裝，用戶下次打開 app 時靜默取得新版本。
+
 ---
 
 ## 11. 部署（GitHub Pages）
 
 1. Repo 設定 → Pages → Source 選 `main` branch，根目錄 `/`
 2. 直接 push 到 `main` → 自動 deploy（約 1–2 分鐘）
-3. Firebase Console → Authentication → Authorised domains → 加入 `<username>.<github.io>`
+3. Firebase Console → Authentication → 加入你嘅 Google 帳號
 4. Firebase Console → Realtime Database → Rules → 貼入上方 Security Rules
-5. 更新內容後記得同步版本號
+5. 更新內容後記得同步版本號，確保用戶清除舊緩存
 
 ---
 
@@ -590,14 +520,13 @@ self.addEventListener('fetch', e => {
 
 - [ ] 根據 app 類型決定 design 方向（參考上方表格）
 - [ ] 建立 Firebase 項目，啟用 Realtime Database 同 Google Auth
-- [ ] 複製 HTML 骨架（帶 top-bar），引入 Firebase SDK，填入 firebaseConfig
+- [ ] 複製 HTML 骨架，引入 Firebase SDK（CDN），填入 firebaseConfig
 - [ ] 設定 `ADMIN_EMAILS` 白名單
 - [ ] 決定主題色，更新 `--accent` 及 dark mode 對應色
 - [ ] 用 Python 腳本生成 `icon-192.png`（背景固定 `#1A3C5E`，白色文字，app 名第一個字）
 - [ ] 定義 Firebase 資料結構（扁平、最多 3 層）
 - [ ] 實作 `onValue()` 監聽 + render 函數
 - [ ] 更新 `manifest.json` 名稱、描述、顏色
-- [ ] 在 `index.html` 頂部加 `<!-- VERSION: YYYY.MM.DD.0 -->`
-- [ ] 改 `sw.js` 的 `CACHE` 版本號，與 VERSION comment 一致
-- [ ] Firebase Console 設定 Security Rules + Authorised domains
+- [ ] 改 `sw.js` 的 `CACHE` 版本號，與 `index.html` 頂部 comment 一致
+- [ ] Firebase Console 設定 Security Rules
 - [ ] 設定 GitHub Pages，測試 PWA 安裝同 Firebase 同步
