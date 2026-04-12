@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.13.1 -->
+<!-- VERSION: 2026.04.13.2 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -45,7 +45,9 @@
 
   /* TOP BAR */
   .top-bar{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;z-index:150;height:48px;}
-  .top-bar-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;}
+  .top-bar-title-wrap{display:flex;align-items:baseline;gap:8px;min-width:0;}
+  .top-bar-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;white-space:nowrap;}
+  .app-version{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.04em;color:var(--text-muted);white-space:nowrap;}
   .top-bar-right{display:flex;align-items:center;gap:10px;}
 
   /* Login chip */
@@ -210,7 +212,10 @@
 
 <!-- TOP BAR -->
 <div class="top-bar">
-  <div class="top-bar-title">Marriott Bonvoy</div>
+  <div class="top-bar-title-wrap">
+    <div class="top-bar-title">Marriott Bonvoy</div>
+    <div class="app-version" id="appVersion">v2026.04.13.2</div>
+  </div>
   <div class="top-bar-right">
     <button class="login-chip" id="loginChip" onclick="showLoginModal()" aria-label="登入">登入</button>
     <div class="user-avatar" id="userAvatar" onclick="showLogoutModal()" role="button" tabindex="0" aria-label="帳戶選單"></div>
