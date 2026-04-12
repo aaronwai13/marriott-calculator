@@ -19,23 +19,27 @@
     --bg:#0A0A0F;--surface:#13131A;--surface2:#1C1C26;
     --border:rgba(201,168,76,0.15);--text:#F0EDE8;--text-muted:#8A8580;
     --green:#4ADE80;--red:#F87171;--grey:#6B7280;
+    --tab-h:60px;
   }
   @media(prefers-color-scheme:light){:root{
     --bg:#F5F3EE;--surface:#FFFFFF;--surface2:#EDE9E0;
     --border:rgba(180,140,50,0.2);--text:#1A1714;--text-muted:#7A7268;--grey:#9CA3AF;
   }}
   *{margin:0;padding:0;box-sizing:border-box;max-width:100%;}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:var(--tab-h);overflow-x:hidden;}
   body::before{content:'';position:fixed;top:0;left:0;right:0;height:40%;background:radial-gradient(ellipse 80% 100% at 50% 0%,rgba(201,168,76,0.07) 0%,transparent 100%);pointer-events:none;z-index:0;}
 
-  /* View switch */
-  .view-switch-shell{position:fixed;top:48px;left:0;right:0;display:flex;justify-content:center;padding:12px 16px 0;z-index:140;pointer-events:none;}
-  .view-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:rgba(19,19,26,0.9);border:1px solid var(--border);border-radius:999px;backdrop-filter:blur(14px);box-shadow:0 12px 40px rgba(0,0,0,0.16);pointer-events:auto;}
-  .view-switch-btn{min-width:132px;padding:10px 18px;border:none;border-radius:999px;background:transparent;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;cursor:pointer;transition:background 0.2s,color 0.2s,box-shadow 0.2s;-webkit-tap-highlight-color:transparent;outline:none;}
-  .view-switch-btn.active{background:linear-gradient(135deg,rgba(154,122,46,0.92),rgba(201,168,76,0.98));color:#0A0A0F;box-shadow:0 8px 18px rgba(201,168,76,0.22);}
+  /* Tab bar */
+  .tab-bar{position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:140;box-shadow:none;}
+  .tab-bar::after{content:'';position:absolute;bottom:calc(-1 * env(safe-area-inset-bottom, 0px));left:0;right:0;height:env(safe-area-inset-bottom, 0px);background:var(--surface);}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;-webkit-tap-highlight-color:transparent;transition:color 0.2s;position:relative;outline:none;}
+  .tab-btn.active{color:var(--gold);}
+  .tab-btn.active::before{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:var(--gold);border-radius:0 0 3px 3px;}
+  .tab-icon{font-size:20px;line-height:1;pointer-events:none;}
+  .tab-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.05em;pointer-events:none;}
 
   /* Pages */
-  .page{display:none;min-height:100vh;}
+  .page{display:none;min-height:calc(100vh - var(--tab-h));}
   .page.active{display:block;}
   .container{max-width:860px;margin:0 auto;padding:28px 20px 20px;position:relative;z-index:1;}
 
@@ -173,7 +177,7 @@
   .brand-stay-nights{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);text-align:right;}
 
   /* Toast */
-  .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;font-family:'DM Mono',monospace;z-index:450;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
+  .toast{position:fixed;bottom:calc(var(--tab-h) + 16px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;font-family:'DM Mono',monospace;z-index:450;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
   .toast.show{opacity:1;}
 
   /* Modal shared */
@@ -199,9 +203,6 @@
     .form-grid{grid-template-columns:1fr}
     .nights-big{font-size:38px}
     .card,.add-form{padding:18px}
-    .view-switch-shell{padding:10px 12px 0}
-    .view-switch{width:min(100%,360px)}
-    .view-switch-btn{min-width:0;padding:10px 12px}
   }
 </style>
 </head>
@@ -216,16 +217,9 @@
   </div>
 </div>
 
-<div class="view-switch-shell">
-  <div class="view-switch" role="tablist" aria-label="年份切換">
-    <button class="view-switch-btn active" id="tab2026" onclick="switchTab('2026')" role="tab" aria-selected="true" aria-controls="page2026">2026 追蹤</button>
-    <button class="view-switch-btn" id="tab2025" onclick="switchTab('2025')" role="tab" aria-selected="false" aria-controls="page2025">2025 回顧</button>
-  </div>
-</div>
-
 <!-- ========== PAGE 2025 ========== -->
 <div class="page" id="page2025">
-  <div class="container" style="padding-top:116px;">
+  <div class="container" style="padding-top:68px;">
     <div class="header">
       <h1>2025 住宿<span>回顧</span></h1>
       <div class="header-sub">全年住宿記錄</div>
@@ -283,7 +277,7 @@
 
 <!-- ========== PAGE 2026 ========== -->
 <div class="page active" id="page2026">
-  <div class="container" id="container2026" style="padding-top:116px;">
+  <div class="container" id="container2026" style="padding-top:68px;">
     <div class="header">
       <h1>2026 住宿<span>追蹤</span></h1>
       <div class="header-sub">鈦金保級目標 · 75晚</div>
@@ -362,6 +356,16 @@
       <div class="stay-list" id="stayList"><div class="empty-state">載入中...</div></div>
     </div>
   </div>
+</div>
+
+<!-- Tab bar -->
+<div class="tab-bar" role="tablist" aria-label="年份切換">
+  <button class="tab-btn active" id="tab2026" onclick="switchTab('2026')" role="tab" aria-selected="true" aria-controls="page2026">
+    <span class="tab-icon">📍</span><span class="tab-label">2026</span>
+  </button>
+  <button class="tab-btn" id="tab2025" onclick="switchTab('2025')" role="tab" aria-selected="false" aria-controls="page2025">
+    <span class="tab-icon">📋</span><span class="tab-label">2025</span>
+  </button>
 </div>
 
 <!-- LOGIN MODAL -->
