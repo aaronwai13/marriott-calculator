@@ -2,14 +2,16 @@
 <html lang="zh-HK">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Marriott Bonvoy 住宿追蹤</title>
+<meta name="description" content="追蹤 Marriott Bonvoy 2025 回顧與 2026 保級進度、Q1 獎勵與積分變化。">
+<meta name="theme-color" content="#0A0A0F">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="manifest" href="./manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.07.2 -->
+<!-- VERSION: 2026.04.13.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -17,27 +19,23 @@
     --bg:#0A0A0F;--surface:#13131A;--surface2:#1C1C26;
     --border:rgba(201,168,76,0.15);--text:#F0EDE8;--text-muted:#8A8580;
     --green:#4ADE80;--red:#F87171;--grey:#6B7280;
-    --tab-h:60px;
   }
   @media(prefers-color-scheme:light){:root{
     --bg:#F5F3EE;--surface:#FFFFFF;--surface2:#EDE9E0;
     --border:rgba(180,140,50,0.2);--text:#1A1714;--text-muted:#7A7268;--grey:#9CA3AF;
   }}
   *{margin:0;padding:0;box-sizing:border-box;max-width:100%;}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:var(--tab-h);overflow-x:hidden;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
   body::before{content:'';position:fixed;top:0;left:0;right:0;height:40%;background:radial-gradient(ellipse 80% 100% at 50% 0%,rgba(201,168,76,0.07) 0%,transparent 100%);pointer-events:none;z-index:0;}
 
-  /* Tab bar */
-  .tab-bar{position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:none;}
-  .tab-bar::after{content:'';position:absolute;bottom:calc(-1 * env(safe-area-inset-bottom, 0px));left:0;right:0;height:env(safe-area-inset-bottom, 0px);background:var(--surface);}
-  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;-webkit-tap-highlight-color:transparent;transition:color 0.2s;position:relative;outline:none;}
-  .tab-btn.active{color:var(--gold);}
-  .tab-btn.active::before{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:var(--gold);border-radius:0 0 3px 3px;}
-  .tab-icon{font-size:20px;line-height:1;pointer-events:none;}
-  .tab-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.05em;pointer-events:none;}
+  /* View switch */
+  .view-switch-shell{position:fixed;top:48px;left:0;right:0;display:flex;justify-content:center;padding:12px 16px 0;z-index:140;pointer-events:none;}
+  .view-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:rgba(19,19,26,0.9);border:1px solid var(--border);border-radius:999px;backdrop-filter:blur(14px);box-shadow:0 12px 40px rgba(0,0,0,0.16);pointer-events:auto;}
+  .view-switch-btn{min-width:132px;padding:10px 18px;border:none;border-radius:999px;background:transparent;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;cursor:pointer;transition:background 0.2s,color 0.2s,box-shadow 0.2s;-webkit-tap-highlight-color:transparent;outline:none;}
+  .view-switch-btn.active{background:linear-gradient(135deg,rgba(154,122,46,0.92),rgba(201,168,76,0.98));color:#0A0A0F;box-shadow:0 8px 18px rgba(201,168,76,0.22);}
 
   /* Pages */
-  .page{display:none;min-height:calc(100vh - var(--tab-h));}
+  .page{display:none;min-height:100vh;}
   .page.active{display:block;}
   .container{max-width:860px;margin:0 auto;padding:28px 20px 20px;position:relative;z-index:1;}
 
@@ -175,7 +173,7 @@
   .brand-stay-nights{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);text-align:right;}
 
   /* Toast */
-  .toast{position:fixed;bottom:calc(var(--tab-h) + 16px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;font-family:'DM Mono',monospace;z-index:450;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
+  .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;font-family:'DM Mono',monospace;z-index:450;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
   .toast.show{opacity:1;}
 
   /* Modal shared */
@@ -197,7 +195,14 @@
   .login-loading-msg{margin-top:10px;font-size:12px;color:var(--text-muted);text-align:center;display:none;font-family:'DM Mono',monospace;}
 
   .empty-state{text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px;font-style:italic;}
-  @media(max-width:540px){.form-grid{grid-template-columns:1fr}.nights-big{font-size:38px}.card,.add-form{padding:18px}}
+  @media(max-width:540px){
+    .form-grid{grid-template-columns:1fr}
+    .nights-big{font-size:38px}
+    .card,.add-form{padding:18px}
+    .view-switch-shell{padding:10px 12px 0}
+    .view-switch{width:min(100%,360px)}
+    .view-switch-btn{min-width:0;padding:10px 12px}
+  }
 </style>
 </head>
 <body>
@@ -206,14 +211,21 @@
 <div class="top-bar">
   <div class="top-bar-title">Marriott Bonvoy</div>
   <div class="top-bar-right">
-    <button class="login-chip" id="loginChip" onclick="showLoginModal()">登入</button>
-    <div class="user-avatar" id="userAvatar" onclick="showLogoutModal()"></div>
+    <button class="login-chip" id="loginChip" onclick="showLoginModal()" aria-label="登入">登入</button>
+    <div class="user-avatar" id="userAvatar" onclick="showLogoutModal()" role="button" tabindex="0" aria-label="帳戶選單"></div>
+  </div>
+</div>
+
+<div class="view-switch-shell">
+  <div class="view-switch" role="tablist" aria-label="年份切換">
+    <button class="view-switch-btn active" id="tab2026" onclick="switchTab('2026')" role="tab" aria-selected="true" aria-controls="page2026">2026 追蹤</button>
+    <button class="view-switch-btn" id="tab2025" onclick="switchTab('2025')" role="tab" aria-selected="false" aria-controls="page2025">2025 回顧</button>
   </div>
 </div>
 
 <!-- ========== PAGE 2025 ========== -->
 <div class="page" id="page2025">
-  <div class="container" style="padding-top:68px;">
+  <div class="container" style="padding-top:116px;">
     <div class="header">
       <h1>2025 住宿<span>回顧</span></h1>
       <div class="header-sub">全年住宿記錄</div>
@@ -271,7 +283,7 @@
 
 <!-- ========== PAGE 2026 ========== -->
 <div class="page active" id="page2026">
-  <div class="container" id="container2026" style="padding-top:68px;">
+  <div class="container" id="container2026" style="padding-top:116px;">
     <div class="header">
       <h1>2026 住宿<span>追蹤</span></h1>
       <div class="header-sub">鈦金保級目標 · 75晚</div>
@@ -295,7 +307,7 @@
         <span class="stat-icon">💎</span>
         <div class="stat-value purple" id="statTotal">—</div>
         <div class="stat-label">目前積分</div>
-        <button id="btnEditPoints" onclick="openPointsModal()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:4px;">✎</button>
+        <button id="btnEditPoints" onclick="openPointsModal()" aria-label="更新積分餘額" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:4px;">✎</button>
       </div>
     </div>
 
@@ -304,9 +316,9 @@
       <div class="section-header" style="margin-bottom:16px;"><div class="section-title">新增住宿</div></div>
       <div class="form-grid">
         <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="inputDate" onchange="checkQ1Hint()"></div></div>
-        <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="btnMinus">−</button><div class="stepper-val" id="nightsVal">1</div><button class="stepper-btn" id="btnPlus">＋</button></div></div>
+        <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="btnMinus" aria-label="減少房晚數">−</button><div class="stepper-val" id="nightsVal">1</div><button class="stepper-btn" id="btnPlus" aria-label="增加房晚數">＋</button></div></div>
       </div>
-      <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="inputName" oninput="onNameInput(this.value)"><button class="input-clear" id="clearName" onclick="clearName()">✕</button></div></div>
+      <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="inputName" oninput="onNameInput(this.value)" autocomplete="off"><button class="input-clear" id="clearName" onclick="clearName()" aria-label="清除酒店名稱">✕</button></div></div>
       <div class="form-group" style="margin-bottom:12px;">
         <label>品牌 <span id="brandHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
         <select class="brand-select" id="inputBrand" onchange="checkQ1Hint()">
@@ -352,20 +364,10 @@
   </div>
 </div>
 
-<!-- Tab bar -->
-<div class="tab-bar">
-  <button class="tab-btn active" id="tab2026" onclick="switchTab('2026')">
-    <span class="tab-icon">📍</span><span class="tab-label">2026</span>
-  </button>
-  <button class="tab-btn" id="tab2025" onclick="switchTab('2025')">
-    <span class="tab-icon">📋</span><span class="tab-label">2025</span>
-  </button>
-</div>
-
 <!-- LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal">
-  <div class="modal">
-    <div class="modal-title">登入</div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+    <div class="modal-title" id="loginModalTitle">登入</div>
     <div class="modal-body-text">使用授權嘅 Google 帳號登入，方可新增或刪除記錄。</div>
     <button class="google-btn" onclick="doLogin()">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -383,8 +385,8 @@
 
 <!-- LOGOUT MODAL -->
 <div class="modal-overlay" id="logoutModal">
-  <div class="modal">
-    <div class="modal-title">登出</div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+    <div class="modal-title" id="logoutModalTitle">登出</div>
     <div class="modal-body-text" id="logoutBody">確定要登出？</div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeAllModals()">取消</button>
@@ -395,8 +397,8 @@
 
 <!-- DELETE MODAL -->
 <div class="modal-overlay" id="delModal">
-  <div class="modal">
-    <div class="modal-title">刪除記錄</div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delModalTitle">
+    <div class="modal-title" id="delModalTitle">刪除記錄</div>
     <div class="modal-body-text">確定要刪除這筆住宿記錄？所有人都會看到此更改。</div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeAllModals()">取消</button>
@@ -407,11 +409,11 @@
 
 <!-- Edit Modal -->
 <div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-title">編輯住宿</div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-title" id="editModalTitle">編輯住宿</div>
     <div class="form-grid" style="margin-bottom:12px;">
       <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="editDate"></div></div>
-      <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="editBtnMinus">−</button><div class="stepper-val" id="editNightsVal">1</div><button class="stepper-btn" id="editBtnPlus">＋</button></div></div>
+      <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="editBtnMinus" aria-label="減少編輯房晚數">−</button><div class="stepper-val" id="editNightsVal">1</div><button class="stepper-btn" id="editBtnPlus" aria-label="增加編輯房晚數">＋</button></div></div>
     </div>
     <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="editName"></div></div>
     <div class="form-group" style="margin-bottom:12px;"><label>品牌</label>
@@ -435,8 +437,8 @@
 
 <!-- Points Modal -->
 <div class="modal-overlay" id="pointsModalOverlay">
-  <div class="modal">
-    <div class="modal-title">更新積分餘額</div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pointsModalTitle">
+    <div class="modal-title" id="pointsModalTitle">更新積分餘額</div>
     <div class="form-group" style="margin-bottom:14px;">
       <label>目前積分（手動設定）</label>
       <div class="input-wrap"><input type="number" id="pointsBaseInput" inputmode="numeric" placeholder="例如 41300" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
@@ -523,27 +525,75 @@ function buildBrandAccordion(stays, containerId) {
   const totalNights=stays.reduce((s,x)=>s+x.nights,0);
   const sorted=Object.entries(brandMap).sort((a,b)=>b[1].nights-a[1].nights);
   const container=document.getElementById(containerId);
-  let html='';
+  const fragment=document.createDocumentFragment();
   sorted.forEach(([brand,data],idx)=>{
     const pct=totalNights>0?Math.round(data.nights/totalNights*100)+'%':'—';
-    const staysHtml=data.stays.map(s=>`
-      <div class="brand-stay-item">
-        <div class="brand-stay-date">${s.date.slice(5).replace('-','/')}</div>
-        <div class="brand-stay-name">${s.name}</div>
-        <div class="brand-stay-nights">${s.nights}晚</div>
-      </div>`).join('');
-    html+=`
-      <div class="brand-row" onclick="toggleBrand(this)" id="brandRow_${containerId}_${idx}">
-        <div class="brand-row-info">
-          <div class="brand-row-name">${brand}</div>
-          <div class="brand-row-meta">${data.stays.length}次 · ${data.nights}晚 · ${pct}</div>
-        </div>
-        <span class="brand-row-chevron">▼</span>
-      </div>
-      <div class="brand-stays" id="brandStays_${containerId}_${idx}">${staysHtml}</div>`;
+    const row=document.createElement('div');
+    row.className='brand-row';
+    row.id=`brandRow_${containerId}_${idx}`;
+    row.setAttribute('role','button');
+    row.setAttribute('tabindex','0');
+    row.setAttribute('aria-expanded','false');
+    row.onclick=()=>toggleBrand(row);
+    row.onkeydown=e=>{
+      if(e.key==='Enter' || e.key===' '){
+        e.preventDefault();
+        toggleBrand(row);
+      }
+    };
+
+    const rowInfo=document.createElement('div');
+    rowInfo.className='brand-row-info';
+
+    const brandName=document.createElement('div');
+    brandName.className='brand-row-name';
+    brandName.textContent=brand;
+
+    const brandMeta=document.createElement('div');
+    brandMeta.className='brand-row-meta';
+    brandMeta.textContent=`${data.stays.length}次 · ${data.nights}晚 · ${pct}`;
+
+    const chevron=document.createElement('span');
+    chevron.className='brand-row-chevron';
+    chevron.textContent='▼';
+
+    rowInfo.append(brandName,brandMeta);
+    row.append(rowInfo,chevron);
+
+    const staysWrap=document.createElement('div');
+    staysWrap.className='brand-stays';
+    staysWrap.id=`brandStays_${containerId}_${idx}`;
+    data.stays.forEach(s=>{
+      const stayItem=document.createElement('div');
+      stayItem.className='brand-stay-item';
+
+      const stayDate=document.createElement('div');
+      stayDate.className='brand-stay-date';
+      stayDate.textContent=s.date.slice(5).replace('-','/');
+
+      const stayName=document.createElement('div');
+      stayName.className='brand-stay-name';
+      stayName.textContent=s.name;
+
+      const stayNights=document.createElement('div');
+      stayNights.className='brand-stay-nights';
+      stayNights.textContent=`${s.nights}晚`;
+
+      stayItem.append(stayDate,stayName,stayNights);
+      staysWrap.appendChild(stayItem);
+    });
+
+    fragment.append(row,staysWrap);
   });
-  html+=`<div style="padding:10px 14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);border-top:1px solid var(--border);">合計 ${stays.length} 次 · ${totalNights} 晚</div>`;
-  container.innerHTML=html;
+  const total=document.createElement('div');
+  total.style.padding='10px 14px';
+  total.style.fontFamily="'DM Mono',monospace";
+  total.style.fontSize='11px';
+  total.style.color='var(--gold)';
+  total.style.borderTop='1px solid var(--border)';
+  total.textContent=`合計 ${stays.length} 次 · ${totalNights} 晚`;
+
+  container.replaceChildren(fragment,total);
 }
 
 window.toggleBrand=function(row){
@@ -553,6 +603,7 @@ window.toggleBrand=function(row){
   const isOpen=stays.classList.contains('show');
   stays.classList.toggle('show',!isOpen);
   row.classList.toggle('open',!isOpen);
+  row.setAttribute('aria-expanded',String(!isOpen));
 };
 
 function render2025(){
@@ -573,7 +624,7 @@ function render2025(){
       if(!q1Started && d>=Q1_START_2025){q1Started=true;html+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
       if(!q1Ended && q1Started && d>Q1_END_2025){q1Ended=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
       const dateStr=s.date.slice(5).replace('-','/');
-      html+=`<div class="stay-item"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${s.name}</div><div class="stay-brand-tag">${s.brand}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
+      html+=`<div class="stay-item"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${escapeHtml(s.name)}</div><div class="stay-brand-tag">${escapeHtml(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
       if(s.date===PLATINUM_DATE){html+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;}
       if(s.date===TITANIUM_DATE){html+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;}
     }
@@ -590,6 +641,8 @@ function switchTab(year){
   document.getElementById('page2026').classList.toggle('active',year==='2026');
   document.getElementById('tab2025').classList.toggle('active',year==='2025');
   document.getElementById('tab2026').classList.toggle('active',year==='2026');
+  document.getElementById('tab2025').setAttribute('aria-selected',String(year==='2025'));
+  document.getElementById('tab2026').setAttribute('aria-selected',String(year==='2026'));
   const on2026=year==='2026';
   // 只有 2026 頁先顯示登入/頭像
   document.getElementById('loginChip').style.visibility=on2026?'':'hidden';
@@ -611,6 +664,12 @@ window.closeAllModals=function(){
 ['loginModal','logoutModal','delModal','modalOverlay','pointsModalOverlay'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeAllModals();});
 });
+document.getElementById('userAvatar').addEventListener('keydown',e=>{
+  if(e.key==='Enter' || e.key===' '){
+    e.preventDefault();
+    showLogoutModal();
+  }
+});
 </script>
 
 <script type="module">
@@ -618,7 +677,6 @@ import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-ap
 import{getDatabase,ref,onValue,push,remove,update}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const ADMIN_EMAIL='nentivericfv@gmail.com';
 const ADMIN_EMAILS=['nentivericfv@gmail.com','1252719751@qq.com'];
 const firebaseConfig={apiKey:"AIzaSyArG04UcAi4oe4DdDJtJPrRCCv5e20cVVk",authDomain:"marriott-calculator.firebaseapp.com",databaseURL:"https://marriott-calculator-default-rtdb.firebaseio.com",projectId:"marriott-calculator",storageBucket:"marriott-calculator.firebasestorage.app",messagingSenderId:"983529900657",appId:"1:983529900657:web:52821f5d4677b85ef7e9d0"};
 
@@ -679,6 +737,21 @@ const DEFAULT_STAYS=[
 
 let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=false,editKey=null,dbInitialized=false,deleteTargetKey=null,toastTimer=null;
 
+function formatLocalDate(date=new Date()){
+  const localDate=new Date(date.getTime()-date.getTimezoneOffset()*60000);
+  return localDate.toISOString().slice(0,10);
+}
+
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g,char=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[char]));
+}
+
 onAuthStateChanged(auth,(user)=>{
   isAdmin=!!(user&&ADMIN_EMAILS.includes(user.email));
   currentIsAdmin=isAdmin;
@@ -691,7 +764,10 @@ onAuthStateChanged(auth,(user)=>{
     chip.classList.remove('show');
     avatar.classList.add('show');
     if(user.photoURL){
-      avatar.innerHTML=`<img src="${user.photoURL}" alt="">`;
+      const img=document.createElement('img');
+      img.src=user.photoURL;
+      img.alt='';
+      avatar.replaceChildren(img);
     }else{
       avatar.textContent=(user.displayName||user.email)[0].toUpperCase();
     }
@@ -799,7 +875,31 @@ function render2026(stays){
   const q1BrandsList=[...new Set(q1Stays.map(s=>s.brand))].sort();
   document.getElementById('brandCount').textContent=`已用 ${usedBrands.size} 個品牌獎勵`;
   const brandsGrid=document.getElementById('brandsGrid');
-  brandsGrid.innerHTML=q1BrandsList.length===0?'<div style="color:var(--text-muted);font-size:12px;grid-column:1/-1;">暫無Q1期間住宿</div>':q1BrandsList.map(b=>`<div style="background:var(--surface2);border:1px solid rgba(128,128,128,0.1);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--text);${usedBrands.has(b)?'text-decoration:line-through;opacity:0.45;':''}">${b}</div>`).join('');
+  brandsGrid.replaceChildren();
+  if(q1BrandsList.length===0){
+    const empty=document.createElement('div');
+    empty.style.color='var(--text-muted)';
+    empty.style.fontSize='12px';
+    empty.style.gridColumn='1/-1';
+    empty.textContent='暫無Q1期間住宿';
+    brandsGrid.appendChild(empty);
+  }else{
+    q1BrandsList.forEach(b=>{
+      const brandChip=document.createElement('div');
+      brandChip.style.background='var(--surface2)';
+      brandChip.style.border='1px solid rgba(128,128,128,0.1)';
+      brandChip.style.borderRadius='8px';
+      brandChip.style.padding='8px 10px';
+      brandChip.style.fontSize='11px';
+      brandChip.style.color='var(--text)';
+      if(usedBrands.has(b)){
+        brandChip.style.textDecoration='line-through';
+        brandChip.style.opacity='0.45';
+      }
+      brandChip.textContent=b;
+      brandsGrid.appendChild(brandChip);
+    });
+  }
 
   const monthGroups={};
   for(const s of sorted){const m=parseInt(s.date.split('-')[1])-1;if(!monthGroups[m])monthGroups[m]=[];monthGroups[m].push(s);}
@@ -873,7 +973,7 @@ function render2026(stays){
       const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
       const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
       const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-      html+=`<div class="stay-item" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${s.name}</div><div class="stay-brand-tag">${s.brand}${s.redeem?' · 兌換':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+      html+=`<div class="stay-item" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${escapeHtml(s.name)}</div><div class="stay-brand-tag">${escapeHtml(s.brand)}${s.redeem?' · 兌換':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
     }
   }
   stayList.innerHTML=html;
@@ -912,7 +1012,7 @@ window.addStay=async function(){
   try{
     const redeemPts=isRedeem?parseInt(document.getElementById('inputRedeemPoints').value)||0:0;
     await push(staysRef,{date,name,brand,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0});
-    document.getElementById('inputDate').value=new Date().toISOString().slice(0,10);
+    document.getElementById('inputDate').value=formatLocalDate();
     document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';
     document.getElementById('brandHint').textContent='';document.getElementById('clearName').classList.remove('visible');
     nightsCount=1;document.getElementById('nightsVal').textContent='1';
@@ -974,8 +1074,7 @@ window.saveEdit=async function(){
 };
 
 window.openPointsModal=function(){
-  const base=localStorage.getItem('pointsBase')||'';
-  document.getElementById('pointsBaseInput').value=base;
+  document.getElementById('pointsBaseInput').value=_pointsBase||'';
   document.getElementById('pointsModalOverlay').classList.add('show');
 };
 window.closePointsModal=function(){document.getElementById('pointsModalOverlay').classList.remove('show');};
@@ -998,7 +1097,7 @@ function showToast(msg,color='#4ADE80'){
   toastTimer=setTimeout(()=>{t.classList.remove('show');toastTimer=null;},2500);
 }
 
-document.getElementById('inputDate').value=new Date().toISOString().slice(0,10);
+document.getElementById('inputDate').value=formatLocalDate();
 </script>
 
 <script>

@@ -1,0 +1,16 @@
+{
+  "rules": {
+    ".read": true,
+    "config": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email === 'nentivericfv@gmail.com' || auth.token.email === '1252719751@qq.com')"
+    },
+    "stays2026": {
+      ".read": true,
+      "$stayId": {
+        ".write": "auth != null && (auth.token.email === 'nentivericfv@gmail.com' || auth.token.email === '1252719751@qq.com')",
+        ".validate": "newData.hasChildren(['date', 'name', 'brand', 'nights', 'redeem'])"
+      }
+    }
+  }
+}
