@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.13.2 -->
+<!-- VERSION: 2026.04.13.3 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -49,6 +49,18 @@
   .top-bar-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;white-space:nowrap;}
   .app-version{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.04em;color:var(--text-muted);white-space:nowrap;}
   .top-bar-right{display:flex;align-items:center;gap:10px;}
+  .sync-chip{display:none;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;border:1px solid rgba(128,128,128,0.16);background:rgba(128,128,128,0.08);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.04em;color:var(--text-muted);white-space:nowrap;}
+  .sync-chip.show{display:inline-flex;}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text-muted);box-shadow:0 0 0 0 rgba(138,133,128,0.35);}
+  .sync-chip.loading .sync-dot{background:var(--gold);animation:sync-pulse 1.6s ease-in-out infinite;}
+  .sync-chip.live .sync-dot{background:var(--green);}
+  .sync-chip.offline .sync-dot{background:var(--grey);}
+  .sync-chip.error .sync-dot{background:var(--red);}
+  @keyframes sync-pulse{
+    0%{box-shadow:0 0 0 0 rgba(201,168,76,0.38)}
+    70%{box-shadow:0 0 0 6px rgba(201,168,76,0)}
+    100%{box-shadow:0 0 0 0 rgba(201,168,76,0)}
+  }
 
   /* Login chip */
   .login-chip{font-size:12px;font-weight:600;color:var(--gold);background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:20px;padding:5px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.15s;display:none;}
@@ -214,9 +226,13 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">Marriott Bonvoy</div>
-    <div class="app-version" id="appVersion">v2026.04.13.2</div>
+    <div class="app-version" id="appVersion">v2026.04.13.3</div>
   </div>
   <div class="top-bar-right">
+    <div class="sync-chip show loading" id="syncChip" aria-live="polite">
+      <span class="sync-dot"></span>
+      <span id="syncLabel">同步中</span>
+    </div>
     <button class="login-chip" id="loginChip" onclick="showLoginModal()" aria-label="登入">登入</button>
     <div class="user-avatar" id="userAvatar" onclick="showLogoutModal()" role="button" tabindex="0" aria-label="帳戶選單"></div>
   </div>
@@ -705,12 +721,69 @@ const auth=getAuth(app);
 const staysRef=ref(db,'stays2026');
 const pointsBaseRef=ref(db,'config/pointsBase');
 const pointsBaseStaysRef=ref(db,'config/pointsBaseStayIds');
+const connectedRef=ref(db,'.info/connected');
 
 let _pointsBase=0;
 let _pointsBaseStays=[];
+let isConnected=null;
+let hasLoadedStays=false;
+let hasLoadedPointsBase=false;
+let hasLoadedPointsBaseStays=false;
+let hasSyncError=false;
+let pendingSyncWrites=0;
 
-onValue(pointsBaseRef,(snap)=>{_pointsBase=snap.val()||0;});
-onValue(pointsBaseStaysRef,(snap)=>{_pointsBaseStays=snap.val()||[];});
+function updateSyncStatus(){
+  const chip=document.getElementById('syncChip');
+  const label=document.getElementById('syncLabel');
+  chip.className='sync-chip show';
+
+  if(hasSyncError){
+    chip.classList.add('error');
+    label.textContent='同步失敗';
+    return;
+  }
+  if(isConnected===false){
+    chip.classList.add('offline');
+    label.textContent='離線';
+    return;
+  }
+  if(isConnected===null || pendingSyncWrites>0 || !hasLoadedStays || !hasLoadedPointsBase || !hasLoadedPointsBaseStays){
+    chip.classList.add('loading');
+    label.textContent='同步中';
+    return;
+  }
+  chip.classList.add('live');
+  label.textContent='已同步';
+}
+
+onValue(connectedRef,(snap)=>{
+  isConnected=!!snap.val();
+  if(isConnected)hasSyncError=false;
+  updateSyncStatus();
+},()=>{
+  hasSyncError=true;
+  updateSyncStatus();
+});
+
+onValue(pointsBaseRef,(snap)=>{
+  _pointsBase=snap.val()||0;
+  hasLoadedPointsBase=true;
+  if(pendingSyncWrites>0)pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+  hasSyncError=false;
+  updateSyncStatus();
+},()=>{
+  hasSyncError=true;
+  updateSyncStatus();
+});
+onValue(pointsBaseStaysRef,(snap)=>{
+  _pointsBaseStays=snap.val()||[];
+  hasLoadedPointsBaseStays=true;
+  hasSyncError=false;
+  updateSyncStatus();
+},()=>{
+  hasSyncError=true;
+  updateSyncStatus();
+});
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
@@ -824,8 +897,15 @@ onValue(staysRef,(snapshot)=>{
   if(data){stays=Object.entries(data).map(([key,val])=>({...val,_key:key}));}
   else if(!dbInitialized){dbInitialized=true;DEFAULT_STAYS.forEach(s=>push(staysRef,s));return;}
   dbInitialized=true;
+  hasLoadedStays=true;
+  if(pendingSyncWrites>0)pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+  hasSyncError=false;
+  updateSyncStatus();
   render2026(stays);
-},()=>{});
+},()=>{
+  hasSyncError=true;
+  updateSyncStatus();
+});
 
 function isQ1Eligible(stay){if(stay.redeem)return false;const d=new Date(stay.date);return d>=Q1_START&&d<=Q1_END;}
 
@@ -1020,6 +1100,9 @@ window.addStay=async function(){
   const btn=document.getElementById('btnAdd');btn.disabled=true;
   try{
     const redeemPts=isRedeem?parseInt(document.getElementById('inputRedeemPoints').value)||0:0;
+    pendingSyncWrites+=1;
+    hasSyncError=false;
+    updateSyncStatus();
     await push(staysRef,{date,name,brand,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0});
     document.getElementById('inputDate').value=formatLocalDate();
     document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';
@@ -1030,7 +1113,12 @@ window.addStay=async function(){
     document.getElementById('inputRedeemPoints').value='';
     document.getElementById('q1Hint').style.display='none';
     showToast('✓ 住宿已新增並同步');
-  }catch(e){showToast('同步失敗','#F87171');}
+  }catch(e){
+    pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+    hasSyncError=true;
+    updateSyncStatus();
+    showToast('同步失敗','#F87171');
+  }
   btn.disabled=false;
 };
 
@@ -1042,8 +1130,19 @@ window._askDelete=function(key){
 window.confirmDelete=async function(){
   closeAllModals();
   if(deleteTargetKey){
-    try{await remove(ref(db,`stays2026/${deleteTargetKey}`));showToast('✓ 已刪除');}
-    catch(e){showToast('刪除失敗','#F87171');}
+    try{
+      pendingSyncWrites+=1;
+      hasSyncError=false;
+      updateSyncStatus();
+      await remove(ref(db,`stays2026/${deleteTargetKey}`));
+      showToast('✓ 已刪除');
+    }
+    catch(e){
+      pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+      hasSyncError=true;
+      updateSyncStatus();
+      showToast('刪除失敗','#F87171');
+    }
     deleteTargetKey=null;
   }
 };
@@ -1078,8 +1177,20 @@ window.saveEdit=async function(){
   if(!date||!name||!brand){showToast('請填寫所有欄位','#F87171');return;}
   const pointsEarned=parseInt(document.getElementById('editPointsEarned').value)||0;
   const redeemPoints=editIsRedeem?parseInt(document.getElementById('editRedeemPoints').value)||0:0;
-  try{await update(ref(db,`stays2026/${editKey}`),{date,name,brand,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});closeModal();showToast('✓ 已更新');}
-  catch(e){showToast('更新失敗','#F87171');}
+  try{
+    pendingSyncWrites+=1;
+    hasSyncError=false;
+    updateSyncStatus();
+    await update(ref(db,`stays2026/${editKey}`),{date,name,brand,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});
+    closeModal();
+    showToast('✓ 已更新');
+  }
+  catch(e){
+    pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+    hasSyncError=true;
+    updateSyncStatus();
+    showToast('更新失敗','#F87171');
+  }
 };
 
 window.openPointsModal=function(){
@@ -1092,10 +1203,18 @@ window.savePointsBase=async function(){
   if(!val||val<0){showToast('請輸入有效積分','#F87171');return;}
   try{
     const ids=window._currentStays?window._currentStays.map(s=>s._key).filter(Boolean):[];
+    pendingSyncWrites+=1;
+    hasSyncError=false;
+    updateSyncStatus();
     await update(ref(db,'config'),{pointsBase:val,pointsBaseStayIds:ids});
     closePointsModal();
     showToast('✓ 積分餘額已更新並同步');
-  }catch(e){showToast('更新失敗','#F87171');}
+  }catch(e){
+    pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+    hasSyncError=true;
+    updateSyncStatus();
+    showToast('更新失敗','#F87171');
+  }
 };
 
 function showToast(msg,color='#4ADE80'){
@@ -1107,6 +1226,7 @@ function showToast(msg,color='#4ADE80'){
 }
 
 document.getElementById('inputDate').value=formatLocalDate();
+updateSyncStatus();
 </script>
 
 <script>
