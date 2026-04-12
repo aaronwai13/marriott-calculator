@@ -9,7 +9,7 @@
 ├── GUIDELINE_CLOUD.md
 ├── README.md
 ├── database.rules.json
-├── icon-2026-04-13-blue.png
+├── icon-192.png
 ├── index.html
 ├── manifest.json
 └── sw.js

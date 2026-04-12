@@ -1,8 +1,8 @@
-const CACHE = 'marriott-v2026.04.13.8';
+const CACHE = 'marriott-v2026.04.13.9';
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(['./', './index.html', './manifest.json', './icon-2026-04-13-blue.png']))
+    caches.open(CACHE).then(c => c.addAll(['./', './index.html', './manifest.json', './icon-192.png']))
   );
   self.skipWaiting();
 });
