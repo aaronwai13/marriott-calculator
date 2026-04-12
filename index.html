@@ -519,6 +519,16 @@ const TITANIUM_DATE='2025-06-05';
 const Q1_START_2025=new Date('2025-02-11');
 const Q1_END_2025=new Date('2025-04-28');
 
+window.escapeHtml=function(value){
+  return String(value).replace(/[&<>"']/g,char=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[char]));
+};
+
 function buildBrandAccordion(stays, containerId) {
   const brandMap={};
   for(const s of stays){
@@ -628,7 +638,7 @@ function render2025(){
       if(!q1Started && d>=Q1_START_2025){q1Started=true;html+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
       if(!q1Ended && q1Started && d>Q1_END_2025){q1Ended=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
       const dateStr=s.date.slice(5).replace('-','/');
-      html+=`<div class="stay-item"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${escapeHtml(s.name)}</div><div class="stay-brand-tag">${escapeHtml(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
+      html+=`<div class="stay-item"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.escapeHtml(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
       if(s.date===PLATINUM_DATE){html+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;}
       if(s.date===TITANIUM_DATE){html+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;}
     }
@@ -744,16 +754,6 @@ let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=fa
 function formatLocalDate(date=new Date()){
   const localDate=new Date(date.getTime()-date.getTimezoneOffset()*60000);
   return localDate.toISOString().slice(0,10);
-}
-
-function escapeHtml(value){
-  return String(value).replace(/[&<>"']/g,char=>({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#39;'
-  }[char]));
 }
 
 onAuthStateChanged(auth,(user)=>{
@@ -977,7 +977,7 @@ function render2026(stays){
       const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
       const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
       const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-      html+=`<div class="stay-item" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${escapeHtml(s.name)}</div><div class="stay-brand-tag">${escapeHtml(s.brand)}${s.redeem?' · 兌換':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+      html+=`<div class="stay-item" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.escapeHtml(s.brand)}${s.redeem?' · 兌換':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
     }
   }
   stayList.innerHTML=html;
