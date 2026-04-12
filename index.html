@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.13.4 -->
+<!-- VERSION: 2026.04.13.5 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -233,7 +233,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">Marriott Bonvoy</div>
-    <div class="app-version" id="appVersion">v2026.04.13.4</div>
+    <div class="app-version" id="appVersion">v2026.04.13.5</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -360,7 +360,14 @@
     <div class="card">
       <div class="section-header"><div class="section-title">Q1 品牌追蹤</div></div>
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span></div>
-      <div id="brandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+      <div style="margin-bottom:14px;">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">已入住品牌</div>
+        <div id="brandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">未入住品牌</div>
+        <div id="remainingBrandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+      </div>
     </div>
 
     <!-- 月度統計 2026 -->
@@ -931,6 +938,12 @@ function calcQ1(stays){
   return{bonus,usedBrands};
 }
 
+function getBrandOptions(){
+  return [...document.querySelectorAll('#inputBrand option')]
+    .map(option=>option.value.trim())
+    .filter(Boolean);
+}
+
 function render2026(stays){
   window._currentStays=stays;
   const sorted=[...stays].sort((a,b)=>a.date.localeCompare(b.date));
@@ -977,9 +990,13 @@ function render2026(stays){
 
   const q1Stays=stays.filter(s=>isQ1Eligible(s));
   const q1BrandsList=[...new Set(q1Stays.map(s=>s.brand))].sort();
+  const allBrands=getBrandOptions();
+  const remainingBrands=allBrands.filter(brand=>!q1BrandsList.includes(brand));
   document.getElementById('brandCount').textContent=`已用 ${usedBrands.size} 個品牌獎勵`;
   const brandsGrid=document.getElementById('brandsGrid');
+  const remainingBrandsGrid=document.getElementById('remainingBrandsGrid');
   brandsGrid.replaceChildren();
+  remainingBrandsGrid.replaceChildren();
   if(q1BrandsList.length===0){
     const empty=document.createElement('div');
     empty.style.color='var(--text-muted)';
@@ -1002,6 +1019,26 @@ function render2026(stays){
       }
       brandChip.textContent=b;
       brandsGrid.appendChild(brandChip);
+    });
+  }
+  if(remainingBrands.length===0){
+    const empty=document.createElement('div');
+    empty.style.color='var(--text-muted)';
+    empty.style.fontSize='12px';
+    empty.style.gridColumn='1/-1';
+    empty.textContent='全部品牌都已經住過';
+    remainingBrandsGrid.appendChild(empty);
+  }else{
+    remainingBrands.forEach(b=>{
+      const brandChip=document.createElement('div');
+      brandChip.style.background='transparent';
+      brandChip.style.border='1px dashed rgba(128,128,128,0.18)';
+      brandChip.style.borderRadius='8px';
+      brandChip.style.padding='8px 10px';
+      brandChip.style.fontSize='11px';
+      brandChip.style.color='var(--text-muted)';
+      brandChip.textContent=b;
+      remainingBrandsGrid.appendChild(brandChip);
     });
   }
 
