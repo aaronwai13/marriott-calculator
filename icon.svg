@@ -1,13 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="萬豪追蹤圖示">
-  <rect width="512" height="512" rx="114" fill="#FFFFFF"/>
-  <text
-    x="50%"
-    y="50%"
-    text-anchor="middle"
-    dominant-baseline="central"
-    font-family="-apple-system, SF Pro Display, SF Pro Text, PingFang TC, Helvetica Neue, Arial, sans-serif"
-    font-size="280"
-    font-weight="700"
-    fill="#111111"
-    letter-spacing="0">萬</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">萬豪追蹤 icon</title>
+  <desc id="desc">White rounded-square icon with the Chinese character 萬 centered in dark text.</desc>
+  <rect x="24" y="24" width="464" height="464" rx="108" fill="#FFFFFF"/>
+  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central"
+    font-family="-apple-system, SF Pro Display, SF Pro Text, PingFang HK, PingFang TC, Heiti TC, sans-serif"
+    font-size="280" font-weight="700" fill="#111110">萬</text>
 </svg>
