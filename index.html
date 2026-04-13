@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.14.2 -->
+<!-- VERSION: 2026.04.14.10 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -287,30 +287,17 @@
 
     <div class="card">
       <div class="section-header"><div class="section-title">月度統計</div></div>
-      <table class="stats-table">
-        <thead><tr><th>月份</th><th>次數</th><th>房晚</th><th>Q1獎勵</th><th>佔全年%</th></tr></thead>
-        <tbody>
-          <tr><td>一月</td><td>5</td><td>6</td><td>—</td><td>9.1%</td></tr>
-          <tr><td>二月</td><td>3</td><td>3</td><td>1</td><td>4.5%</td></tr>
-          <tr><td>三月</td><td>9</td><td>13</td><td>13</td><td>19.7%</td></tr>
-          <tr><td>四月</td><td>8</td><td>12</td><td>10</td><td>18.2%</td></tr>
-          <tr><td>五月</td><td>8</td><td>10</td><td>—</td><td>15.2%</td></tr>
-          <tr><td>六月</td><td>7</td><td>7</td><td>—</td><td>10.6%</td></tr>
-          <tr><td>七月</td><td>1</td><td>1</td><td>—</td><td>1.5%</td></tr>
-          <tr><td>八月</td><td>2</td><td>2</td><td>—</td><td>3.0%</td></tr>
-          <tr><td>九月</td><td>2</td><td>2</td><td>—</td><td>3.0%</td></tr>
-          <tr><td>十月</td><td>4</td><td>4</td><td>—</td><td>6.1%</td></tr>
-          <tr><td>十一月</td><td>3</td><td>3</td><td>—</td><td>4.5%</td></tr>
-          <tr><td>十二月</td><td>3</td><td>3</td><td>—</td><td>4.5%</td></tr>
-          <tr><td>50晚年度福利</td><td>—</td><td>—</td><td>5</td><td>—</td></tr>
-          <tr><td>合計</td><td>55</td><td>66</td><td>29</td><td>100%</td></tr>
-        </tbody>
-      </table>
+      <div id="monthAccordion2025"><div class="empty-state">載入中...</div></div>
     </div>
 
     <div class="card">
       <div class="section-header"><div class="section-title">品牌統計</div></div>
       <div id="brandAccordion2025"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-header"><div class="section-title">地區統計</div></div>
+      <div id="regionAccordion2025"><div class="empty-state">載入中...</div></div>
     </div>
 
     <div>
@@ -396,16 +383,18 @@
     <!-- 月度統計 2026 -->
     <div class="card">
       <div class="section-header"><div class="section-title">月度統計</div></div>
-      <table class="stats-table" id="monthTable2026">
-        <thead><tr><th>月份</th><th>次數</th><th>房晚</th><th>Q1獎勵</th><th>佔全年%</th></tr></thead>
-        <tbody id="monthTableBody2026"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:16px;">載入中...</td></tr></tbody>
-      </table>
+      <div id="monthAccordion2026"><div class="empty-state">載入中...</div></div>
     </div>
 
     <!-- 品牌統計 2026 -->
     <div class="card">
       <div class="section-header"><div class="section-title">品牌統計</div></div>
       <div id="brandAccordion2026"><div class="empty-state">載入中...</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-header"><div class="section-title">地區統計</div></div>
+      <div id="regionAccordion2026"><div class="empty-state">載入中...</div></div>
     </div>
 
     <!-- 住宿明細 -->
@@ -584,6 +573,7 @@ const PLATINUM_DATE='2025-04-21';
 const TITANIUM_DATE='2025-06-05';
 const Q1_START_2025=new Date('2025-02-11');
 const Q1_END_2025=new Date('2025-04-28');
+const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 
 window.escapeHtml=function(value){
   return String(value).replace(/[&<>"']/g,char=>({
@@ -676,6 +666,221 @@ function buildBrandAccordion(stays, containerId) {
   container.replaceChildren(fragment,total);
 }
 
+function buildMonthAccordion(monthEntries, containerId, totalMeta){
+  const container=document.getElementById(containerId);
+  const fragment=document.createDocumentFragment();
+  monthEntries.forEach((entry,idx)=>{
+    const row=document.createElement('div');
+    row.className='brand-row';
+    row.id=`brandRow_${containerId}_${idx}`;
+    row.setAttribute('role','button');
+    row.setAttribute('tabindex','0');
+    row.setAttribute('aria-expanded','false');
+    row.onclick=()=>toggleBrand(row);
+    row.onkeydown=e=>{
+      if(e.key==='Enter' || e.key===' '){
+        e.preventDefault();
+        toggleBrand(row);
+      }
+    };
+
+    const rowInfo=document.createElement('div');
+    rowInfo.className='brand-row-info';
+
+    const monthName=document.createElement('div');
+    monthName.className='brand-row-name';
+    monthName.textContent=entry.label;
+
+    const monthMeta=document.createElement('div');
+    monthMeta.className='brand-row-meta';
+    const q1Text=entry.q1Bonus>0?` · Q1 ${entry.q1Bonus}晚`:'';
+    monthMeta.textContent=`${entry.count}次 · ${entry.nights}晚${q1Text} · ${entry.pct}`;
+
+    const chevron=document.createElement('span');
+    chevron.className='brand-row-chevron';
+    chevron.textContent='▼';
+
+    rowInfo.append(monthName,monthMeta);
+    row.append(rowInfo,chevron);
+
+    const staysWrap=document.createElement('div');
+    staysWrap.className='brand-stays';
+    staysWrap.id=`brandStays_${containerId}_${idx}`;
+    entry.stays.forEach(stay=>{
+      const stayItem=document.createElement('div');
+      stayItem.className='brand-stay-item';
+
+      const stayDate=document.createElement('div');
+      stayDate.className='brand-stay-date';
+      stayDate.textContent=stay.date.slice(5).replace('-','/');
+
+      const stayName=document.createElement('div');
+      stayName.className='brand-stay-name';
+      stayName.textContent=stay.name;
+
+      const stayNights=document.createElement('div');
+      stayNights.className='brand-stay-nights';
+      stayNights.textContent=`${stay.nights}晚`;
+
+      stayItem.append(stayDate,stayName,stayNights);
+      staysWrap.appendChild(stayItem);
+    });
+
+    fragment.append(row,staysWrap);
+  });
+
+  const total=document.createElement('div');
+  total.style.padding='10px 14px';
+  total.style.fontFamily="'DM Mono',monospace";
+  total.style.fontSize='11px';
+  total.style.color='var(--gold)';
+  total.style.borderTop='1px solid var(--border)';
+  total.textContent=totalMeta;
+  container.replaceChildren(fragment,total);
+}
+
+function buildRegionAccordion(stays, containerId){
+  const regionMap={};
+  for(const stay of stays){
+    const region=inferRegionFromName(stay.name);
+    if(!regionMap[region])regionMap[region]={nights:0,stays:[]};
+    regionMap[region].nights+=stay.nights;
+    regionMap[region].stays.push(stay);
+  }
+  const totalNights=stays.reduce((sum,item)=>sum+item.nights,0);
+  const sorted=Object.entries(regionMap).sort((a,b)=>{
+    if(b[1].nights!==a[1].nights)return b[1].nights-a[1].nights;
+    if(b[1].stays.length!==a[1].stays.length)return b[1].stays.length-a[1].stays.length;
+    return a[0]===b[0]?0:(a[0]>b[0]?1:-1);
+  });
+  const container=document.getElementById(containerId);
+  const fragment=document.createDocumentFragment();
+  sorted.forEach(([region,data],idx)=>{
+    const pct=totalNights>0?Math.round(data.nights/totalNights*100)+'%':'—';
+    const row=document.createElement('div');
+    row.className='brand-row';
+    row.id=`brandRow_${containerId}_${idx}`;
+    row.setAttribute('role','button');
+    row.setAttribute('tabindex','0');
+    row.setAttribute('aria-expanded','false');
+    row.onclick=()=>toggleBrand(row);
+    row.onkeydown=e=>{
+      if(e.key==='Enter' || e.key===' '){
+        e.preventDefault();
+        toggleBrand(row);
+      }
+    };
+
+    const rowInfo=document.createElement('div');
+    rowInfo.className='brand-row-info';
+
+    const regionName=document.createElement('div');
+    regionName.className='brand-row-name';
+    regionName.textContent=region;
+
+    const regionMeta=document.createElement('div');
+    regionMeta.className='brand-row-meta';
+    regionMeta.textContent=`${data.stays.length}次 · ${data.nights}晚 · ${pct}`;
+
+    const chevron=document.createElement('span');
+    chevron.className='brand-row-chevron';
+    chevron.textContent='▼';
+
+    rowInfo.append(regionName,regionMeta);
+    row.append(rowInfo,chevron);
+
+    const staysWrap=document.createElement('div');
+    staysWrap.className='brand-stays';
+    staysWrap.id=`brandStays_${containerId}_${idx}`;
+    data.stays.forEach(stay=>{
+      const stayItem=document.createElement('div');
+      stayItem.className='brand-stay-item';
+
+      const stayDate=document.createElement('div');
+      stayDate.className='brand-stay-date';
+      stayDate.textContent=stay.date.slice(5).replace('-','/');
+
+      const stayName=document.createElement('div');
+      stayName.className='brand-stay-name';
+      stayName.textContent=stay.name;
+
+      const stayNights=document.createElement('div');
+      stayNights.className='brand-stay-nights';
+      stayNights.textContent=`${stay.nights}晚`;
+
+      stayItem.append(stayDate,stayName,stayNights);
+      staysWrap.appendChild(stayItem);
+    });
+
+    fragment.append(row,staysWrap);
+  });
+
+  const total=document.createElement('div');
+  total.style.padding='10px 14px';
+  total.style.fontFamily="'DM Mono',monospace";
+  total.style.fontSize='11px';
+  total.style.color='var(--gold)';
+  total.style.borderTop='1px solid var(--border)';
+  total.textContent=`合計 ${stays.length} 次 · ${totalNights} 晚`;
+
+  container.replaceChildren(fragment,total);
+}
+
+const REGION_KEYWORDS=[
+  {region:'香港',keywords:['香港','东涌','東涌','问月','問月','柏宁','柏寧','southside','南岸']},
+  {region:'深圳',keywords:['深圳','noa']},
+  {region:'廣州',keywords:['广州','廣州','广交会','廣交會','白云','白雲','天河']},
+  {region:'珠海',keywords:['珠海']},
+  {region:'北京',keywords:['北京','大兴','大興']},
+  {region:'上海',keywords:['上海']},
+  {region:'杭州',keywords:['杭州']},
+  {region:'佛山',keywords:['佛山']},
+  {region:'中山',keywords:['中山']},
+  {region:'東莞',keywords:['东莞','東莞']},
+  {region:'順德',keywords:['顺德','順德']},
+  {region:'汕頭',keywords:['汕头','汕頭']},
+  {region:'福州',keywords:['福州']},
+  {region:'鄭州',keywords:['郑州','鄭州']},
+  {region:'西安',keywords:['西安']},
+  {region:'瀋陽',keywords:['沈阳','瀋陽']},
+  {region:'重慶',keywords:['重庆','重慶']},
+  {region:'貴陽',keywords:['贵阳','貴陽']},
+  {region:'柳州',keywords:['柳州']},
+  {region:'昆明',keywords:['昆明']},
+  {region:'札幌',keywords:['札幌']},
+  {region:'東京',keywords:['东京','東京','ginza']},
+  {region:'首爾',keywords:['首尔','首爾','seoul']},
+  {region:'曼谷',keywords:['曼谷','bangkok','sukhumvit']},
+  {region:'新加坡',keywords:['新加坡','singapore','duxton']},
+  {region:'雅加達',keywords:['雅加达','雅加達','jakarta']},
+  {region:'卡薩布蘭卡',keywords:['casablanca','卡萨布兰卡','卡薩布蘭卡']},
+  {region:'伊斯坦堡',keywords:['伊斯坦布尔','伊斯坦堡','istanbul']},
+];
+
+function inferRegionFromName(name=''){
+  const normalizeRegionText=value=>String(value||'').toLowerCase().normalize('NFKC').replace(/[\s\-_/.,，。、（）()]+/g,' ').trim();
+  const normalized=normalizeRegionText(name);
+  for(const item of REGION_KEYWORDS){
+    if(item.keywords.some(keyword=>normalized.includes(normalizeRegionText(keyword)))){
+      return item.region;
+    }
+  }
+  return '其他';
+}
+
+function renderRegionAccordion(stays, containerId){
+  try{
+    buildRegionAccordion(stays,containerId);
+  }catch(error){
+    console.error('renderRegionAccordion failed',error);
+    const container=document.getElementById(containerId);
+    if(container){
+      const message=error&&error.message?window.escapeHtml(error.message):'unknown error';
+      container.innerHTML=`<div class="empty-state">地區統計載入失敗<br><span style="font-size:11px;">${message}</span></div>`;
+    }
+  }
+}
+
 window.toggleBrand=function(row){
   const idx=row.id.split('_').pop();
   const containerId=row.id.split('_').slice(1,-1).join('_');
@@ -687,18 +892,43 @@ window.toggleBrand=function(row){
 };
 
 function render2025(){
-  const monthNames=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
   const grouped={};
   for(const s of STAYS_2025){const m=parseInt(s.date.split('-')[1])-1;if(!grouped[m])grouped[m]=[];grouped[m].push(s);}
+  const totalNights2025=STAYS_2025.reduce((sum,stay)=>sum+stay.nights,0);
+  const q1MonthBonus2025={};
+  const usedBrands2025=new Set();
+  const q1Eligible2025=[...STAYS_2025]
+    .filter(stay=>!stay.redeem)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  q1Eligible2025.forEach(stay=>{
+    const d=new Date(stay.date);
+    if(d>=Q1_START_2025&&d<=Q1_END_2025&&!usedBrands2025.has(stay.brand)){
+      usedBrands2025.add(stay.brand);
+      const monthIndex=parseInt(stay.date.split('-')[1])-1;
+      q1MonthBonus2025[monthIndex]=(q1MonthBonus2025[monthIndex]||0)+stay.nights;
+    }
+  });
+  const monthEntries2025=Object.keys(grouped).sort((a,b)=>a-b).map(month=>{
+    const monthStays=grouped[month];
+    const nights=monthStays.reduce((sum,stay)=>sum+stay.nights,0);
+    return{
+      label:MONTH_NAMES[month],
+      count:monthStays.length,
+      nights,
+      q1Bonus:q1MonthBonus2025[month]||0,
+      pct:totalNights2025>0?Math.round(nights/totalNights2025*100)+'%':'—',
+      stays:monthStays
+    };
+  });
   let html='';
   let q1Started=false,q1Ended=false;
   for(const m of Object.keys(grouped).sort((a,b)=>a-b)){
-    const mInt=parseInt(m);
+    const mInt=parseInt(m,10);
     let q1Tag='';
     if(mInt===1)q1Tag='<span class="q1-tag">Q1 期間（2/11起）</span>';
     else if(mInt===2)q1Tag='<span class="q1-tag">Q1 期間</span>';
     else if(mInt===3)q1Tag='<span class="q1-tag">Q1 期間（至4/28）</span>';
-    html+=`<div class="month-header">${monthNames[m]}${q1Tag}</div>`;
+    html+=`<div class="month-header">${MONTH_NAMES[m]}${q1Tag}</div>`;
     for(const s of grouped[m]){
       const d=new Date(s.date);
       if(!q1Started && d>=Q1_START_2025){q1Started=true;html+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
@@ -710,7 +940,9 @@ function render2025(){
     }
   }
   document.getElementById('stayList2025').innerHTML=html;
+  buildMonthAccordion(monthEntries2025,'monthAccordion2025',`合計 ${STAYS_2025.length} 次 · ${totalNights2025} 晚 · Q1獎勵 24晚 · 50晚年度福利 5晚`);
   buildBrandAccordion(STAYS_2025,'brandAccordion2025');
+  renderRegionAccordion(STAYS_2025,'regionAccordion2025');
 }
 render2025();
 
@@ -833,8 +1065,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-const APP_VERSION='v2026.04.14.2';
+const APP_VERSION='v2026.04.14.10';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1092,18 +1323,25 @@ function render2026(stays){
       q1BonusByMonth[m]=(q1BonusByMonth[m]||0)+s.nights;
     }
   }
-  let tbody='';
+  const monthEntries2026=[];
   for(const m of Object.keys(monthGroups).sort((a,b)=>a-b)){
     const n=monthGroups[m].reduce((s,x)=>s+x.nights,0);
     const cnt=monthGroups[m].length;
     const pctM=actualNights>0?Math.round(n/actualNights*100)+'%':'—';
     const q1b=q1BonusByMonth[m]||0;
-    tbody+=`<tr><td>${MONTH_NAMES[m]}</td><td>${cnt}</td><td>${n}</td><td>${q1b||'—'}</td><td>${pctM}</td></tr>`;
+    monthEntries2026.push({
+      label:MONTH_NAMES[m],
+      count:cnt,
+      nights:n,
+      q1Bonus:q1b,
+      pct:pctM,
+      stays:monthGroups[m]
+    });
   }
-  tbody+=`<tr><td>合計</td><td>${stays.length}</td><td>${actualNights}</td><td>${bonus}</td><td>100%</td></tr>`;
-  document.getElementById('monthTableBody2026').innerHTML=tbody;
+  buildMonthAccordion(monthEntries2026,'monthAccordion2026',`合計 ${stays.length} 次 · ${actualNights} 晚 · Q1獎勵 ${bonus}晚`);
 
   buildBrandAccordion(stays,'brandAccordion2026');
+  renderRegionAccordion(stays,'regionAccordion2026');
 
   const stayList=document.getElementById('stayList');
   if(sorted.length===0){stayList.innerHTML='<div class="empty-state">未有住宿記錄</div>';return;}
