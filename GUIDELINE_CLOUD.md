@@ -36,8 +36,7 @@
 project/
 ├── index.html
 ├── manifest.json
-├── sw.js
-└── icon-192.png
+└── sw.js
 ```
 
 Firebase SDK 直接從 CDN 引入，唔需要 `npm install`。
@@ -260,12 +259,11 @@ font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue',
 
 - `manifest.json`
 - `sw.js`
-- `icon-192.png`
 
 PWA 原則：
 
 - app 名稱清楚
-- icon 簡單清晰
+- 預設唔指定 custom icon，交由系統按網站捷徑方式處理
 - 可離線讀基本頁面
 - 更新策略簡單直接
 
@@ -273,17 +271,9 @@ PWA 原則：
 
 ## 13. Icon Defaults
 
-預設 icon 規則：
+預設唔另外提供 custom PWA icon。
 
-- 背景色固定深藍 `#1A3C5E`
-- 文字預設用 app 名稱第一個字
-- 文字色固定白色
-- 字體固定 PingFang SC：`/System/Library/Fonts/PingFang.ttc`
-- 圓角約 20 至 22%
-- 尺寸 192 × 192
-- `purpose: "any maskable"`
-
-如果我冇特別講，直接按呢套做。
+如果我明確要求，先再為個別 app 製作 icon。
 
 ---
 

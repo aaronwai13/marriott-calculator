@@ -9,7 +9,6 @@
 ├── GUIDELINE_CLOUD.md
 ├── README.md
 ├── database.rules.json
-├── icon-192.png
 ├── index.html
 ├── manifest.json
 └── sw.js
@@ -21,7 +20,7 @@
 - Firebase Realtime Database
 - Firebase Google Auth
 - 靜態托管可直接部署
-- PWA: `manifest.json` + `sw.js`
+- PWA: `manifest.json` + `sw.js`，目前刻意不指定 custom icon
 
 ## Firebase 資料結構
 
