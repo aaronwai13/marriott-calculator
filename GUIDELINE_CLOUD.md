@@ -292,13 +292,32 @@ PWA 原則：
 
 視覺方向如下：
 
-- 白底
+- 深黑或深灰底
 - 中間用單一大字
+- 文字預設用銀白或偏銀灰色
 - 文字用 iPhone 默認字體風格
 - 整體乾淨、直接、容易喺主畫面辨認
-- 唔好用花巧漸層、陰影、裝飾圖案
+- 可以有好輕微明暗層次，但唔好用花巧漸層、厚重陰影、裝飾圖案
+
+原因：
+
+- 呢種方向喺 iPhone 主畫面 light / dark icon modes 下面最容易保持穩定
+- 比白底黑字更唔容易被 iOS 自動改成不可預測效果
+- 如果要做一系列 app icon，優先保持同一套黑底銀字語言
 
 字體內容應按 app 主題決定，唔固定使用某一個字。
+
+如果之後要修改 PWA icon，唔好只改圖片內容；要一併更新 asset identity。最少包括：
+
+- 新 icon 檔名，例如 `icon-192-vYYYY.MM.DD.N.png`
+- 新 `apple-touch-icon` 檔名
+- 新 `icon.svg` 檔名
+- bump `manifest.json` URL 或內部 icon `src`
+- bump `start_url`
+- bump `manifest.id`
+- bump `sw.js` cache key
+
+否則 iPhone 可能會長時間沿用舊 icon 決策，即使 Safari 資料已清。
 
 如果要做 icon，優先跟以上方向，除非我另外指定。
 
