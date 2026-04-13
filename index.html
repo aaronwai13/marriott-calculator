@@ -263,7 +263,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.04.13.15</div>
+    <div class="app-version" id="appVersion">v2026.04.13.16</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -852,7 +852,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-const APP_VERSION='v2026.04.13.15';
+const APP_VERSION='v2026.04.13.16';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -876,7 +876,7 @@ const BRAND_KEYWORDS=[
   {brand:'Sheraton',keywords:['喜来登','喜達屋','Sheraton']},
   {brand:'St. Regis',keywords:['瑞吉','St. Regis','St Regis']},
   {brand:'Tribute Portfolio',keywords:['臻品之选','臻品之選','Tribute Portfolio']},
-  {brand:'W Hotels',keywords:['W酒店','W Hotel','W Hotels']},
+  {brand:'W Hotels',keywords:['W酒店','w酒店','W Hotel','W Hotels',' W ']},
   {brand:'Westin',keywords:['威斯汀','Westin']},
 ];
 
@@ -908,6 +908,9 @@ function normalizeText(value=''){
 }
 
 function inferBrandFromName(name=''){
+  if(/(^|[\s(（])w($|[\s)）店酒])/i.test(name)||/[A-Za-z\u4e00-\u9fff]W酒店/i.test(name)){
+    return 'W Hotels';
+  }
   for(const item of BRAND_KEYWORDS){
     if(item.keywords.some(keyword=>name.toLowerCase().includes(keyword.toLowerCase()))){
       return item.brand;
@@ -953,11 +956,29 @@ function scoreHotelSuggestion(query,target){
 
 function searchLocalHotels(query){
   return getLocalHotelCatalog()
-    .map(item=>({item,score:Math.max(scoreHotelSuggestion(query,item.name),scoreHotelSuggestion(query,`${item.brand||''} ${item.name}`))}))
+    .map(item=>({
+      item,
+      score:Math.max(
+        scoreHotelSuggestion(query,item.name),
+        scoreHotelSuggestion(query,`${item.brand||''} ${item.name}`),
+        scoreHotelSuggestion(query,`${item.meta||''} ${item.brand||''} ${item.name}`)
+      )
+    }))
     .filter(entry=>entry.score>0)
     .sort((a,b)=>b.score-a.score||String(b.item.date||'').localeCompare(String(a.item.date||'')))
     .slice(0,LOCAL_HOTEL_LIMIT)
     .map(entry=>entry.item);
+}
+
+function buildTypedSuggestion(query){
+  const trimmed=query.trim();
+  if(!trimmed)return null;
+  return{
+    name:trimmed,
+    brand:inferBrandFromName(trimmed),
+    meta:'使用你輸入嘅內容',
+    source:'typed'
+  };
 }
 
 function dedupeHotelSuggestions(suggestions){
@@ -1073,7 +1094,7 @@ function renderHotelSuggestions(query,suggestions,{isLoading=false,forceShow=fal
       brand.textContent=suggestion.brand||'';
       const source=document.createElement('div');
       source.className='hotel-suggestion-source';
-      source.textContent=suggestion.source==='global'?'全球補充':'本地記錄';
+      source.textContent=suggestion.source==='global'?'全球補充':suggestion.source==='typed'?'直接使用':'本地記錄';
       side.append(brand,source);
 
       button.append(main,side);
@@ -1109,7 +1130,7 @@ function applyHotelSuggestion(suggestion){
   input.value=suggestion.name;
   document.getElementById('clearName').classList.add('visible');
   document.getElementById('inputBrand').value=suggestion.brand||inferBrandFromName(suggestion.name)||'';
-  document.getElementById('brandHint').textContent=suggestion.source==='global'?'全球匹配':'本地匹配';
+  document.getElementById('brandHint').textContent=suggestion.source==='global'?'全球匹配':suggestion.source==='typed'?'已套用':'本地匹配';
   hideHotelSuggestions();
   checkQ1Hint();
 }
@@ -1123,12 +1144,14 @@ async function runHotelSearch(query){
 
   const token=++hotelSearchToken;
   const localResults=searchLocalHotels(trimmed);
-  renderHotelSuggestions(trimmed,localResults,{isLoading:trimmed.length>=MIN_REMOTE_QUERY_LENGTH});
+  const typedSuggestion=buildTypedSuggestion(trimmed);
+  const initialSuggestions=dedupeHotelSuggestions([typedSuggestion,...localResults].filter(Boolean));
+  renderHotelSuggestions(trimmed,initialSuggestions,{isLoading:trimmed.length>=MIN_REMOTE_QUERY_LENGTH});
 
-  if(localResults.length>=LOCAL_HOTEL_LIMIT||trimmed.length<MIN_REMOTE_QUERY_LENGTH)return;
+  if(initialSuggestions.length>=LOCAL_HOTEL_LIMIT||trimmed.length<MIN_REMOTE_QUERY_LENGTH)return;
   const remoteResults=await fetchRemoteHotels(trimmed,token);
   if(token!==hotelSearchToken)return;
-  const merged=dedupeHotelSuggestions([...localResults,...remoteResults]);
+  const merged=dedupeHotelSuggestions([typedSuggestion,...localResults,...remoteResults].filter(Boolean));
   renderHotelSuggestions(trimmed,merged,{isLoading:false});
 }
 
