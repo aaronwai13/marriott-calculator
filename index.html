@@ -263,7 +263,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.04.13.14</div>
+    <div class="app-version" id="appVersion">v2026.04.13.15</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -742,7 +742,9 @@ function switchTab(year){
   document.getElementById('tab2025').setAttribute('aria-selected',String(year==='2025'));
   document.getElementById('tab2026').setAttribute('aria-selected',String(year==='2026'));
   const on2026=year==='2026';
-  // 只有 2026 頁先顯示登入/頭像
+  // 只有 2026 頁先顯示同步、更新、登入相關操作
+  document.getElementById('syncChip').style.display=on2026?'':'none';
+  document.getElementById('refreshBtn').style.display=on2026?'':'none';
   document.getElementById('loginChip').style.visibility=on2026?'':'hidden';
   document.getElementById('userAvatar').style.visibility=on2026?'':'hidden';
 }
@@ -850,7 +852,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-const APP_VERSION='v2026.04.13.14';
+const APP_VERSION='v2026.04.13.15';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -930,6 +932,12 @@ function getLocalHotelCatalog(){
     }
   }
   return [...map.values()];
+}
+
+function getDefaultHotelSuggestions(){
+  return getLocalHotelCatalog()
+    .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))
+    .slice(0,6);
 }
 
 function scoreHotelSuggestion(query,target){
@@ -1021,14 +1029,14 @@ async function fetchRemoteHotels(query,token){
   }
 }
 
-function renderHotelSuggestions(query,suggestions,{isLoading=false}={}){
+function renderHotelSuggestions(query,suggestions,{isLoading=false,forceShow=false}={}){
   const panel=document.getElementById('hotelSuggestions');
   const list=document.getElementById('hotelSuggestionsList');
   const status=document.getElementById('hotelSuggestionsStatus');
   list.replaceChildren();
   activeHotelSuggestionIndex=-1;
 
-  if(!query){
+  if(!query&&!forceShow){
     panel.classList.remove('show');
     status.style.display='none';
     return;
@@ -1117,7 +1125,7 @@ async function runHotelSearch(query){
   const localResults=searchLocalHotels(trimmed);
   renderHotelSuggestions(trimmed,localResults,{isLoading:trimmed.length>=MIN_REMOTE_QUERY_LENGTH});
 
-  if(trimmed.length<MIN_REMOTE_QUERY_LENGTH)return;
+  if(localResults.length>=LOCAL_HOTEL_LIMIT||trimmed.length<MIN_REMOTE_QUERY_LENGTH)return;
   const remoteResults=await fetchRemoteHotels(trimmed,token);
   if(token!==hotelSearchToken)return;
   const merged=dedupeHotelSuggestions([...localResults,...remoteResults]);
@@ -1411,7 +1419,11 @@ window.onNameInput=function(val){
 };
 window.onNameFocus=function(){
   const value=document.getElementById('inputName').value.trim();
-  if(value)runHotelSearch(value);
+  if(value){
+    runHotelSearch(value);
+    return;
+  }
+  renderHotelSuggestions('',getDefaultHotelSuggestions(),{forceShow:true});
 };
 window.clearName=function(){
   document.getElementById('inputName').value='';
