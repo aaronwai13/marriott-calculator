@@ -1,6 +1,6 @@
-# Marriott Bonvoy 住宿追蹤
+# 萬豪追蹤
 
-一個零 build step 的單頁 PWA，用來記錄 `2025` 住宿回顧，同步追蹤 `2026` Marriott Bonvoy 保級進度、Q1 品牌獎勵與積分變化。
+一個零 build step 的單頁 PWA，用來記錄 `2025` 住宿回顧，同步追蹤 `2026` 萬豪保級進度、Q1 品牌獎勵與積分變化。
 
 ## Repo 結構
 

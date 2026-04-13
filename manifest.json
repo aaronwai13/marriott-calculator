@@ -1,7 +1,7 @@
 {
-  "name": "Marriott Bonvoy 住宿追蹤",
+  "name": "萬豪追蹤",
   "short_name": "萬豪追蹤",
-  "description": "Marriott Bonvoy 2026 住宿進度追蹤",
+  "description": "萬豪追蹤 2026 住宿進度",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0A0A0F",
