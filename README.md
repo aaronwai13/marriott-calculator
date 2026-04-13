@@ -20,7 +20,7 @@
 - Firebase Realtime Database
 - Firebase Google Auth
 - 靜態托管可直接部署
-- PWA: `manifest.json` + `sw.js`，目前刻意不指定 custom icon
+- PWA: `manifest.json` + `sw.js`，提供 `icon-192.png` 與 `apple-touch-icon.png`
 
 ## Firebase 資料結構
 
@@ -56,7 +56,7 @@
 - 確認 `index.html` 內 Firebase config 指向正確 project
 - 確認 Firebase Auth 已啟用 Google 登入
 - 套用 Realtime Database rules
-- 如有改動靜態資源，更新 `index.html` 與 `sw.js` 版本號
+- 如有改動靜態資源，更新 `index.html`、畫面顯示版本與 `sw.js` 版本號
 
 ## 備註
 

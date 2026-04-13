@@ -2,7 +2,7 @@ const CACHE = 'marriott-v2026.04.14.2';
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png']))
+    caches.open(CACHE).then(c => c.addAll(['./', './index.html', './manifest.json', './icon-192.png', './apple-touch-icon.png']))
   );
   self.skipWaiting();
 });
