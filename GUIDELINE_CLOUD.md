@@ -263,7 +263,7 @@ font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue',
 PWA 原則：
 
 - app 名稱清楚
-- 預設唔指定 custom icon，交由系統按網站捷徑方式處理
+- 預設提供 custom icon
 - 可離線讀基本頁面
 - 更新策略簡單直接
 
@@ -271,9 +271,15 @@ PWA 原則：
 
 ## 13. Icon Defaults
 
-預設唔另外提供 custom PWA icon。
+預設提供 custom PWA icon，方向如下：
 
-如果我明確要求，先再為個別 app 製作 icon。
+- 白底
+- 中間用單一大字「萬」
+- 文字用 iPhone 默認字體風格
+- 整體乾淨、直接、容易喺主畫面辨認
+- 唔好用花巧漸層、陰影、裝飾圖案
+
+如果要做 icon，優先跟以上方向，除非我另外指定。
 
 ---
 

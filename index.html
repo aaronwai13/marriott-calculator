@@ -123,21 +123,6 @@
   .input-wrap input:focus{border-color:var(--gold);}
   .input-clear{position:absolute;right:10px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:4px;line-height:1;display:none;}
   .input-clear.visible{display:block;}
-  .hotel-input-wrap{position:relative;}
-  .hotel-suggestions{position:absolute;top:calc(100% + 8px);left:0;right:0;background:rgba(20,20,27,0.98);border:1px solid rgba(201,168,76,0.16);border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,0.35);overflow:hidden;display:none;z-index:30;backdrop-filter:blur(14px);}
-  .hotel-suggestions.show{display:block;}
-  .hotel-suggestions-list{max-height:280px;overflow:auto;}
-  .hotel-suggestion{width:100%;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.04);padding:12px 14px;text-align:left;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent;}
-  .hotel-suggestion:last-child{border-bottom:none;}
-  .hotel-suggestion:active,.hotel-suggestion.active{background:rgba(201,168,76,0.1);}
-  .hotel-suggestion-main{min-width:0;}
-  .hotel-suggestion-name{font-size:13px;font-weight:500;line-height:1.35;}
-  .hotel-suggestion-meta{margin-top:3px;font-size:11px;color:var(--text-muted);line-height:1.35;}
-  .hotel-suggestion-side{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
-  .hotel-suggestion-brand{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);white-space:nowrap;}
-  .hotel-suggestion-source{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
-  .hotel-suggestions-status{padding:10px 14px;font-size:11px;color:var(--text-muted);border-top:1px solid rgba(255,255,255,0.04);}
-  .hotel-suggestions-empty{padding:12px 14px;font-size:11px;color:var(--text-muted);}
   .brand-select{background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 36px 10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8580' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
   .brand-select:focus{border-color:var(--gold);}
   .stepper{display:flex;align-items:center;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;overflow:hidden;height:40px;user-select:none;}
@@ -263,7 +248,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.04.13.16</div>
+    <div class="app-version" id="appVersion">v2026.04.14.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -373,13 +358,9 @@
       </div>
       <div class="form-group" style="margin-bottom:12px;">
         <label>酒店名稱</label>
-        <div class="input-wrap hotel-input-wrap">
-          <input type="text" id="inputName" oninput="onNameInput(this.value)" onfocus="onNameFocus()" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="input-wrap">
+          <input type="text" id="inputName" oninput="onNameInput(this.value)" autocomplete="off" autocapitalize="off" spellcheck="false">
           <button class="input-clear" id="clearName" onclick="clearName()" aria-label="清除酒店名稱">✕</button>
-          <div class="hotel-suggestions" id="hotelSuggestions" role="listbox" aria-label="酒店候選">
-            <div class="hotel-suggestions-list" id="hotelSuggestionsList"></div>
-            <div class="hotel-suggestions-status" id="hotelSuggestionsStatus" style="display:none;"></div>
-          </div>
         </div>
       </div>
       <div class="form-group" style="margin-bottom:12px;">
@@ -852,7 +833,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-const APP_VERSION='v2026.04.13.16';
+const APP_VERSION='v2026.04.14.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -876,15 +857,9 @@ const BRAND_KEYWORDS=[
   {brand:'Sheraton',keywords:['喜来登','喜達屋','Sheraton']},
   {brand:'St. Regis',keywords:['瑞吉','St. Regis','St Regis']},
   {brand:'Tribute Portfolio',keywords:['臻品之选','臻品之選','Tribute Portfolio']},
-  {brand:'W Hotels',keywords:['W酒店','w酒店','W Hotel','W Hotels',' W ']},
+  {brand:'W Hotels',keywords:['W酒店','w酒店','W Hotel','W Hotels']},
   {brand:'Westin',keywords:['威斯汀','Westin']},
 ];
-
-const GLOBAL_HOTEL_SEARCH_ENDPOINT='https://photon.komoot.io/api/?limit=6&lang=zh&q=';
-const LOCAL_HOTEL_LIMIT=5;
-const GLOBAL_HOTEL_LIMIT=5;
-const MIN_REMOTE_QUERY_LENGTH=3;
-const HOTEL_BRAND_ALIASES=['Marriott','Bonvoy','JW','Westin','Sheraton','Courtyard','Renaissance','St Regis','St. Regis','Ritz','Ritz-Carlton','Le Meridien','Meridien','Aloft','Fairfield','Autograph','W Hotel','W Hotels','Moxy','Element','Edition','Tribute','Luxury Collection','Four Points','AC Hotels','Design Hotels','Bvlgari'];
 
 const DEFAULT_STAYS=[
   {date:'2026-01-09',name:'香港柏宁酒店，傲途格精选',brand:'Autograph Collection',nights:1,redeem:false},
@@ -900,259 +875,18 @@ const DEFAULT_STAYS=[
 ];
 
 let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=false,editKey=null,dbInitialized=false,deleteTargetKey=null,toastTimer=null;
-let hotelSearchTimer=null,hotelSearchToken=0,hotelRemoteAbortController=null,activeHotelSuggestionIndex=-1;
-const hotelRemoteCache=new Map();
 
 function normalizeText(value=''){
   return value.toLowerCase().normalize('NFKC').replace(/[\s\-_/.,，。、（）()]+/g,' ').trim();
 }
 
 function inferBrandFromName(name=''){
-  if(/(^|[\s(（])w($|[\s)）店酒])/i.test(name)||/[A-Za-z\u4e00-\u9fff]W酒店/i.test(name)){
-    return 'W Hotels';
-  }
   for(const item of BRAND_KEYWORDS){
     if(item.keywords.some(keyword=>name.toLowerCase().includes(keyword.toLowerCase()))){
       return item.brand;
     }
   }
   return '';
-}
-
-function getHotelLocationMeta(properties={}){
-  return [properties.city,properties.district,properties.state,properties.country].filter(Boolean).join(' · ');
-}
-
-function getLocalHotelCatalog(){
-  const sourceStays=[...STAYS_2025,...DEFAULT_STAYS,...(window._currentStays||[])];
-  const map=new Map();
-  for(const stay of sourceStays){
-    const key=normalizeText(stay.name);
-    if(!key)continue;
-    const existing=map.get(key);
-    if(!existing||String(stay.date||'')>String(existing.date||'')){
-      map.set(key,{name:stay.name,brand:stay.brand||inferBrandFromName(stay.name),meta:'已住過記錄',source:'local',date:stay.date||''});
-    }
-  }
-  return [...map.values()];
-}
-
-function getDefaultHotelSuggestions(){
-  return getLocalHotelCatalog()
-    .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))
-    .slice(0,6);
-}
-
-function scoreHotelSuggestion(query,target){
-  const q=normalizeText(query);
-  const t=normalizeText(target);
-  if(!q||!t)return 0;
-  if(t===q)return 120;
-  if(t.startsWith(q))return 95;
-  if(t.includes(` ${q}`))return 82;
-  if(t.includes(q))return 70;
-  return 0;
-}
-
-function searchLocalHotels(query){
-  return getLocalHotelCatalog()
-    .map(item=>({
-      item,
-      score:Math.max(
-        scoreHotelSuggestion(query,item.name),
-        scoreHotelSuggestion(query,`${item.brand||''} ${item.name}`),
-        scoreHotelSuggestion(query,`${item.meta||''} ${item.brand||''} ${item.name}`)
-      )
-    }))
-    .filter(entry=>entry.score>0)
-    .sort((a,b)=>b.score-a.score||String(b.item.date||'').localeCompare(String(a.item.date||'')))
-    .slice(0,LOCAL_HOTEL_LIMIT)
-    .map(entry=>entry.item);
-}
-
-function buildTypedSuggestion(query){
-  const trimmed=query.trim();
-  if(!trimmed)return null;
-  return{
-    name:trimmed,
-    brand:inferBrandFromName(trimmed),
-    meta:'使用你輸入嘅內容',
-    source:'typed'
-  };
-}
-
-function dedupeHotelSuggestions(suggestions){
-  const map=new Map();
-  for(const suggestion of suggestions){
-    const key=normalizeText(suggestion.name);
-    if(!key)continue;
-    if(!map.has(key)||map.get(key).source==='global'&&suggestion.source==='local'){
-      map.set(key,suggestion);
-    }
-  }
-  return [...map.values()];
-}
-
-function isLikelyMarriottHotel(name=''){
-  const lower=name.toLowerCase();
-  return HOTEL_BRAND_ALIASES.some(alias=>lower.includes(alias.toLowerCase()));
-}
-
-function buildRemoteQuery(query){
-  if(HOTEL_BRAND_ALIASES.some(alias=>query.toLowerCase().includes(alias.toLowerCase()))){
-    return query;
-  }
-  if(/酒店|hotel|resort|inn/i.test(query)){
-    return `${query} marriott`;
-  }
-  return `${query} marriott hotel`;
-}
-
-function parseRemoteHotels(data){
-  const features=Array.isArray(data&&data.features)?data.features:[];
-  return features.map(feature=>{
-    const properties=feature&&feature.properties?feature.properties:{};
-    const name=(properties.name||'').trim();
-    if(!name||!isLikelyMarriottHotel(name))return null;
-    const brand=inferBrandFromName(name);
-    if(!brand)return null;
-    return{
-      name,
-      brand,
-      meta:getHotelLocationMeta(properties)||'全球酒店資料',
-      source:'global'
-    };
-  }).filter(Boolean).slice(0,GLOBAL_HOTEL_LIMIT);
-}
-
-async function fetchRemoteHotels(query,token){
-  const normalized=normalizeText(query);
-  if(normalized.length<MIN_REMOTE_QUERY_LENGTH)return[];
-  if(hotelRemoteCache.has(normalized))return hotelRemoteCache.get(normalized);
-
-  if(hotelRemoteAbortController)hotelRemoteAbortController.abort();
-  hotelRemoteAbortController=new AbortController();
-
-  try{
-    const response=await fetch(`${GLOBAL_HOTEL_SEARCH_ENDPOINT}${encodeURIComponent(buildRemoteQuery(query))}`,{
-      signal:hotelRemoteAbortController.signal,
-      headers:{Accept:'application/json'}
-    });
-    if(!response.ok)throw new Error(`remote_${response.status}`);
-    const payload=await response.json();
-    if(token!==hotelSearchToken)return[];
-    const results=parseRemoteHotels(payload);
-    hotelRemoteCache.set(normalized,results);
-    return results;
-  }catch(error){
-    if(error.name==='AbortError')return[];
-    return[];
-  }
-}
-
-function renderHotelSuggestions(query,suggestions,{isLoading=false,forceShow=false}={}){
-  const panel=document.getElementById('hotelSuggestions');
-  const list=document.getElementById('hotelSuggestionsList');
-  const status=document.getElementById('hotelSuggestionsStatus');
-  list.replaceChildren();
-  activeHotelSuggestionIndex=-1;
-
-  if(!query&&!forceShow){
-    panel.classList.remove('show');
-    status.style.display='none';
-    return;
-  }
-
-  if(suggestions.length===0&&!isLoading){
-    const empty=document.createElement('div');
-    empty.className='hotel-suggestions-empty';
-    empty.textContent='未搵到候選，可以直接輸入酒店名。';
-    list.appendChild(empty);
-  }else{
-    suggestions.forEach((suggestion,index)=>{
-      const button=document.createElement('button');
-      button.type='button';
-      button.className='hotel-suggestion';
-      button.setAttribute('role','option');
-      button.dataset.index=String(index);
-      button.onclick=()=>applyHotelSuggestion(suggestion);
-
-      const main=document.createElement('div');
-      main.className='hotel-suggestion-main';
-      const name=document.createElement('div');
-      name.className='hotel-suggestion-name';
-      name.textContent=suggestion.name;
-      const meta=document.createElement('div');
-      meta.className='hotel-suggestion-meta';
-      meta.textContent=suggestion.meta||'';
-      main.append(name,meta);
-
-      const side=document.createElement('div');
-      side.className='hotel-suggestion-side';
-      const brand=document.createElement('div');
-      brand.className='hotel-suggestion-brand';
-      brand.textContent=suggestion.brand||'';
-      const source=document.createElement('div');
-      source.className='hotel-suggestion-source';
-      source.textContent=suggestion.source==='global'?'全球補充':suggestion.source==='typed'?'直接使用':'本地記錄';
-      side.append(brand,source);
-
-      button.append(main,side);
-      list.appendChild(button);
-    });
-  }
-
-  if(isLoading){
-    status.style.display='block';
-    status.textContent='搜尋全球萬豪酒店中...';
-  }else{
-    status.style.display=suggestions.some(item=>item.source==='global')?'block':'none';
-    status.textContent=status.style.display==='block'?'已補充全球酒店候選':'';
-  }
-
-  panel.classList.add('show');
-}
-
-function hideHotelSuggestions(){
-  document.getElementById('hotelSuggestions').classList.remove('show');
-  activeHotelSuggestionIndex=-1;
-}
-
-function setActiveHotelSuggestion(nextIndex){
-  const buttons=[...document.querySelectorAll('#hotelSuggestionsList .hotel-suggestion')];
-  if(!buttons.length)return;
-  activeHotelSuggestionIndex=(nextIndex+buttons.length)%buttons.length;
-  buttons.forEach((button,index)=>button.classList.toggle('active',index===activeHotelSuggestionIndex));
-}
-
-function applyHotelSuggestion(suggestion){
-  const input=document.getElementById('inputName');
-  input.value=suggestion.name;
-  document.getElementById('clearName').classList.add('visible');
-  document.getElementById('inputBrand').value=suggestion.brand||inferBrandFromName(suggestion.name)||'';
-  document.getElementById('brandHint').textContent=suggestion.source==='global'?'全球匹配':suggestion.source==='typed'?'已套用':'本地匹配';
-  hideHotelSuggestions();
-  checkQ1Hint();
-}
-
-async function runHotelSearch(query){
-  const trimmed=query.trim();
-  if(!trimmed){
-    hideHotelSuggestions();
-    return;
-  }
-
-  const token=++hotelSearchToken;
-  const localResults=searchLocalHotels(trimmed);
-  const typedSuggestion=buildTypedSuggestion(trimmed);
-  const initialSuggestions=dedupeHotelSuggestions([typedSuggestion,...localResults].filter(Boolean));
-  renderHotelSuggestions(trimmed,initialSuggestions,{isLoading:trimmed.length>=MIN_REMOTE_QUERY_LENGTH});
-
-  if(initialSuggestions.length>=LOCAL_HOTEL_LIMIT||trimmed.length<MIN_REMOTE_QUERY_LENGTH)return;
-  const remoteResults=await fetchRemoteHotels(trimmed,token);
-  if(token!==hotelSearchToken)return;
-  const merged=dedupeHotelSuggestions([typedSuggestion,...localResults,...remoteResults].filter(Boolean));
-  renderHotelSuggestions(trimmed,merged,{isLoading:false});
 }
 
 function formatLocalDate(date=new Date()){
@@ -1427,33 +1161,20 @@ function render2026(stays){
 window.onNameInput=function(val){
   setTimeout(checkQ1Hint,100);
   document.getElementById('clearName').classList.toggle('visible',val.length>0);
-  if(hotelSearchTimer)clearTimeout(hotelSearchTimer);
-  if(hotelRemoteAbortController)hotelRemoteAbortController.abort();
   if(val.length===0){
     document.getElementById('inputBrand').value='';
     document.getElementById('brandHint').textContent='';
-    hideHotelSuggestions();
     return;
   }
   const inferredBrand=inferBrandFromName(val);
   document.getElementById('inputBrand').value=inferredBrand;
   document.getElementById('brandHint').textContent=inferredBrand?'自動匹配':'';
-  hotelSearchTimer=setTimeout(()=>runHotelSearch(val),220);
-};
-window.onNameFocus=function(){
-  const value=document.getElementById('inputName').value.trim();
-  if(value){
-    runHotelSearch(value);
-    return;
-  }
-  renderHotelSuggestions('',getDefaultHotelSuggestions(),{forceShow:true});
 };
 window.clearName=function(){
   document.getElementById('inputName').value='';
   document.getElementById('inputBrand').value='';
   document.getElementById('brandHint').textContent='';
   document.getElementById('clearName').classList.remove('visible');
-  hideHotelSuggestions();
 };
 window.toggleRedeem=function(){
   isRedeem=!isRedeem;
@@ -1606,26 +1327,6 @@ function showToast(msg,color='#4ADE80'){
 
 document.getElementById('appVersion').textContent=APP_VERSION;
 document.getElementById('inputDate').value=formatLocalDate();
-document.addEventListener('pointerdown',event=>{
-  const wrap=document.querySelector('.hotel-input-wrap');
-  if(wrap&&!wrap.contains(event.target))hideHotelSuggestions();
-});
-document.getElementById('inputName').addEventListener('keydown',event=>{
-  const buttons=[...document.querySelectorAll('#hotelSuggestionsList .hotel-suggestion')];
-  if(!buttons.length)return;
-  if(event.key==='ArrowDown'){
-    event.preventDefault();
-    setActiveHotelSuggestion(activeHotelSuggestionIndex+1);
-  }else if(event.key==='ArrowUp'){
-    event.preventDefault();
-    setActiveHotelSuggestion(activeHotelSuggestionIndex-1);
-  }else if(event.key==='Enter'&&activeHotelSuggestionIndex>=0){
-    event.preventDefault();
-    buttons[activeHotelSuggestionIndex].click();
-  }else if(event.key==='Escape'){
-    hideHotelSuggestions();
-  }
-});
 updateSyncStatus();
 </script>
 
