@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.14.10 -->
+<!-- VERSION: 2026.04.14.11 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -143,6 +143,11 @@
 
   /* Stay list */
   .stay-list{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px;}
+  .search-box{margin-bottom:12px;}
+  .search-input{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 38px 12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;}
+  .search-input:focus{border-color:var(--gold);}
+  .search-clear{position:absolute;right:10px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:4px;line-height:1;display:none;}
+  .search-clear.visible{display:block;}
   .month-header{padding:8px 16px;background:var(--surface2);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;border-bottom:1px solid rgba(128,128,128,0.06);display:flex;align-items:center;gap:8px;}
   .q1-tag{font-size:9px;padding:2px 7px;border-radius:100px;background:rgba(201,168,76,0.12);color:var(--gold);border:1px solid rgba(201,168,76,0.2);}
   .q1-divider{padding:6px 16px;background:rgba(201,168,76,0.06);border-bottom:1px solid rgba(201,168,76,0.15);border-top:1px solid rgba(201,168,76,0.15);font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:0.1em;text-align:center;}
@@ -302,6 +307,12 @@
 
     <div>
       <div class="section-header"><div class="section-title">住宿明細</div><div class="badge badge-gold">2025年</div></div>
+      <div class="search-box">
+        <div class="input-wrap">
+          <input class="search-input" type="text" id="search2025" placeholder="搜尋酒店、品牌、地區" oninput="updateStaySearch('2025', this.value)" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="search-clear" id="clearSearch2025" onclick="clearStaySearch('2025')" aria-label="清除2025搜尋">✕</button>
+        </div>
+      </div>
       <div class="stay-list" id="stayList2025"></div>
     </div>
   </div>
@@ -400,6 +411,12 @@
     <!-- 住宿明細 -->
     <div>
       <div class="section-header"><div class="section-title">住宿明細</div><div class="badge badge-gold">2026年</div></div>
+      <div class="search-box">
+        <div class="input-wrap">
+          <input class="search-input" type="text" id="search2026" placeholder="搜尋酒店、品牌、地區" oninput="updateStaySearch('2026', this.value)" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="search-clear" id="clearSearch2026" onclick="clearStaySearch('2026')" aria-label="清除2026搜尋">✕</button>
+        </div>
+      </div>
       <div class="stay-list" id="stayList"><div class="empty-state">載入中...</div></div>
     </div>
   </div>
@@ -574,6 +591,7 @@ const TITANIUM_DATE='2025-06-05';
 const Q1_START_2025=new Date('2025-02-11');
 const Q1_END_2025=new Date('2025-04-28');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+const staySearchState={2025:'',2026:''};
 
 window.escapeHtml=function(value){
   return String(value).replace(/[&<>"']/g,char=>({
@@ -868,6 +886,36 @@ function inferRegionFromName(name=''){
   return '其他';
 }
 
+function matchesStaySearch(stay, year){
+  const keyword=(staySearchState[year]||'').trim().toLowerCase();
+  if(!keyword)return true;
+  const haystack=[
+    stay.name||'',
+    stay.brand||'',
+    inferRegionFromName(stay.name)||'',
+    stay.date||''
+  ].join(' ').toLowerCase();
+  return haystack.includes(keyword);
+}
+
+window.updateStaySearch=function(year, value){
+  staySearchState[year]=value;
+  const clearButton=document.getElementById(`clearSearch${year}`);
+  if(clearButton)clearButton.classList.toggle('visible',value.length>0);
+  if(year==='2025')render2025();
+  else if(window._currentStays)render2026(window._currentStays);
+};
+
+window.clearStaySearch=function(year){
+  staySearchState[year]='';
+  const input=document.getElementById(`search${year}`);
+  const clearButton=document.getElementById(`clearSearch${year}`);
+  if(input)input.value='';
+  if(clearButton)clearButton.classList.remove('visible');
+  if(year==='2025')render2025();
+  else if(window._currentStays)render2026(window._currentStays);
+};
+
 function renderRegionAccordion(stays, containerId){
   try{
     buildRegionAccordion(stays,containerId);
@@ -894,6 +942,13 @@ window.toggleBrand=function(row){
 function render2025(){
   const grouped={};
   for(const s of STAYS_2025){const m=parseInt(s.date.split('-')[1])-1;if(!grouped[m])grouped[m]=[];grouped[m].push(s);}
+  const filteredStays2025=STAYS_2025.filter(stay=>matchesStaySearch(stay,'2025'));
+  const filteredGroups2025={};
+  for(const stay of filteredStays2025){
+    const month=parseInt(stay.date.split('-')[1])-1;
+    if(!filteredGroups2025[month])filteredGroups2025[month]=[];
+    filteredGroups2025[month].push(stay);
+  }
   const totalNights2025=STAYS_2025.reduce((sum,stay)=>sum+stay.nights,0);
   const q1MonthBonus2025={};
   const usedBrands2025=new Set();
@@ -943,6 +998,31 @@ function render2025(){
   buildMonthAccordion(monthEntries2025,'monthAccordion2025',`合計 ${STAYS_2025.length} 次 · ${totalNights2025} 晚 · Q1獎勵 24晚 · 50晚年度福利 5晚`);
   buildBrandAccordion(STAYS_2025,'brandAccordion2025');
   renderRegionAccordion(STAYS_2025,'regionAccordion2025');
+  const stayList2025=document.getElementById('stayList2025');
+  if(filteredStays2025.length===0){
+    stayList2025.innerHTML='<div class="empty-state">搵唔到符合搜尋嘅住宿</div>';
+    return;
+  }
+  let filteredHtml='';
+  let filteredQ1Started=false,filteredQ1Ended=false;
+  for(const m of Object.keys(filteredGroups2025).sort((a,b)=>a-b)){
+    const mInt=parseInt(m,10);
+    let q1Tag='';
+    if(mInt===1)q1Tag='<span class="q1-tag">Q1 期間（2/11起）</span>';
+    else if(mInt===2)q1Tag='<span class="q1-tag">Q1 期間</span>';
+    else if(mInt===3)q1Tag='<span class="q1-tag">Q1 期間（至4/28）</span>';
+    filteredHtml+=`<div class="month-header">${MONTH_NAMES[m]}${q1Tag}</div>`;
+    for(const s of filteredGroups2025[m]){
+      const d=new Date(s.date);
+      if(!filteredQ1Started && d>=Q1_START_2025){filteredQ1Started=true;filteredHtml+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
+      if(!filteredQ1Ended && filteredQ1Started && d>Q1_END_2025){filteredQ1Ended=true;filteredHtml+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
+      const dateStr=s.date.slice(5).replace('-','/');
+      filteredHtml+=`<div class="stay-item"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.escapeHtml(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
+      if(s.date===PLATINUM_DATE){filteredHtml+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;}
+      if(s.date===TITANIUM_DATE){filteredHtml+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;}
+    }
+  }
+  stayList2025.innerHTML=filteredHtml;
 }
 render2025();
 
@@ -1065,7 +1145,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.04.14.10';
+const APP_VERSION='v2026.04.14.11';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1217,6 +1297,7 @@ function getBrandOptions(){
 function render2026(stays){
   window._currentStays=stays;
   const sorted=[...stays].sort((a,b)=>a.date.localeCompare(b.date));
+  const filteredStays=sorted.filter(stay=>matchesStaySearch(stay,'2026'));
   const actualNights=stays.reduce((s,x)=>s+x.nights,0);
   const{bonus,usedBrands}=calcQ1(stays);
   window._q1UsedBrands=usedBrands;
@@ -1345,19 +1426,26 @@ function render2026(stays){
 
   const stayList=document.getElementById('stayList');
   if(sorted.length===0){stayList.innerHTML='<div class="empty-state">未有住宿記錄</div>';return;}
+  if(filteredStays.length===0){stayList.innerHTML='<div class="empty-state">搵唔到符合搜尋嘅住宿</div>';return;}
+  const filteredMonthGroups={};
+  for(const stay of filteredStays){
+    const month=parseInt(stay.date.split('-')[1])-1;
+    if(!filteredMonthGroups[month])filteredMonthGroups[month]=[];
+    filteredMonthGroups[month].push(stay);
+  }
   const now=new Date();let html='';
-  for(const m of Object.keys(monthGroups).sort((a,b)=>a-b)){
+  for(const m of Object.keys(filteredMonthGroups).sort((a,b)=>a-b)){
     const monthStart=new Date(2026,parseInt(m),1),monthEnd=new Date(2026,parseInt(m)+1,0);
     const q1Ended=now>Q1_END;
-    const hasQ1Stays=monthGroups[m].some(s=>isQ1Eligible(s));
+    const hasQ1Stays=filteredMonthGroups[m].some(s=>isQ1Eligible(s));
     const isQ1EndMonth=parseInt(m)===Q1_END.getMonth(); // 五月
-    const hasNonQ1Stays=monthGroups[m].some(s=>!isQ1Eligible(s));
+    const hasNonQ1Stays=filteredMonthGroups[m].some(s=>!isQ1Eligible(s));
     const q1EndInMonth=isQ1EndMonth&&hasQ1Stays&&hasNonQ1Stays;
     const q1TagText=q1EndInMonth?'Q1 期間（至 5/10）':(q1Ended?'Q1 已結束':'Q1 期間');
     const q1TagHtml=hasQ1Stays?`<span class="q1-tag">${q1TagText}</span>`:'';
     html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
     let q1DividerShown=false;
-    for(const s of monthGroups[m]){
+    for(const s of filteredMonthGroups[m]){
       if(!q1DividerShown&&q1EndInMonth&&!isQ1Eligible(s)){
         q1DividerShown=true;
         html+=`<div class="q1-divider">── Q1 結束 ──</div>`;
