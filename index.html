@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.14.11 -->
+<!-- VERSION: 2026.04.14.12 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -903,7 +903,7 @@ window.updateStaySearch=function(year, value){
   const clearButton=document.getElementById(`clearSearch${year}`);
   if(clearButton)clearButton.classList.toggle('visible',value.length>0);
   if(year==='2025')render2025();
-  else if(window._currentStays)render2026(window._currentStays);
+  else if(window._currentStays&&window.render2026)window.render2026(window._currentStays);
 };
 
 window.clearStaySearch=function(year){
@@ -913,7 +913,7 @@ window.clearStaySearch=function(year){
   if(input)input.value='';
   if(clearButton)clearButton.classList.remove('visible');
   if(year==='2025')render2025();
-  else if(window._currentStays)render2026(window._currentStays);
+  else if(window._currentStays&&window.render2026)window.render2026(window._currentStays);
 };
 
 function renderRegionAccordion(stays, containerId){
@@ -1145,7 +1145,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.04.14.11';
+const APP_VERSION='v2026.04.14.12';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1484,6 +1484,8 @@ function render2026(stays){
   }
   stayList.innerHTML=html;
 }
+
+window.render2026=render2026;
 
 window.onNameInput=function(val){
   setTimeout(checkQ1Hint,100);
