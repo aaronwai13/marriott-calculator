@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.15.9 -->
+<!-- VERSION: 2026.04.23.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -259,7 +259,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.04.14.2</div>
+    <div class="app-version" id="appVersion">v2026.04.23.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1269,7 +1269,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.04.19.1';
+const APP_VERSION='v2026.04.23.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1391,7 +1391,13 @@ setupStepper('editBtnMinus','editBtnPlus','editNightsVal',()=>editNightsCount,v=
 onValue(staysRef,(snapshot)=>{
   const data=snapshot.val();let stays=[];
   if(data){stays=Object.entries(data).map(([key,val])=>({...val,_key:key}));}
-  else if(!dbInitialized){dbInitialized=true;DEFAULT_STAYS.forEach(s=>push(staysRef,s));return;}
+  else if(!dbInitialized){
+    dbInitialized=true;
+    if(isAdmin){
+      DEFAULT_STAYS.forEach(s=>push(staysRef,s));
+      return;
+    }
+  }
   dbInitialized=true;
   hasLoadedStays=true;
   if(pendingSyncWrites>0)pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
@@ -1739,8 +1745,8 @@ window.openEdit=function(key,date,name,brand,nights,redeem,pointsEarned,redeemPo
   document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
   const d=new Date(date);
   const inQ1=d>=Q1_START&&d<=Q1_END;
-  const brandUsed=window._q1UsedBrands&&window._q1UsedBrands.has(brandDecoded);
-  document.getElementById('editQ1Hint').style.display=(inQ1&&!redeem&&(!brandUsed||pointsEarned>0))?'block':'none';
+  const firstQ1KeyForBrand=window.firstQ1KeyByBrandForSort&&window.firstQ1KeyByBrandForSort[brandDecoded];
+  document.getElementById('editQ1Hint').style.display=(inQ1&&!redeem&&firstQ1KeyForBrand===key)?'block':'none';
   document.getElementById('modalOverlay').classList.add('show');
 };
 window.closeModal=function(){document.getElementById('modalOverlay').classList.remove('show');editKey=null;};
@@ -1777,8 +1783,9 @@ window.openPointsModal=function(){
 };
 window.closePointsModal=function(){document.getElementById('pointsModalOverlay').classList.remove('show');};
 window.savePointsBase=async function(){
-  const val=parseInt(document.getElementById('pointsBaseInput').value);
-  if(!val||val<0){showToast('請輸入有效積分','#F87171');return;}
+  const rawValue=document.getElementById('pointsBaseInput').value.trim();
+  const val=Number.parseInt(rawValue,10);
+  if(rawValue===''||Number.isNaN(val)||val<0){showToast('請輸入有效積分','#F87171');return;}
   try{
     const ids=window._currentStays?window._currentStays.map(s=>s._key).filter(Boolean):[];
     pendingSyncWrites+=1;
