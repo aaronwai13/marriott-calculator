@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.23.4 -->
+<!-- VERSION: 2026.04.24.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -259,7 +259,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.04.23.4</div>
+    <div class="app-version" id="appVersion">v2026.04.24.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -377,7 +377,7 @@
         <label>使用積分</label>
         <div class="input-wrap"><input type="number" id="inputRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
-      <div id="q1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 退房後將獲 +2,500 積分</div>
+      <div id="q1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
       <button class="btn-add" id="btnAdd" onclick="addStay()">＋ 新增住宿</button>
     </div>
 
@@ -511,7 +511,7 @@
       <label>使用積分</label>
       <div class="input-wrap"><input type="number" id="editRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
-    <div id="editQ1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · +2,500 積分</div>
+    <div id="editQ1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
     <div class="form-group" style="margin-bottom:14px;">
       <label>賺取積分（退房後填寫）</label>
       <div class="input-wrap"><input type="number" id="editPointsEarned" inputmode="numeric" placeholder="例如 4608" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
@@ -867,6 +867,8 @@ const REGION_KEYWORDS=[
   {region:'順德',keywords:['顺德','順德']},
   {region:'汕頭',keywords:['汕头','汕頭']},
   {region:'福州',keywords:['福州']},
+  {region:'惠州',keywords:['惠州']},
+  {region:'廈門',keywords:['厦门','廈門','xiamen']},
   {region:'鄭州',keywords:['郑州','鄭州']},
   {region:'西安',keywords:['西安']},
   {region:'瀋陽',keywords:['沈阳','瀋陽']},
@@ -929,9 +931,8 @@ function sortFilteredStays2026(stays){
       return a.date.localeCompare(b.date)||(a._key||'').localeCompare(b._key||'');
     }
     if(staySort2026==='earned'){
-      const firstQ1KeyByBrand=window.firstQ1KeyByBrandForSort||{};
-      const earnedA=!a.redeem&&a.pointsEarned>0?a.pointsEarned+((firstQ1KeyByBrand[a.brand]===a._key)?2500:0):null;
-      const earnedB=!b.redeem&&b.pointsEarned>0?b.pointsEarned+((firstQ1KeyByBrand[b.brand]===b._key)?2500:0):null;
+      const earnedA=!a.redeem&&a.pointsEarned>0?a.pointsEarned:null;
+      const earnedB=!b.redeem&&b.pointsEarned>0?b.pointsEarned:null;
       if(earnedA===null&&earnedB===null)return b.date.localeCompare(a.date)||(b._key||'').localeCompare(a._key||'');
       if(earnedA===null)return 1;
       if(earnedB===null)return -1;
@@ -1273,7 +1274,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.04.23.4';
+const APP_VERSION='v2026.04.24.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1459,8 +1460,6 @@ function render2026(stays){
 
   let earned2026=0;
   for(const s of stays){if(s.pointsEarned>0)earned2026+=s.pointsEarned;}
-  // Q1 bonus: 每個品牌第一次入住先加 2500，usedBrands 已係唯一品牌 set
-  earned2026+=usedBrands.size*2500;
   document.getElementById('statEarned').textContent=earned2026>0?earned2026.toLocaleString():'—';
 
   const pointsBase=_pointsBase;
@@ -1472,8 +1471,6 @@ function render2026(stays){
     if(!pointsBaseStays.includes(s._key)){
       if(s.pointsEarned>0)netChange+=s.pointsEarned;
       if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
-      // 只有該品牌第一次Q1住宿先加2500
-      if(isQ1Eligible(s)&&firstQ1KeyByBrand[s.brand]===s._key)netChange+=2500;
     }
   }
   const currentPoints=_hasPointsBase?pointsBase+netChange:0;
@@ -1606,10 +1603,9 @@ function render2026(stays){
           pointsHtml=redPart+' '+earnPart;
         }else if(isFirstQ1ForBrand){
           if(s.pointsEarned>0){
-            const totalPoints=s.pointsEarned+2500;
-            pointsHtml=`<span style="color:var(--green);font-size:10px;">+${totalPoints.toLocaleString()}</span><br><span style="font-size:9px;color:var(--green);">住宿 +${s.pointsEarned.toLocaleString()}</span><span style="font-size:9px;color:#0071e3;"> · Q1 積分 +2,500</span>`;
+            pointsHtml=`<span style="color:var(--green);font-size:10px;">+${s.pointsEarned.toLocaleString()}</span><br><span style="font-size:9px;color:#0071e3;">已包含 Q1 獎勵</span>`;
           }else{
-            pointsHtml=`<span style="color:var(--green);font-size:10px;">+?</span><br><span style="font-size:9px;color:var(--green);">住宿 +?</span><span style="font-size:9px;color:#0071e3;"> · Q1 積分 +2,500</span>`;
+            pointsHtml=`<span style="color:var(--green);font-size:10px;">+?</span><br><span style="font-size:9px;color:#0071e3;">符合 Q1 獎勵</span>`;
           }
         }else{
           const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
@@ -1633,10 +1629,9 @@ function render2026(stays){
         pointsHtml=redPart+' '+earnPart;
       }else if(isFirstQ1ForBrand){
         if(s.pointsEarned>0){
-          const totalPoints=s.pointsEarned+2500;
-          pointsHtml=`<span style="color:var(--green);font-size:10px;">+${totalPoints.toLocaleString()}</span><br><span style="font-size:9px;color:var(--green);">住宿 +${s.pointsEarned.toLocaleString()}</span><span style="font-size:9px;color:#0071e3;"> · Q1 積分 +2,500</span>`;
+          pointsHtml=`<span style="color:var(--green);font-size:10px;">+${s.pointsEarned.toLocaleString()}</span><br><span style="font-size:9px;color:#0071e3;">已包含 Q1 獎勵</span>`;
         }else{
-          pointsHtml=`<span style="color:var(--green);font-size:10px;">+?</span><br><span style="font-size:9px;color:var(--green);">住宿 +?</span><span style="font-size:9px;color:#0071e3;"> · Q1 積分 +2,500</span>`;
+          pointsHtml=`<span style="color:var(--green);font-size:10px;">+?</span><br><span style="font-size:9px;color:#0071e3;">符合 Q1 獎勵</span>`;
         }
       }else{
         const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
