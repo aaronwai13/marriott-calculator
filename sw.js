@@ -1,4 +1,4 @@
-const CACHE = 'marriott-v2026.04.23.3';
+const CACHE = 'marriott-v2026.04.23.4';
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -11,7 +11,8 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    ).then(() => self.clients.matchAll({ type: 'window' }))
+      .then(clients => clients.forEach(client => client.postMessage({ type: 'RELOAD_PAGE' })))
   );
   self.clients.claim();
 });
