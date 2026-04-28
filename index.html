@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.24.1 -->
+<!-- VERSION: 2026.04.28.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -259,7 +259,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.04.24.1</div>
+    <div class="app-version" id="appVersion">v2026.04.28.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -371,6 +371,10 @@
         <select class="brand-select" id="inputBrand" onchange="checkQ1Hint()">
           <option value="">選擇品牌...</option><option>AC Hotels</option><option>Aloft</option><option>Autograph Collection</option><option>Bvlgari Hotels</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option>
         </select>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>地區 <span id="regionHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
+        <select class="brand-select" id="inputRegion" onchange="onRegionSelect()"></select>
       </div>
       <div class="toggle-row" id="redeemToggle" onclick="toggleRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
       <div class="form-group" id="redeemPointsGroup" style="margin-bottom:12px;display:none;">
@@ -500,11 +504,14 @@
       <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="editDate" onchange="checkEditQ1Hint()"></div></div>
       <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="editBtnMinus" aria-label="減少編輯房晚數">−</button><div class="stepper-val" id="editNightsVal">1</div><button class="stepper-btn" id="editBtnPlus" aria-label="增加編輯房晚數">＋</button></div></div>
     </div>
-    <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="editName"></div></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="editName" oninput="updateRegionHint('editName','editRegionHint')"></div></div>
     <div class="form-group" style="margin-bottom:12px;"><label>品牌</label>
       <select class="brand-select" id="editBrand" onchange="checkEditQ1Hint()">
         <option value="">選擇品牌...</option><option>AC Hotels</option><option>Aloft</option><option>Autograph Collection</option><option>Bvlgari Hotels</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option>
       </select>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>地區 <span id="editRegionHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
+      <select class="brand-select" id="editRegion"></select>
     </div>
     <div class="toggle-row" id="editRedeemToggle" onclick="toggleEditRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
     <div class="form-group" id="editRedeemPointsGroup" style="margin-bottom:12px;display:none;">
@@ -773,7 +780,7 @@ function buildMonthAccordion(monthEntries, containerId, totalMeta){
 function buildRegionAccordion(stays, containerId){
   const regionMap={};
   for(const stay of stays){
-    const region=inferRegionFromName(stay.name);
+    const region=getStayRegion(stay);
     if(!regionMap[region])regionMap[region]={nights:0,stays:[]};
     regionMap[region].nights+=stay.nights;
     regionMap[region].stays.push(stay);
@@ -885,6 +892,7 @@ const REGION_KEYWORDS=[
   {region:'卡薩布蘭卡',keywords:['casablanca','卡萨布兰卡','卡薩布蘭卡']},
   {region:'伊斯坦堡',keywords:['伊斯坦布尔','伊斯坦堡','istanbul']},
 ];
+const REGION_OPTIONS=['香港','深圳','廣州','珠海','北京','上海','杭州','佛山','中山','東莞','順德','汕頭','福州','惠州','廈門','鄭州','西安','瀋陽','重慶','貴陽','柳州','昆明','札幌','東京','首爾','曼谷','新加坡','雅加達','卡薩布蘭卡','伊斯坦堡','其他'];
 
 function inferRegionFromName(name=''){
   const normalizeRegionText=value=>String(value||'').toLowerCase().normalize('NFKC').replace(/[\s\-_/.,，。、（）()]+/g,' ').trim();
@@ -897,12 +905,39 @@ function inferRegionFromName(name=''){
   return '其他';
 }
 
+function getStayRegion(stay){
+  return stay&&stay.region?stay.region:inferRegionFromName(stay&&stay.name);
+}
+
+function populateRegionSelect(selectId, selected=''){
+  const select=document.getElementById(selectId);
+  select.replaceChildren();
+  const auto=document.createElement('option');
+  auto.value='';
+  auto.textContent='自動判斷';
+  select.appendChild(auto);
+  REGION_OPTIONS.forEach(region=>{
+    const option=document.createElement('option');
+    option.value=region;
+    option.textContent=region;
+    select.appendChild(option);
+  });
+  select.value=selected&&REGION_OPTIONS.includes(selected)?selected:'';
+}
+
+function updateRegionHint(inputId, hintId){
+  const name=document.getElementById(inputId).value;
+  const inferred=inferRegionFromName(name);
+  document.getElementById(hintId).textContent=`自動：${inferred}`;
+}
+
 function matchesStaySearch(stay, year){
   const keyword=(staySearchState[year]||'').trim().toLowerCase();
   if(!keyword)return true;
   const haystack=[
     stay.name||'',
     stay.brand||'',
+    getStayRegion(stay)||'',
     inferRegionFromName(stay.name)||'',
     stay.date||''
   ].join(' ').toLowerCase();
@@ -1274,7 +1309,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.04.24.1';
+const APP_VERSION='v2026.04.28.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1594,7 +1629,7 @@ function render2026(stays){
           html+=`<div class="q1-divider">── Q1 結束 ──</div>`;
         }
         const dateStr=s.date.slice(5).replace('-','/');
-        const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
+        const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
         let pointsHtml='';
         const isFirstQ1ForBrand=isQ1Eligible(s)&&firstQ1KeyByBrand[s.brand]===s._key;
         if(s.redeem){
@@ -1620,7 +1655,7 @@ function render2026(stays){
   }else{
     for(const s of filteredStays){
       const dateStr=s.date.slice(5).replace('-','/');
-      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
+      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
       let pointsHtml='';
       const isFirstQ1ForBrand=isQ1Eligible(s)&&firstQ1KeyByBrand[s.brand]===s._key;
       if(s.redeem){
@@ -1654,17 +1689,23 @@ window.onNameInput=function(val){
   if(val.length===0){
     document.getElementById('inputBrand').value='';
     document.getElementById('brandHint').textContent='';
+    updateRegionHint('inputName','regionHint');
     return;
   }
   const inferredBrand=inferBrandFromName(val);
   document.getElementById('inputBrand').value=inferredBrand;
   document.getElementById('brandHint').textContent=inferredBrand?'自動匹配':'';
+  updateRegionHint('inputName','regionHint');
 };
 window.clearName=function(){
   document.getElementById('inputName').value='';
   document.getElementById('inputBrand').value='';
   document.getElementById('brandHint').textContent='';
   document.getElementById('clearName').classList.remove('visible');
+  updateRegionHint('inputName','regionHint');
+};
+window.onRegionSelect=function(){
+  updateRegionHint('inputName','regionHint');
 };
 window.toggleRedeem=function(){
   isRedeem=!isRedeem;
@@ -1684,7 +1725,7 @@ window.checkQ1Hint=function(){
 
 window.addStay=async function(){
   if(!isAdmin)return;
-  const date=document.getElementById('inputDate').value,name=document.getElementById('inputName').value.trim(),brand=document.getElementById('inputBrand').value;
+  const date=document.getElementById('inputDate').value,name=document.getElementById('inputName').value.trim(),brand=document.getElementById('inputBrand').value,region=document.getElementById('inputRegion').value;
   if(!date||!name||!brand){showToast('請填寫日期、酒店名稱及品牌','#F87171');return;}
   const btn=document.getElementById('btnAdd');btn.disabled=true;
   try{
@@ -1692,10 +1733,11 @@ window.addStay=async function(){
     pendingSyncWrites+=1;
     hasSyncError=false;
     updateSyncStatus();
-    await push(staysRef,{date,name,brand,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0});
+    await push(staysRef,{date,name,brand,region,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0});
     document.getElementById('inputDate').value=formatLocalDate();
     document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';
     document.getElementById('brandHint').textContent='';document.getElementById('clearName').classList.remove('visible');
+    document.getElementById('inputRegion').value='';updateRegionHint('inputName','regionHint');
     nightsCount=1;document.getElementById('nightsVal').textContent='1';
     isRedeem=false;document.getElementById('redeemToggle').classList.remove('active');
     document.getElementById('redeemPointsGroup').style.display='none';
@@ -1736,18 +1778,21 @@ window.confirmDelete=async function(){
   }
 };
 
-window.openEdit=function(key,date,name,brand,nights,redeem,pointsEarned,redeemPoints){
+window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,redeemPoints){
   if(!isAdmin)return;
   editKey=key;editNightsCount=nights;editIsRedeem=redeem;
   document.getElementById('editDate').value=date;
   document.getElementById('editName').value=decodeURIComponent(name);
   const brandDecoded=decodeURIComponent(brand);
+  const regionDecoded=decodeURIComponent(region||'');
   document.getElementById('editBrand').value=brandDecoded;
+  document.getElementById('editRegion').value=regionDecoded;
   document.getElementById('editNightsVal').textContent=nights;
   document.getElementById('editRedeemToggle').classList.toggle('active',redeem);
   document.getElementById('editPointsEarned').value=pointsEarned||'';
   document.getElementById('editRedeemPoints').value=redeemPoints||'';
   document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
+  updateRegionHint('editName','editRegionHint');
   checkEditQ1Hint();
   document.getElementById('modalOverlay').classList.add('show');
 };
@@ -1768,7 +1813,7 @@ window.checkEditQ1Hint=function(){
 };
 window.saveEdit=async function(){
   if(!isAdmin)return;
-  const date=document.getElementById('editDate').value,name=document.getElementById('editName').value.trim(),brand=document.getElementById('editBrand').value;
+  const date=document.getElementById('editDate').value,name=document.getElementById('editName').value.trim(),brand=document.getElementById('editBrand').value,region=document.getElementById('editRegion').value;
   if(!date||!name||!brand){showToast('請填寫所有欄位','#F87171');return;}
   const pointsEarned=parseInt(document.getElementById('editPointsEarned').value)||0;
   const redeemPoints=editIsRedeem?parseInt(document.getElementById('editRedeemPoints').value)||0:0;
@@ -1776,7 +1821,7 @@ window.saveEdit=async function(){
     pendingSyncWrites+=1;
     hasSyncError=false;
     updateSyncStatus();
-    await update(ref(db,`stays2026/${editKey}`),{date,name,brand,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});
+    await update(ref(db,`stays2026/${editKey}`),{date,name,brand,region,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});
     closeModal();
     showToast('✓ 已更新');
   }
@@ -1823,6 +1868,9 @@ function showToast(msg,color='#4ADE80'){
 
 document.getElementById('appVersion').textContent=APP_VERSION;
 document.getElementById('inputDate').value=formatLocalDate();
+populateRegionSelect('inputRegion');
+populateRegionSelect('editRegion');
+updateRegionHint('inputName','regionHint');
 updateSyncStatus();
 </script>
 
