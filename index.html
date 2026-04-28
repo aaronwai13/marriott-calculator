@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.28.1 -->
+<!-- VERSION: 2026.04.28.2 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -259,7 +259,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.04.28.1</div>
+    <div class="app-version" id="appVersion">v2026.04.28.2</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1309,7 +1309,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.04.28.1';
+const APP_VERSION='v2026.04.28.2';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1886,6 +1886,12 @@ if('serviceWorker' in navigator){
     updateBanner.classList.add('show');
   }
 
+  function activateWaitingWorker(worker){
+    waitingWorker=worker;
+    hideUpdateBanner();
+    waitingWorker.postMessage({type:'SKIP_WAITING'});
+  }
+
   function hideUpdateBanner(){
     updateBanner.classList.remove('show');
   }
@@ -1901,13 +1907,13 @@ if('serviceWorker' in navigator){
     reg.update();
     setInterval(()=>reg.update(),5*60*1000);
     if(reg.waiting){
-      showUpdateBanner(reg.waiting);
+      activateWaitingWorker(reg.waiting);
     }
     reg.addEventListener('updatefound',()=>{
       const newWorker=reg.installing;
       newWorker.addEventListener('statechange',()=>{
         if(newWorker.state==='installed'&&navigator.serviceWorker.controller){
-          showUpdateBanner(newWorker);
+          activateWaitingWorker(newWorker);
         }
       });
     });
