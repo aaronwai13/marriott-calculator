@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.05.03.16 -->
+<!-- VERSION: 2026.05.03.17 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -101,6 +101,7 @@
   .progress-chip.unlocked strong{color:var(--green);}
 
   .insight-grid{display:flex;gap:10px;margin-bottom:14px;}
+  .insight-grid.two-cards{max-width:560px;margin-left:auto;margin-right:auto;}
   .insight-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 14px;min-height:82px;display:flex;flex-direction:column;justify-content:space-between;color:var(--text);font:inherit;text-align:left;}
   .insight-grid .insight-card{flex:1 1 0;min-width:0;}
   .insight-card.hidden{display:none;}
@@ -257,7 +258,7 @@
   .empty-state{text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px;font-style:italic;}
   @media(max-width:540px){
     .form-grid{grid-template-columns:1fr}
-    .insight-grid{display:flex;overflow-x:auto;gap:8px;margin-left:-20px;margin-right:-20px;padding:0 20px 2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+    .insight-grid,.insight-grid.two-cards{display:flex;overflow-x:auto;gap:8px;max-width:none;margin-left:-20px;margin-right:-20px;padding:0 20px 2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
     .insight-card{min-width:156px;min-height:76px;padding:12px;scroll-snap-align:start;}
     .insight-grid::-webkit-scrollbar{display:none;}
     .nights-big{font-size:38px}
@@ -280,7 +281,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.05.03.16</div>
+    <div class="app-version" id="appVersion">v2026.05.03.17</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1287,7 +1288,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.05.03.16';
+const APP_VERSION='v2026.05.03.17';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1369,6 +1370,13 @@ function formatShortStayDate(dateString){
   return window.formatShortDate(dateString);
 }
 
+function updateInsightGridLayout(){
+  const grid=document.querySelector('#page2026 .insight-grid');
+  if(!grid)return;
+  const visibleCards=grid.querySelectorAll('.insight-card:not(.hidden)').length;
+  grid.classList.toggle('two-cards',visibleCards===2);
+}
+
 function updateInsightCards(stays,total,left){
   const today=new Date();
   const todayKey=formatLocalDate(today);
@@ -1424,6 +1432,7 @@ function updateInsightCards(stays,total,left){
   missingCard.classList.toggle('hidden',missingStays.length===0);
   missingValue.textContent=missingStays.length;
   missingMeta.textContent=missingStays.length>0?'按此查看未填積分':'暫時無待補記錄';
+  updateInsightGridLayout();
 }
 
 onAuthStateChanged(auth,(user)=>{
