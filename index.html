@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.05.03.18 -->
+<!-- VERSION: 2026.05.03.19 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -281,7 +281,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.05.03.18</div>
+    <div class="app-version" id="appVersion">v2026.05.03.19</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -413,6 +413,13 @@
         </div>
         <div class="insight-meta" id="missingPointsMeta">載入中...</div>
       </button>
+      <div class="insight-card hidden" id="redeemCard">
+        <div>
+          <div class="insight-kicker">兌換餘力</div>
+          <div class="insight-value red" id="redeemValue">—</div>
+        </div>
+        <div class="insight-meta" id="redeemMeta">載入中...</div>
+      </div>
     </div>
 
     <div class="stats-grid">
@@ -1288,7 +1295,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.05.03.18';
+const APP_VERSION='v2026.05.03.19';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1432,6 +1439,33 @@ function updateInsightCards(stays,total,left){
   missingCard.classList.toggle('hidden',missingStays.length===0);
   missingValue.textContent=missingStays.length;
   missingMeta.textContent=missingStays.length>0?'按此查看未填積分':'暫時無待補記錄';
+
+  const redeemStays=stays.filter(s=>s.redeem&&(s.redeemPoints||0)>0);
+  const redeemCard=document.getElementById('redeemCard');
+  const redeemValueEl=document.getElementById('redeemValue');
+  const redeemMetaEl=document.getElementById('redeemMeta');
+  if(redeemStays.length>0){
+    const totalPts=redeemStays.reduce((sum,s)=>sum+s.redeemPoints,0);
+    const totalNts=redeemStays.reduce((sum,s)=>sum+s.nights,0);
+    const avgPts=Math.round(totalPts/totalNts);
+    redeemCard.classList.remove('hidden');
+    if(_hasPointsBase&&avgPts>0){
+      let netChg=0;
+      for(const s of stays){
+        if(!_pointsBaseStays.includes(s._key)){
+          if(s.pointsEarned>0)netChg+=s.pointsEarned;
+          if(s.redeem&&s.redeemPoints>0)netChg-=s.redeemPoints;
+        }
+      }
+      const estNts=Math.floor((_pointsBase+netChg)/avgPts);
+      redeemValueEl.textContent=`估可換 ${estNts} 晚`;
+    }else{
+      redeemValueEl.textContent=`已換 ${totalNts} 晚`;
+    }
+    redeemMetaEl.textContent=`已用 ${totalPts.toLocaleString()} 分 · 均 ${avgPts.toLocaleString()}/晚`;
+  }else{
+    redeemCard.classList.add('hidden');
+  }
   updateInsightGridLayout();
 }
 
