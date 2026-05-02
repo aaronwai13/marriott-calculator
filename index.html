@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.05.03.17 -->
+<!-- VERSION: 2026.05.03.18 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -281,7 +281,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.05.03.17</div>
+    <div class="app-version" id="appVersion">v2026.05.03.18</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -944,8 +944,8 @@ function sortFilteredStays2026(stays){
       return a.date.localeCompare(b.date)||(a._key||'').localeCompare(b._key||'');
     }
     if(staySort2026==='earned'){
-      const earnedA=!a.redeem&&a.pointsEarned>0?a.pointsEarned:null;
-      const earnedB=!b.redeem&&b.pointsEarned>0?b.pointsEarned:null;
+      const earnedA=a.pointsEarned>0?a.pointsEarned:null;
+      const earnedB=b.pointsEarned>0?b.pointsEarned:null;
       if(earnedA===null&&earnedB===null)return b.date.localeCompare(a.date)||(b._key||'').localeCompare(a._key||'');
       if(earnedA===null)return 1;
       if(earnedB===null)return -1;
@@ -1288,7 +1288,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.05.03.17';
+const APP_VERSION='v2026.05.03.18';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
