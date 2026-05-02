@@ -1364,7 +1364,7 @@ function addDays(dateString,days){
 
 function isMissingPointsStay(stay,todayKey=formatLocalDate()){
   if(stay.redeem || (stay.pointsEarned||0)>0)return false;
-  return addDays(stay.date,stay.nights||1)<todayKey;
+  return addDays(stay.date,stay.nights||1)<=todayKey;
 }
 
 function daysBetween(start,end){
