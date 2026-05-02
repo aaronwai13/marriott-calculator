@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.04.28.2 -->
+<!-- VERSION: 2026.05.02.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -210,13 +210,6 @@
   /* Toast */
   .toast{position:fixed;bottom:calc(var(--tab-h) + 16px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;font-family:'DM Mono',monospace;z-index:450;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
   .toast.show{opacity:1;}
-  .update-banner{position:fixed;left:50%;bottom:calc(var(--tab-h) + 68px);transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 10px 32px rgba(0,0,0,0.22);z-index:460;opacity:0;pointer-events:none;transition:opacity 0.2s ease,transform 0.2s ease;max-width:min(calc(100vw - 32px),420px);}
-  .update-banner.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);}
-  .update-banner-copy{display:flex;flex-direction:column;gap:2px;min-width:0;}
-  .update-banner-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;color:var(--gold);}
-  .update-banner-sub{font-size:12px;color:var(--text-muted);line-height:1.35;}
-  .update-banner-btn{padding:9px 12px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:#0A0A0F;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
-  .update-banner-close{padding:7px 8px;border:none;background:none;color:var(--text-muted);font-size:14px;cursor:pointer;flex-shrink:0;}
 
   /* Modal shared */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s;}
@@ -259,7 +252,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.04.28.2</div>
+    <div class="app-version" id="appVersion">v2026.05.02.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -368,9 +361,7 @@
       </div>
       <div class="form-group" style="margin-bottom:12px;">
         <label>品牌 <span id="brandHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
-        <select class="brand-select" id="inputBrand" onchange="checkQ1Hint()">
-          <option value="">選擇品牌...</option><option>AC Hotels</option><option>Aloft</option><option>Autograph Collection</option><option>Bvlgari Hotels</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option>
-        </select>
+        <select class="brand-select" id="inputBrand" onchange="checkQ1Hint()"></select>
       </div>
       <div class="form-group" style="margin-bottom:12px;">
         <label>地區 <span id="regionHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
@@ -506,9 +497,7 @@
     </div>
     <div class="form-group" style="margin-bottom:12px;"><label>酒店名稱</label><div class="input-wrap"><input type="text" id="editName" oninput="updateRegionHint('editName','editRegionHint')"></div></div>
     <div class="form-group" style="margin-bottom:12px;"><label>品牌</label>
-      <select class="brand-select" id="editBrand" onchange="checkEditQ1Hint()">
-        <option value="">選擇品牌...</option><option>AC Hotels</option><option>Aloft</option><option>Autograph Collection</option><option>Bvlgari Hotels</option><option>Courtyard</option><option>Delta Hotels</option><option>Design Hotels</option><option>Edition</option><option>Element</option><option>Fairfield</option><option>Four Points</option><option>JW Marriott</option><option>Le Meridien</option><option>Luxury Collection</option><option>Marriott</option><option>Moxy</option><option>Renaissance</option><option>Ritz-Carlton</option><option>Sheraton</option><option>St. Regis</option><option>Tribute Portfolio</option><option>W Hotels</option><option>Westin</option>
-      </select>
+      <select class="brand-select" id="editBrand" onchange="checkEditQ1Hint()"></select>
     </div>
     <div class="form-group" style="margin-bottom:12px;"><label>地區 <span id="editRegionHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
       <select class="brand-select" id="editRegion"></select>
@@ -541,14 +530,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="update-banner" id="updateBanner" aria-live="polite">
-  <div class="update-banner-copy">
-    <div class="update-banner-title">有新版本可更新</div>
-    <div class="update-banner-sub">新版本已準備好，按更新即可切換。</div>
-  </div>
-  <button class="update-banner-btn" id="updateBannerBtn" type="button">更新</button>
-  <button class="update-banner-close" id="updateBannerClose" type="button" aria-label="稍後再說">✕</button>
-</div>
 
 <script>
 // ===== 2025 STATIC DATA =====
@@ -631,153 +612,90 @@ window.escapeHtml=function(value){
   }[char]));
 };
 
-function buildBrandAccordion(stays, containerId) {
+const BRAND_OPTIONS=['AC Hotels','Aloft','Autograph Collection','Bvlgari Hotels','Courtyard','Delta Hotels','Design Hotels','Edition','Element','Fairfield','Four Points','JW Marriott','Le Meridien','Luxury Collection','Marriott','Moxy','Renaissance','Ritz-Carlton','Sheraton','St. Regis','Tribute Portfolio','W Hotels','Westin'];
+
+function populateBrandSelect(id){
+  const sel=document.getElementById(id);
+  const placeholder=document.createElement('option');
+  placeholder.value='';placeholder.textContent='選擇品牌...';
+  sel.replaceChildren(placeholder);
+  BRAND_OPTIONS.forEach(b=>{const o=document.createElement('option');o.textContent=b;sel.appendChild(o);});
+}
+
+function buildAccordion(items,containerId,totalMeta){
+  const year=containerId.endsWith('2025')?'2025':'2026';
+  const container=document.getElementById(containerId);
+  const fragment=document.createDocumentFragment();
+  items.forEach((item,idx)=>{
+    const row=document.createElement('div');
+    row.className='brand-row';
+    row.id=`brandRow_${containerId}_${idx}`;
+    row.setAttribute('role','button');
+    row.setAttribute('tabindex','0');
+    row.setAttribute('aria-expanded','false');
+    row.onclick=()=>toggleBrand(row);
+    row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleBrand(row);}};
+    const rowInfo=document.createElement('div');
+    rowInfo.className='brand-row-info';
+    const name=document.createElement('div');
+    name.className='brand-row-name';
+    name.textContent=item.label;
+    const meta=document.createElement('div');
+    meta.className='brand-row-meta';
+    meta.textContent=item.meta;
+    const chevron=document.createElement('span');
+    chevron.className='brand-row-chevron';
+    chevron.textContent='▼';
+    rowInfo.append(name,meta);
+    row.append(rowInfo,chevron);
+    const staysWrap=document.createElement('div');
+    staysWrap.className='brand-stays';
+    staysWrap.id=`brandStays_${containerId}_${idx}`;
+    item.stays.forEach(s=>{
+      const stayItem=document.createElement('div');
+      stayItem.className='brand-stay-item';
+      const stayDate=document.createElement('div');
+      stayDate.className='brand-stay-date';
+      stayDate.textContent=s.date.slice(5).replace('-','/');
+      const stayNights=document.createElement('div');
+      stayNights.className='brand-stay-nights';
+      stayNights.textContent=`${s.nights}晚`;
+      stayItem.append(stayDate,createStayJumpButton(s,year),stayNights);
+      staysWrap.appendChild(stayItem);
+    });
+    fragment.append(row,staysWrap);
+  });
+  const total=document.createElement('div');
+  total.style.cssText="padding:10px 14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);border-top:1px solid var(--border)";
+  total.textContent=totalMeta;
+  container.replaceChildren(fragment,total);
+}
+
+function buildBrandAccordion(stays,containerId){
+  const totalNights=stays.reduce((s,x)=>s+x.nights,0);
   const brandMap={};
   for(const s of stays){
     if(!brandMap[s.brand])brandMap[s.brand]={nights:0,stays:[]};
     brandMap[s.brand].nights+=s.nights;
     brandMap[s.brand].stays.push(s);
   }
-  const totalNights=stays.reduce((s,x)=>s+x.nights,0);
-  const sorted=Object.entries(brandMap).sort((a,b)=>b[1].nights-a[1].nights);
-  const container=document.getElementById(containerId);
-  const fragment=document.createDocumentFragment();
-  sorted.forEach(([brand,data],idx)=>{
-    const pct=totalNights>0?Math.round(data.nights/totalNights*100)+'%':'—';
-    const row=document.createElement('div');
-    row.className='brand-row';
-    row.id=`brandRow_${containerId}_${idx}`;
-    row.setAttribute('role','button');
-    row.setAttribute('tabindex','0');
-    row.setAttribute('aria-expanded','false');
-    row.onclick=()=>toggleBrand(row);
-    row.onkeydown=e=>{
-      if(e.key==='Enter' || e.key===' '){
-        e.preventDefault();
-        toggleBrand(row);
-      }
-    };
-
-    const rowInfo=document.createElement('div');
-    rowInfo.className='brand-row-info';
-
-    const brandName=document.createElement('div');
-    brandName.className='brand-row-name';
-    brandName.textContent=brand;
-
-    const brandMeta=document.createElement('div');
-    brandMeta.className='brand-row-meta';
-    brandMeta.textContent=`${data.stays.length}次 · ${data.nights}晚 · ${pct}`;
-
-    const chevron=document.createElement('span');
-    chevron.className='brand-row-chevron';
-    chevron.textContent='▼';
-
-    rowInfo.append(brandName,brandMeta);
-    row.append(rowInfo,chevron);
-
-    const staysWrap=document.createElement('div');
-    staysWrap.className='brand-stays';
-    staysWrap.id=`brandStays_${containerId}_${idx}`;
-    data.stays.forEach(s=>{
-      const stayItem=document.createElement('div');
-      stayItem.className='brand-stay-item';
-
-      const stayDate=document.createElement('div');
-      stayDate.className='brand-stay-date';
-      stayDate.textContent=s.date.slice(5).replace('-','/');
-
-      const stayNights=document.createElement('div');
-      stayNights.className='brand-stay-nights';
-      stayNights.textContent=`${s.nights}晚`;
-
-      stayItem.append(stayDate,createStayJumpButton(s,containerId.endsWith('2025')?'2025':'2026'),stayNights);
-      staysWrap.appendChild(stayItem);
-    });
-
-    fragment.append(row,staysWrap);
-  });
-  const total=document.createElement('div');
-  total.style.padding='10px 14px';
-  total.style.fontFamily="'DM Mono',monospace";
-  total.style.fontSize='11px';
-  total.style.color='var(--gold)';
-  total.style.borderTop='1px solid var(--border)';
-  total.textContent=`合計 ${stays.length} 次 · ${totalNights} 晚`;
-
-  container.replaceChildren(fragment,total);
+  const items=Object.entries(brandMap)
+    .sort((a,b)=>b[1].nights-a[1].nights)
+    .map(([brand,data])=>({label:brand,meta:`${data.stays.length}次 · ${data.nights}晚 · ${totalNights>0?Math.round(data.nights/totalNights*100)+'%':'—'}`,stays:data.stays}));
+  buildAccordion(items,containerId,`合計 ${stays.length} 次 · ${totalNights} 晚`);
 }
 
-function buildMonthAccordion(monthEntries, containerId, totalMeta){
-  const container=document.getElementById(containerId);
-  const fragment=document.createDocumentFragment();
-  monthEntries.forEach((entry,idx)=>{
-    const row=document.createElement('div');
-    row.className='brand-row';
-    row.id=`brandRow_${containerId}_${idx}`;
-    row.setAttribute('role','button');
-    row.setAttribute('tabindex','0');
-    row.setAttribute('aria-expanded','false');
-    row.onclick=()=>toggleBrand(row);
-    row.onkeydown=e=>{
-      if(e.key==='Enter' || e.key===' '){
-        e.preventDefault();
-        toggleBrand(row);
-      }
-    };
-
-    const rowInfo=document.createElement('div');
-    rowInfo.className='brand-row-info';
-
-    const monthName=document.createElement('div');
-    monthName.className='brand-row-name';
-    monthName.textContent=entry.label;
-
-    const monthMeta=document.createElement('div');
-    monthMeta.className='brand-row-meta';
-    const q1Text=entry.q1Bonus>0?` · Q1 ${entry.q1Bonus}晚`:'';
-    monthMeta.textContent=`${entry.count}次 · ${entry.nights}晚${q1Text} · ${entry.pct}`;
-
-    const chevron=document.createElement('span');
-    chevron.className='brand-row-chevron';
-    chevron.textContent='▼';
-
-    rowInfo.append(monthName,monthMeta);
-    row.append(rowInfo,chevron);
-
-    const staysWrap=document.createElement('div');
-    staysWrap.className='brand-stays';
-    staysWrap.id=`brandStays_${containerId}_${idx}`;
-    entry.stays.forEach(stay=>{
-      const stayItem=document.createElement('div');
-      stayItem.className='brand-stay-item';
-
-      const stayDate=document.createElement('div');
-      stayDate.className='brand-stay-date';
-      stayDate.textContent=stay.date.slice(5).replace('-','/');
-
-      const stayNights=document.createElement('div');
-      stayNights.className='brand-stay-nights';
-      stayNights.textContent=`${stay.nights}晚`;
-
-      stayItem.append(stayDate,createStayJumpButton(stay,containerId.endsWith('2025')?'2025':'2026'),stayNights);
-      staysWrap.appendChild(stayItem);
-    });
-
-    fragment.append(row,staysWrap);
-  });
-
-  const total=document.createElement('div');
-  total.style.padding='10px 14px';
-  total.style.fontFamily="'DM Mono',monospace";
-  total.style.fontSize='11px';
-  total.style.color='var(--gold)';
-  total.style.borderTop='1px solid var(--border)';
-  total.textContent=totalMeta;
-  container.replaceChildren(fragment,total);
+function buildMonthAccordion(monthEntries,containerId,totalMeta){
+  const items=monthEntries.map(e=>({
+    label:e.label,
+    meta:`${e.count}次 · ${e.nights}晚${e.q1Bonus>0?` · Q1 ${e.q1Bonus}晚`:''} · ${e.pct}`,
+    stays:e.stays
+  }));
+  buildAccordion(items,containerId,totalMeta);
 }
 
-function buildRegionAccordion(stays, containerId){
+function buildRegionAccordion(stays,containerId){
+  const totalNights=stays.reduce((sum,item)=>sum+item.nights,0);
   const regionMap={};
   for(const stay of stays){
     const region=getStayRegion(stay);
@@ -785,79 +703,14 @@ function buildRegionAccordion(stays, containerId){
     regionMap[region].nights+=stay.nights;
     regionMap[region].stays.push(stay);
   }
-  const totalNights=stays.reduce((sum,item)=>sum+item.nights,0);
-  const sorted=Object.entries(regionMap).sort((a,b)=>{
-    if(b[1].nights!==a[1].nights)return b[1].nights-a[1].nights;
-    if(b[1].stays.length!==a[1].stays.length)return b[1].stays.length-a[1].stays.length;
-    return a[0]===b[0]?0:(a[0]>b[0]?1:-1);
-  });
-  const container=document.getElementById(containerId);
-  const fragment=document.createDocumentFragment();
-  sorted.forEach(([region,data],idx)=>{
-    const pct=totalNights>0?Math.round(data.nights/totalNights*100)+'%':'—';
-    const row=document.createElement('div');
-    row.className='brand-row';
-    row.id=`brandRow_${containerId}_${idx}`;
-    row.setAttribute('role','button');
-    row.setAttribute('tabindex','0');
-    row.setAttribute('aria-expanded','false');
-    row.onclick=()=>toggleBrand(row);
-    row.onkeydown=e=>{
-      if(e.key==='Enter' || e.key===' '){
-        e.preventDefault();
-        toggleBrand(row);
-      }
-    };
-
-    const rowInfo=document.createElement('div');
-    rowInfo.className='brand-row-info';
-
-    const regionName=document.createElement('div');
-    regionName.className='brand-row-name';
-    regionName.textContent=region;
-
-    const regionMeta=document.createElement('div');
-    regionMeta.className='brand-row-meta';
-    regionMeta.textContent=`${data.stays.length}次 · ${data.nights}晚 · ${pct}`;
-
-    const chevron=document.createElement('span');
-    chevron.className='brand-row-chevron';
-    chevron.textContent='▼';
-
-    rowInfo.append(regionName,regionMeta);
-    row.append(rowInfo,chevron);
-
-    const staysWrap=document.createElement('div');
-    staysWrap.className='brand-stays';
-    staysWrap.id=`brandStays_${containerId}_${idx}`;
-    data.stays.forEach(stay=>{
-      const stayItem=document.createElement('div');
-      stayItem.className='brand-stay-item';
-
-      const stayDate=document.createElement('div');
-      stayDate.className='brand-stay-date';
-      stayDate.textContent=stay.date.slice(5).replace('-','/');
-
-      const stayNights=document.createElement('div');
-      stayNights.className='brand-stay-nights';
-      stayNights.textContent=`${stay.nights}晚`;
-
-      stayItem.append(stayDate,createStayJumpButton(stay,containerId.endsWith('2025')?'2025':'2026'),stayNights);
-      staysWrap.appendChild(stayItem);
-    });
-
-    fragment.append(row,staysWrap);
-  });
-
-  const total=document.createElement('div');
-  total.style.padding='10px 14px';
-  total.style.fontFamily="'DM Mono',monospace";
-  total.style.fontSize='11px';
-  total.style.color='var(--gold)';
-  total.style.borderTop='1px solid var(--border)';
-  total.textContent=`合計 ${stays.length} 次 · ${totalNights} 晚`;
-
-  container.replaceChildren(fragment,total);
+  const items=Object.entries(regionMap)
+    .sort((a,b)=>{
+      if(b[1].nights!==a[1].nights)return b[1].nights-a[1].nights;
+      if(b[1].stays.length!==a[1].stays.length)return b[1].stays.length-a[1].stays.length;
+      return a[0]===b[0]?0:(a[0]>b[0]?1:-1);
+    })
+    .map(([region,data])=>({label:region,meta:`${data.stays.length}次 · ${data.nights}晚 · ${totalNights>0?Math.round(data.nights/totalNights*100)+'%':'—'}`,stays:data.stays}));
+  buildAccordion(items,containerId,`合計 ${stays.length} 次 · ${totalNights} 晚`);
 }
 
 const REGION_KEYWORDS=[
@@ -1136,26 +989,6 @@ function render2025(){
       stays:monthStays
     };
   });
-  let html='';
-  let q1Started=false,q1Ended=false;
-  for(const m of Object.keys(grouped).sort((a,b)=>a-b)){
-    const mInt=parseInt(m,10);
-    let q1Tag='';
-    if(mInt===1)q1Tag='<span class="q1-tag">Q1 期間（2/11起）</span>';
-    else if(mInt===2)q1Tag='<span class="q1-tag">Q1 期間</span>';
-    else if(mInt===3)q1Tag='<span class="q1-tag">Q1 期間（至4/28）</span>';
-    html+=`<div class="month-header">${MONTH_NAMES[m]}${q1Tag}</div>`;
-    for(const s of grouped[m]){
-      const d=new Date(s.date);
-      if(!q1Started && d>=Q1_START_2025){q1Started=true;html+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
-      if(!q1Ended && q1Started && d>Q1_END_2025){q1Ended=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
-      const dateStr=s.date.slice(5).replace('-','/');
-      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.escapeHtml(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
-      if(s.date===PLATINUM_DATE){html+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;}
-      if(s.date===TITANIUM_DATE){html+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;}
-    }
-  }
-  document.getElementById('stayList2025').innerHTML=html;
   buildMonthAccordion(monthEntries2025,'monthAccordion2025',`合計 ${STAYS_2025.length} 次 · ${totalNights2025} 晚 · Q1獎勵 24晚 · 50晚年度福利 5晚`);
   buildBrandAccordion(STAYS_2025,'brandAccordion2025');
   renderRegionAccordion(STAYS_2025,'regionAccordion2025');
@@ -1309,7 +1142,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.04.28.2';
+const APP_VERSION='v2026.05.02.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1465,11 +1298,7 @@ function calcQ1(stays){
   return{bonus,usedBrands};
 }
 
-function getBrandOptions(){
-  return [...document.querySelectorAll('#inputBrand option')]
-    .map(option=>option.value.trim())
-    .filter(Boolean);
-}
+function getBrandOptions(){return BRAND_OPTIONS;}
 
 function render2026(stays){
   window._currentStays=stays;
@@ -1479,7 +1308,6 @@ function render2026(stays){
   for(const s of allQ1Sorted){
     if(!firstQ1KeyByBrand[s.brand])firstQ1KeyByBrand[s.brand]=s._key;
   }
-  window.firstQ1KeyByBrandForSort=firstQ1KeyByBrand;
   const filteredStays=sortFilteredStays2026(
     sorted.filter(stay=>matchesStaySearch(stay,'2026')&&matchesStayFilter2026(stay)&&matchesStaySortScope2026(stay))
   );
@@ -1602,7 +1430,11 @@ function render2026(stays){
 
   const stayList=document.getElementById('stayList');
   if(sorted.length===0){stayList.innerHTML='<div class="empty-state">未有住宿記錄</div>';return;}
-  if(filteredStays.length===0){stayList.innerHTML='<div class="empty-state">搵唔到符合搜尋嘅住宿</div>';return;}
+  if(filteredStays.length===0){
+    const hasScope=sorted.some(s=>matchesStaySearch(s,'2026')&&matchesStayFilter2026(s));
+    const msg=hasScope?(staySort2026==='earned'?'未有住宿已填賺取積分':'未有兌換住宿已填積分'):'搵唔到符合搜尋嘅住宿';
+    stayList.innerHTML=`<div class="empty-state">${msg}</div>`;return;
+  }
   const now=new Date();let html='';
   const groupByMonth=staySort2026==='latest'||staySort2026==='oldest';
   if(groupByMonth){
@@ -1624,9 +1456,9 @@ function render2026(stays){
       html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
       let q1DividerShown=false;
       for(const s of filteredMonthGroups[m]){
-        if(!q1DividerShown&&q1EndInMonth&&!isQ1Eligible(s)){
-          q1DividerShown=true;
-          html+=`<div class="q1-divider">── Q1 結束 ──</div>`;
+        if(!q1DividerShown&&q1EndInMonth){
+          const trigger=staySort2026==='latest'?isQ1Eligible(s):!isQ1Eligible(s);
+          if(trigger){q1DividerShown=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
         }
         const dateStr=s.date.slice(5).replace('-','/');
         const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
@@ -1868,6 +1700,8 @@ function showToast(msg,color='#4ADE80'){
 
 document.getElementById('appVersion').textContent=APP_VERSION;
 document.getElementById('inputDate').value=formatLocalDate();
+populateBrandSelect('inputBrand');
+populateBrandSelect('editBrand');
 populateRegionSelect('inputRegion');
 populateRegionSelect('editRegion');
 updateRegionHint('inputName','regionHint');
@@ -1876,57 +1710,11 @@ updateSyncStatus();
 
 <script>
 if('serviceWorker' in navigator){
-  let waitingWorker=null;
-  const updateBanner=document.getElementById('updateBanner');
-  const updateButton=document.getElementById('updateBannerBtn');
-  const updateClose=document.getElementById('updateBannerClose');
-
-  function showUpdateBanner(worker){
-    waitingWorker=worker;
-    updateBanner.classList.add('show');
-  }
-
-  function activateWaitingWorker(worker){
-    waitingWorker=worker;
-    hideUpdateBanner();
-    waitingWorker.postMessage({type:'SKIP_WAITING'});
-  }
-
-  function hideUpdateBanner(){
-    updateBanner.classList.remove('show');
-  }
-
-  updateButton.addEventListener('click',()=>{
-    if(waitingWorker){
-      waitingWorker.postMessage({type:'SKIP_WAITING'});
-    }
-  });
-  updateClose.addEventListener('click',hideUpdateBanner);
-
   navigator.serviceWorker.register('./sw.js').then(reg=>{
     reg.update();
     setInterval(()=>reg.update(),5*60*1000);
-    if(reg.waiting){
-      activateWaitingWorker(reg.waiting);
-    }
-    reg.addEventListener('updatefound',()=>{
-      const newWorker=reg.installing;
-      newWorker.addEventListener('statechange',()=>{
-        if(newWorker.state==='installed'&&navigator.serviceWorker.controller){
-          activateWaitingWorker(newWorker);
-        }
-      });
-    });
   });
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    hideUpdateBanner();
-    window.location.reload();
-  });
-  navigator.serviceWorker.addEventListener('message',event=>{
-    if(event.data&&event.data.type==='RELOAD_PAGE'){
-      window.location.reload();
-    }
-  });
+  navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload());
 }
 </script>
 </body>
