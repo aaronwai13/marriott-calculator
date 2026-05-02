@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.05.02.1 -->
+<!-- VERSION: 2026.05.03.16 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -77,6 +77,9 @@
   .header h1{font-family:'Playfair Display',serif;font-size:clamp(24px,5vw,42px);font-weight:900;line-height:1.05;margin-bottom:6px;}
   .header h1 span{color:var(--gold);}
   .header-sub{font-size:13px;color:var(--text-muted);font-weight:300;}
+  .header-actions{display:flex;justify-content:center;gap:8px;margin-top:12px;}
+  .shortcut-btn{appearance:none;border:1px solid rgba(201,168,76,0.28);background:rgba(201,168,76,0.1);color:var(--gold-light);border-radius:999px;padding:7px 12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .shortcut-btn:active{opacity:0.75;transform:scale(0.98);}
 
   .card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:14px;position:relative;overflow:hidden;}
   .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
@@ -85,13 +88,29 @@
   .progress-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.25em;color:var(--gold);text-transform:uppercase;margin-bottom:4px;}
   .progress-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
   .nights-big{font-family:'Playfair Display',serif;font-size:46px;font-weight:900;color:var(--gold);line-height:1;letter-spacing:-2px;text-align:right;}
-  .nights-denom{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);text-align:right;}
   .progress-track{background:var(--surface2);border-radius:100px;height:7px;overflow:hidden;margin-bottom:7px;}
   .progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));transition:width 1s cubic-bezier(0.16,1,0.3,1);width:0%;}
   .progress-ticks{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:10px;}
-  .nights-remaining{font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);}
-  .nights-remaining strong{color:var(--gold-light);font-size:14px;}
+  .nights-remaining{font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+  .nights-remaining strong{color:var(--gold-light);font-size:18px;}
   .nights-remaining.achieved{color:var(--green);font-size:14px;font-weight:600;}
+  .progress-breakdown{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;}
+  .progress-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 8px;border-radius:999px;background:rgba(128,128,128,0.08);border:1px solid rgba(128,128,128,0.12);font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);white-space:nowrap;}
+  .progress-chip strong{color:var(--gold-light);font-weight:500;}
+  .progress-chip.unlocked{color:var(--green);border-color:rgba(74,222,128,0.22);background:rgba(74,222,128,0.08);}
+  .progress-chip.unlocked strong{color:var(--green);}
+
+  .insight-grid{display:flex;gap:10px;margin-bottom:14px;}
+  .insight-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 14px;min-height:82px;display:flex;flex-direction:column;justify-content:space-between;color:var(--text);font:inherit;text-align:left;}
+  .insight-grid .insight-card{flex:1 1 0;min-width:0;}
+  .insight-card.hidden{display:none;}
+  .insight-card.actionable{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .insight-card.actionable:active{opacity:0.82;transform:scale(0.99);}
+  .insight-kicker{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--gold);text-transform:uppercase;margin-bottom:7px;white-space:nowrap;}
+  .insight-value{font-size:16px;font-weight:700;line-height:1.15;color:var(--text);overflow-wrap:anywhere;}
+  .insight-value.gold{color:var(--gold-light);}
+  .insight-value.green{color:var(--green);}
+  .insight-meta{font-size:11px;color:var(--text-muted);line-height:1.35;margin-top:6px;}
 
   .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}.stat-value.blue{color:#60A5FA;}.stat-value.purple{color:#C084FC;}
   .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;}
@@ -103,6 +122,12 @@
 
   .section-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
+  .section-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:none;border:none;color:var(--text);font:inherit;text-align:left;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent;}
+  .section-toggle-left{display:flex;align-items:center;gap:10px;min-width:0;}
+  .section-summary{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .section-chevron{font-size:12px;color:var(--text-muted);transition:transform 0.18s;flex-shrink:0;}
+  .collapsible-card.collapsed .section-chevron{transform:rotate(-90deg);}
+  .collapsible-card.collapsed .collapsible-body{display:none;}
   .badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;padding:3px 9px;border-radius:100px;text-transform:uppercase;}
   .badge-gold{background:rgba(201,168,76,0.12);color:var(--gold);border:1px solid rgba(201,168,76,0.25);}
 
@@ -232,6 +257,9 @@
   .empty-state{text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px;font-style:italic;}
   @media(max-width:540px){
     .form-grid{grid-template-columns:1fr}
+    .insight-grid{display:flex;overflow-x:auto;gap:8px;margin-left:-20px;margin-right:-20px;padding:0 20px 2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+    .insight-card{min-width:156px;min-height:76px;padding:12px;scroll-snap-align:start;}
+    .insight-grid::-webkit-scrollbar{display:none;}
     .nights-big{font-size:38px}
     .card,.add-form{padding:18px}
     .top-bar{padding:0 12px}
@@ -252,7 +280,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.05.02.1</div>
+    <div class="app-version" id="appVersion">v2026.05.03.16</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -270,6 +298,9 @@
     <div class="header">
       <h1>2025 住宿<span>回顧</span></h1>
       <div class="header-sub">全年住宿記錄</div>
+      <div class="header-actions">
+        <button class="shortcut-btn" type="button" onclick="jumpToStayList('2025')">住宿明細</button>
+      </div>
     </div>
 
     <div class="card">
@@ -287,19 +318,34 @@
       <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value blue">29</div><div class="stat-label">獎勵房晚（Q1+年度）</div></div>
     </div>
 
-    <div class="card">
-      <div class="section-header"><div class="section-title">月度統計</div></div>
-      <div id="monthAccordion2025"><div class="empty-state">載入中...</div></div>
+    <div class="card collapsible-card collapsed" id="monthSectionCard2025">
+      <div class="section-header">
+        <button class="section-toggle" type="button" onclick="toggleSection('monthSectionCard2025')" aria-expanded="false">
+          <span class="section-toggle-left"><span class="section-title">月度統計</span><span class="section-summary" id="monthSectionSummary2025">載入中...</span></span>
+          <span class="section-chevron">▼</span>
+        </button>
+      </div>
+      <div class="collapsible-body" id="monthAccordion2025"><div class="empty-state">載入中...</div></div>
     </div>
 
-    <div class="card">
-      <div class="section-header"><div class="section-title">品牌統計</div></div>
-      <div id="brandAccordion2025"></div>
+    <div class="card collapsible-card collapsed" id="brandSectionCard2025">
+      <div class="section-header">
+        <button class="section-toggle" type="button" onclick="toggleSection('brandSectionCard2025')" aria-expanded="false">
+          <span class="section-toggle-left"><span class="section-title">品牌統計</span><span class="section-summary" id="brandSectionSummary2025">載入中...</span></span>
+          <span class="section-chevron">▼</span>
+        </button>
+      </div>
+      <div class="collapsible-body" id="brandAccordion2025"></div>
     </div>
 
-    <div class="card">
-      <div class="section-header"><div class="section-title">地區統計</div></div>
-      <div id="regionAccordion2025"><div class="empty-state">載入中...</div></div>
+    <div class="card collapsible-card collapsed" id="regionSectionCard2025">
+      <div class="section-header">
+        <button class="section-toggle" type="button" onclick="toggleSection('regionSectionCard2025')" aria-expanded="false">
+          <span class="section-toggle-left"><span class="section-title">地區統計</span><span class="section-summary" id="regionSectionSummary2025">載入中...</span></span>
+          <span class="section-chevron">▼</span>
+        </button>
+      </div>
+      <div class="collapsible-body" id="regionAccordion2025"><div class="empty-state">載入中...</div></div>
     </div>
 
     <div id="staySection2025">
@@ -321,16 +367,51 @@
     <div class="header">
       <h1>2026 住宿<span>追蹤</span></h1>
       <div class="header-sub">鈦金保級目標 · 75晚</div>
+      <div class="header-actions">
+        <button class="shortcut-btn" type="button" onclick="jumpToStayList('2026')">住宿明細</button>
+      </div>
     </div>
 
     <div class="card">
       <div class="progress-header">
         <div><div class="progress-label">年度進度</div><div class="progress-title">鈦金精英保級</div></div>
-        <div><div class="nights-big" id="totalDisplay">—</div><div class="nights-denom">/ 75 晚</div></div>
+        <div><div class="nights-big" id="totalDisplay">—</div></div>
       </div>
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-ticks"><span>0</span><span>75</span></div>
       <div class="nights-remaining" id="nightsRemainingEl">距離75晚目標，仲需 <strong>—</strong> 晚</div>
+      <div class="progress-breakdown" id="progressBreakdown" aria-label="房晚組成"></div>
+    </div>
+
+    <div class="insight-grid" aria-label="保級摘要">
+      <div class="insight-card hidden" id="nextStayCard">
+        <div>
+          <div class="insight-kicker">下一站</div>
+          <div class="insight-value" id="nextStayName">—</div>
+        </div>
+        <div class="insight-meta" id="nextStayMeta">載入中...</div>
+      </div>
+      <div class="insight-card">
+        <div>
+          <div class="insight-kicker">保級節奏</div>
+          <div class="insight-value gold" id="paceValue">—</div>
+        </div>
+        <div class="insight-meta" id="paceMeta">載入中...</div>
+      </div>
+      <div class="insight-card">
+        <div>
+          <div class="insight-kicker">Q1 活動</div>
+          <div class="insight-value green" id="q1WindowValue">—</div>
+        </div>
+        <div class="insight-meta" id="q1WindowMeta">載入中...</div>
+      </div>
+      <button class="insight-card actionable hidden" id="missingPointsCard" type="button" onclick="showMissingPoints()" aria-label="查看待補積分住宿">
+        <div>
+          <div class="insight-kicker">待補積分</div>
+          <div class="insight-value" id="missingPointsValue">—</div>
+        </div>
+        <div class="insight-meta" id="missingPointsMeta">載入中...</div>
+      </button>
     </div>
 
     <div class="stats-grid">
@@ -377,34 +458,56 @@
     </div>
 
     <!-- Q1 brands -->
-    <div class="card">
-      <div class="section-header"><div class="section-title">Q1 品牌追蹤</div></div>
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span></div>
-      <div style="margin-bottom:14px;">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">已入住品牌</div>
-        <div id="brandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+    <div class="card collapsible-card collapsed" id="q1SectionCard">
+      <div class="section-header">
+        <button class="section-toggle" type="button" onclick="toggleSection('q1SectionCard')" aria-expanded="false">
+          <span class="section-toggle-left"><span class="section-title">Q1 品牌追蹤</span><span class="section-summary" id="q1SectionSummary">載入中...</span></span>
+          <span class="section-chevron">▼</span>
+        </button>
       </div>
-      <div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">未入住品牌</div>
-        <div id="remainingBrandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+      <div class="collapsible-body">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span></div>
+        <div style="margin-bottom:14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">已入住品牌</div>
+          <div id="brandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">未入住品牌</div>
+          <div id="remainingBrandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+        </div>
       </div>
     </div>
 
     <!-- 月度統計 2026 -->
-    <div class="card">
-      <div class="section-header"><div class="section-title">月度統計</div></div>
-      <div id="monthAccordion2026"><div class="empty-state">載入中...</div></div>
+    <div class="card collapsible-card collapsed" id="monthSectionCard">
+      <div class="section-header">
+        <button class="section-toggle" type="button" onclick="toggleSection('monthSectionCard')" aria-expanded="false">
+          <span class="section-toggle-left"><span class="section-title">月度統計</span><span class="section-summary" id="monthSectionSummary">載入中...</span></span>
+          <span class="section-chevron">▼</span>
+        </button>
+      </div>
+      <div class="collapsible-body" id="monthAccordion2026"><div class="empty-state">載入中...</div></div>
     </div>
 
     <!-- 品牌統計 2026 -->
-    <div class="card">
-      <div class="section-header"><div class="section-title">品牌統計</div></div>
-      <div id="brandAccordion2026"><div class="empty-state">載入中...</div></div>
+    <div class="card collapsible-card collapsed" id="brandSectionCard">
+      <div class="section-header">
+        <button class="section-toggle" type="button" onclick="toggleSection('brandSectionCard')" aria-expanded="false">
+          <span class="section-toggle-left"><span class="section-title">品牌統計</span><span class="section-summary" id="brandSectionSummary">載入中...</span></span>
+          <span class="section-chevron">▼</span>
+        </button>
+      </div>
+      <div class="collapsible-body" id="brandAccordion2026"><div class="empty-state">載入中...</div></div>
     </div>
 
-    <div class="card">
-      <div class="section-header"><div class="section-title">地區統計</div></div>
-      <div id="regionAccordion2026"><div class="empty-state">載入中...</div></div>
+    <div class="card collapsible-card collapsed" id="regionSectionCard">
+      <div class="section-header">
+        <button class="section-toggle" type="button" onclick="toggleSection('regionSectionCard')" aria-expanded="false">
+          <span class="section-toggle-left"><span class="section-title">地區統計</span><span class="section-summary" id="regionSectionSummary">載入中...</span></span>
+          <span class="section-chevron">▼</span>
+        </button>
+      </div>
+      <div class="collapsible-body" id="regionAccordion2026"><div class="empty-state">載入中...</div></div>
     </div>
 
     <!-- 住宿明細 -->
@@ -602,6 +705,27 @@ const staySearchState={2025:'',2026:''};
 let stayFilter2026='all';
 let staySort2026='latest';
 
+window.formatDateKey=function(date=new Date()){
+  const localDate=new Date(date.getTime()-date.getTimezoneOffset()*60000);
+  return localDate.toISOString().slice(0,10);
+};
+
+window.addDaysToDateKey=function(dateString,days){
+  const date=new Date(`${dateString}T00:00:00`);
+  date.setDate(date.getDate()+days);
+  return window.formatDateKey(date);
+};
+
+window.isMissingPointsStay=function(stay,todayKey=window.formatDateKey()){
+  if(stay.redeem || (stay.pointsEarned||0)>0)return false;
+  return window.addDaysToDateKey(stay.date,stay.nights||1)<todayKey;
+};
+
+window.formatShortDate=function(dateString){
+  const [,month,day]=dateString.split('-');
+  return `${Number(day)}/${Number(month)}`;
+};
+
 window.escapeHtml=function(value){
   return String(value).replace(/[&<>"']/g,char=>({
     '&':'&amp;',
@@ -656,7 +780,7 @@ function buildAccordion(items,containerId,totalMeta){
       stayItem.className='brand-stay-item';
       const stayDate=document.createElement('div');
       stayDate.className='brand-stay-date';
-      stayDate.textContent=s.date.slice(5).replace('-','/');
+      stayDate.textContent=window.formatShortDate(s.date);
       const stayNights=document.createElement('div');
       stayNights.className='brand-stay-nights';
       stayNights.textContent=`${s.nights}晚`;
@@ -806,7 +930,7 @@ function matchesStayFilter2026(stay){
     case 'q1':
       return !stay.redeem && new Date(stay.date)>=Q1_START_2026_FILTER && new Date(stay.date)<=Q1_END_2026_FILTER;
     case 'missing-points':
-      return !stay.redeem && (!stay.pointsEarned || stay.pointsEarned<=0);
+      return window.isMissingPointsStay(stay);
     default:
       return true;
   }
@@ -922,6 +1046,24 @@ window.setStayFilter=function(filter){
   if(window._currentStays&&window.render2026)window.render2026(window._currentStays);
 };
 
+window.jumpToStayList=function(year='2026'){
+  const section=document.getElementById(`staySection${year}`);
+  if(section)section.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+window.showMissingPoints=function(){
+  setStayFilter('missing-points');
+  jumpToStayList('2026');
+};
+
+window.toggleSection=function(cardId){
+  const card=document.getElementById(cardId);
+  if(!card)return;
+  const isCollapsed=card.classList.toggle('collapsed');
+  const button=card.querySelector('.section-toggle');
+  if(button)button.setAttribute('aria-expanded',String(!isCollapsed));
+};
+
 window.setStaySort=function(sort){
   staySort2026=sort;
   document.querySelectorAll('#staySortChips2026 .filter-chip').forEach(button=>{
@@ -964,6 +1106,9 @@ function render2025(){
     filteredGroups2025[month].push(stay);
   }
   const totalNights2025=STAYS_2025.reduce((sum,stay)=>sum+stay.nights,0);
+  document.getElementById('monthSectionSummary2025').textContent=`${Object.keys(grouped).length} 個月份`;
+  document.getElementById('brandSectionSummary2025').textContent=`${new Set(STAYS_2025.map(s=>s.brand)).size} 個品牌`;
+  document.getElementById('regionSectionSummary2025').textContent=`${new Set(STAYS_2025.map(s=>getStayRegion(s))).size} 個地區`;
   const q1MonthBonus2025={};
   const usedBrands2025=new Set();
   const q1Eligible2025=[...STAYS_2025]
@@ -1010,7 +1155,7 @@ function render2025(){
       const d=new Date(s.date);
       if(!filteredQ1Started && d>=Q1_START_2025){filteredQ1Started=true;filteredHtml+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
       if(!filteredQ1Ended && filteredQ1Started && d>Q1_END_2025){filteredQ1Ended=true;filteredHtml+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
-      const dateStr=s.date.slice(5).replace('-','/');
+      const dateStr=window.formatShortDate(s.date);
       filteredHtml+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.escapeHtml(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
       if(s.date===PLATINUM_DATE){filteredHtml+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;}
       if(s.date===TITANIUM_DATE){filteredHtml+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;}
@@ -1141,8 +1286,8 @@ onValue(pointsBaseStaysRef,(snap)=>{
   updateSyncStatus();
 });
 
-const TARGET=75,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.05.02.1';
+const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
+const APP_VERSION='v2026.05.03.16';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1201,6 +1346,84 @@ function inferBrandFromName(name=''){
 function formatLocalDate(date=new Date()){
   const localDate=new Date(date.getTime()-date.getTimezoneOffset()*60000);
   return localDate.toISOString().slice(0,10);
+}
+
+function addDays(dateString,days){
+  const date=new Date(`${dateString}T00:00:00`);
+  date.setDate(date.getDate()+days);
+  return formatLocalDate(date);
+}
+
+function isMissingPointsStay(stay,todayKey=formatLocalDate()){
+  if(stay.redeem || (stay.pointsEarned||0)>0)return false;
+  return addDays(stay.date,stay.nights||1)<todayKey;
+}
+
+function daysBetween(start,end){
+  const startDay=new Date(start.getFullYear(),start.getMonth(),start.getDate());
+  const endDay=new Date(end.getFullYear(),end.getMonth(),end.getDate());
+  return Math.ceil((endDay-startDay)/86400000);
+}
+
+function formatShortStayDate(dateString){
+  return window.formatShortDate(dateString);
+}
+
+function updateInsightCards(stays,total,left){
+  const today=new Date();
+  const todayKey=formatLocalDate(today);
+  const nextStay=[...stays]
+    .filter(stay=>stay.date>=todayKey)
+    .sort((a,b)=>a.date.localeCompare(b.date)||(a._key||'').localeCompare(b._key||''))[0];
+  const nextName=document.getElementById('nextStayName');
+  const nextMeta=document.getElementById('nextStayMeta');
+  const nextCard=document.getElementById('nextStayCard');
+  if(nextStay){
+    nextCard.classList.remove('hidden');
+    const nightsText=`${nextStay.nights}晚${nextStay.redeem?' · 兌換':' · 現金'}`;
+    nextName.textContent=nextStay.name;
+    nextMeta.textContent=`${formatShortStayDate(nextStay.date)} · ${nextStay.brand} · ${nightsText}`;
+  }else{
+    nextCard.classList.add('hidden');
+    nextName.textContent='未有未來住宿';
+    nextMeta.textContent=total>=TARGET?'鈦金目標已達成':'可以開始安排下一段住宿';
+  }
+
+  const paceValue=document.getElementById('paceValue');
+  const paceMeta=document.getElementById('paceMeta');
+  if(left<=0){
+    paceValue.textContent='已達標';
+    paceMeta.textContent=`全年已累計 ${total} 晚`;
+  }else{
+    const monthsLeft=Math.max(1,12-today.getMonth());
+    const monthlyPace=Math.ceil(left/monthsLeft);
+    const monthRange=`${today.getMonth()+1}-12月`;
+    paceValue.textContent=`每月約 ${monthlyPace} 晚`;
+    paceMeta.textContent=`${monthRange} 平均 · 尚欠 ${left} 晚`;
+  }
+
+  const q1Value=document.getElementById('q1WindowValue');
+  const q1Meta=document.getElementById('q1WindowMeta');
+  if(today<Q1_START){
+    const days=daysBetween(today,Q1_START);
+    q1Value.textContent=`${days}日後開始`;
+    q1Meta.textContent='首個合資格品牌可額外加房晚';
+  }else if(today<=Q1_END){
+    const days=daysBetween(today,Q1_END);
+    q1Value.textContent=`仲有 ${days} 日`;
+    q1Meta.textContent='10/5 前現金入住新品牌先計獎勵';
+  }else{
+    q1Value.textContent='已結束';
+    q1Meta.textContent='品牌獎勵已按首次合資格入住計算';
+  }
+
+  const missingStays=stays.filter(stay=>isMissingPointsStay(stay,todayKey));
+  const missingCard=document.getElementById('missingPointsCard');
+  const missingValue=document.getElementById('missingPointsValue');
+  const missingMeta=document.getElementById('missingPointsMeta');
+  missingCard.classList.toggle('hidden',missingStays.length===0);
+  missingValue.textContent=missingStays.length;
+  missingMeta.textContent=missingStays.length>0?'按此查看未填積分':'暫時無待補記錄';
 }
 
 onAuthStateChanged(auth,(user)=>{
@@ -1298,6 +1521,10 @@ function calcQ1(stays){
   return{bonus,usedBrands};
 }
 
+function calcAnnualChoiceBonus(preAnnualTotal){
+  return preAnnualTotal>=ANNUAL_CHOICE_THRESHOLD?ANNUAL_CHOICE_BONUS:0;
+}
+
 function getBrandOptions(){return BRAND_OPTIONS;}
 
 function render2026(stays){
@@ -1314,11 +1541,23 @@ function render2026(stays){
   const actualNights=stays.reduce((s,x)=>s+x.nights,0);
   const{bonus,usedBrands}=calcQ1(stays);
   window._q1UsedBrands=usedBrands;
-  const total=actualNights+bonus,left=Math.max(0,TARGET-total),pct=Math.min(100,(total/TARGET)*100);
+  const preAnnualTotal=actualNights+bonus;
+  const annualBonus=calcAnnualChoiceBonus(preAnnualTotal);
+  const total=preAnnualTotal+annualBonus,left=Math.max(0,TARGET-total),pct=Math.min(100,(total/TARGET)*100);
 
   document.getElementById('totalDisplay').textContent=total;
   document.getElementById('statActual').textContent=actualNights;
   document.getElementById('statQ1').textContent=bonus;
+  const annualLeft=Math.max(0,ANNUAL_CHOICE_THRESHOLD-preAnnualTotal);
+  const annualChip=annualBonus>0
+    ? `<span class="progress-chip unlocked">50晚福利 <strong>+5</strong></span>`
+    : `<span class="progress-chip">50晚差 <strong>${annualLeft}</strong></span>`;
+  document.getElementById('progressBreakdown').innerHTML=[
+    `<span class="progress-chip">實際 <strong>${actualNights}</strong></span>`,
+    `<span class="progress-chip">Q1 <strong>+${bonus}</strong></span>`,
+    annualChip
+  ].join('');
+  updateInsightCards(stays,total,left);
   setTimeout(()=>{document.getElementById('progressFill').style.width=pct+'%';},100);
 
   let earned2026=0;
@@ -1341,13 +1580,14 @@ function render2026(stays){
 
   const remainEl=document.getElementById('nightsRemainingEl');
   if(total>=TARGET){remainEl.className='nights-remaining achieved';remainEl.innerHTML='已達標 🎉';}
-  else{remainEl.className='nights-remaining';remainEl.innerHTML=`距離75晚目標，仲需 <strong>${left}</strong> 晚 · <span style="color:var(--gold);">${Math.round(pct)}%</span>`;}
+  else{remainEl.className='nights-remaining';remainEl.innerHTML=`<span>距離75晚仲需</span><strong>${left}</strong><span>晚</span><span style="color:var(--gold);">${Math.round(pct)}%</span>`;}
 
   const q1Stays=stays.filter(s=>isQ1Eligible(s));
   const q1BrandsList=[...new Set(q1Stays.map(s=>s.brand))].sort();
   const allBrands=getBrandOptions();
   const remainingBrands=allBrands.filter(brand=>!q1BrandsList.includes(brand));
   document.getElementById('brandCount').textContent=`已用 ${usedBrands.size} 個品牌獎勵`;
+  document.getElementById('q1SectionSummary').textContent=`${q1BrandsList.length} 個品牌 · ${remainingBrands.length} 個未住`;
   const brandsGrid=document.getElementById('brandsGrid');
   const remainingBrandsGrid=document.getElementById('remainingBrandsGrid');
   brandsGrid.replaceChildren();
@@ -1399,6 +1639,9 @@ function render2026(stays){
 
   const monthGroups={};
   for(const s of sorted){const m=parseInt(s.date.split('-')[1])-1;if(!monthGroups[m])monthGroups[m]=[];monthGroups[m].push(s);}
+  document.getElementById('monthSectionSummary').textContent=`${Object.keys(monthGroups).length} 個月份`;
+  document.getElementById('brandSectionSummary').textContent=`${new Set(stays.map(s=>s.brand)).size} 個品牌`;
+  document.getElementById('regionSectionSummary').textContent=`${new Set(stays.map(s=>getStayRegion(s))).size} 個地區`;
   const q1BonusByMonth={};
   const usedForBonus=new Set();
   for(const s of sorted){
@@ -1423,7 +1666,7 @@ function render2026(stays){
       stays:monthGroups[m]
     });
   }
-  buildMonthAccordion(monthEntries2026,'monthAccordion2026',`合計 ${stays.length} 次 · ${actualNights} 晚 · Q1獎勵 ${bonus}晚`);
+  buildMonthAccordion(monthEntries2026,'monthAccordion2026',`合計 ${stays.length} 次 · ${actualNights} 晚 · Q1獎勵 ${bonus}晚 · 50晚年度福利 ${annualBonus}晚`);
 
   buildBrandAccordion(stays,'brandAccordion2026');
   renderRegionAccordion(stays,'regionAccordion2026');
@@ -1460,7 +1703,7 @@ function render2026(stays){
           const trigger=staySort2026==='latest'?isQ1Eligible(s):!isQ1Eligible(s);
           if(trigger){q1DividerShown=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
         }
-        const dateStr=s.date.slice(5).replace('-','/');
+        const dateStr=window.formatShortDate(s.date);
         const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
         let pointsHtml='';
         const isFirstQ1ForBrand=isQ1Eligible(s)&&firstQ1KeyByBrand[s.brand]===s._key;
@@ -1486,7 +1729,7 @@ function render2026(stays){
     }
   }else{
     for(const s of filteredStays){
-      const dateStr=s.date.slice(5).replace('-','/');
+      const dateStr=window.formatShortDate(s.date);
       const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
       let pointsHtml='';
       const isFirstQ1ForBrand=isQ1Eligible(s)&&firstQ1KeyByBrand[s.brand]===s._key;
