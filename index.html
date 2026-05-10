@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.05.03.21 -->
+<!-- VERSION: 2026.05.11.9 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -179,7 +179,9 @@
   .stay-item.jump-highlight{background:rgba(201,168,76,0.14);box-shadow:inset 0 0 0 1px rgba(201,168,76,0.28);animation:stay-jump-pulse 1.8s ease;}
   .stay-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);}
   .stay-name{font-size:13px;font-weight:500;line-height:1.3;}
-  .stay-brand-tag{font-size:11px;color:var(--text-muted);margin-top:1px;}
+  .stay-brand-tag{font-size:11px;color:var(--text-muted);margin-top:1px;display:flex;align-items:center;gap:5px;min-width:0;}
+  .stay-brand-mark{display:none;}
+  .stay-brand-mark-text{display:none;}
   .stay-nights-tag{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap;}
   .stay-actions{display:flex;gap:4px;}
   .btn-icon{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:4px 6px;border-radius:6px;-webkit-tap-highlight-color:transparent;outline:none;}
@@ -201,6 +203,7 @@
   @media(prefers-color-scheme:light){
     .milestone-row.platinum{background:rgba(255,243,205,0.5);}
     .milestone-row.titanium{background:rgba(212,237,218,0.5);}
+    .stay-brand-mark img{filter:grayscale(1) brightness(0.48);opacity:0.76;}
   }
 
   /* Stats table */
@@ -223,6 +226,16 @@
   .brand-row.open .brand-row-chevron{transform:rotate(180deg);}
   .brand-stays{display:none;background:var(--surface2);border-bottom:1px solid rgba(128,128,128,0.05);}
   .brand-stays.show{display:block;}
+  .brand-logo-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px 12px;align-items:center;padding:4px 2px 2px;}
+  .brand-logo-chip{grid-column:span 2;min-height:34px;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:10px;font-weight:700;line-height:1.1;text-align:center;}
+  .brand-logo-chip.balanced-tail{grid-column:span 3;}
+  .brand-logo-chip img{width:100%;max-width:92px;max-height:30px;object-fit:contain;display:block;filter:grayscale(1) invert(1) brightness(1.35);opacity:0.9;}
+  .brand-logo-chip[data-brand="Courtyard"] img,.brand-logo-chip[data-brand="Four Points"] img,.brand-logo-chip[data-brand="Tribute Portfolio"] img{max-width:104px;}
+  .brand-logo-chip.fallback{font-size:10px;color:var(--text-muted);letter-spacing:0.02em;}
+  #q1SectionCard.q1-review .q1-brand-label{display:none;}
+  @media(prefers-color-scheme:light){
+    .brand-logo-chip img{filter:grayscale(1) brightness(0.5);opacity:0.86;}
+  }
   .brand-stay-item{display:grid;grid-template-columns:68px 1fr auto;gap:10px;padding:9px 14px 9px 28px;border-bottom:1px solid rgba(128,128,128,0.04);font-size:12px;}
   .brand-stay-item:last-child{border-bottom:none;}
   .brand-stay-item.redeem{opacity:0.4;}
@@ -281,7 +294,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.05.03.21</div>
+    <div class="app-version" id="appVersion">v2026.05.11.9</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -399,7 +412,7 @@
         </div>
         <div class="insight-meta" id="paceMeta">載入中...</div>
       </div>
-      <div class="insight-card">
+      <div class="insight-card" id="q1WindowCard">
         <div>
           <div class="insight-kicker">Q1 活動</div>
           <div class="insight-value green" id="q1WindowValue">—</div>
@@ -469,17 +482,17 @@
     <div class="card collapsible-card collapsed" id="q1SectionCard">
       <div class="section-header">
         <button class="section-toggle" type="button" onclick="toggleSection('q1SectionCard')" aria-expanded="false">
-          <span class="section-toggle-left"><span class="section-title">Q1 品牌追蹤</span><span class="section-summary" id="q1SectionSummary">載入中...</span></span>
+          <span class="section-toggle-left"><span class="section-title" id="q1SectionTitle">Q1 品牌追蹤</span><span class="section-summary" id="q1SectionSummary">載入中...</span></span>
           <span class="section-chevron">▼</span>
         </button>
       </div>
       <div class="collapsible-body">
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span></div>
+        <div id="q1SectionDesc" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span></div>
         <div style="margin-bottom:14px;">
-          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">已入住品牌</div>
+          <div class="q1-brand-label" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">已入住品牌</div>
           <div id="brandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
         </div>
-        <div>
+        <div id="remainingBrandsBlock">
           <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">未入住品牌</div>
           <div id="remainingBrandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
         </div>
@@ -745,6 +758,32 @@ window.escapeHtml=function(value){
 };
 
 const BRAND_OPTIONS=['AC Hotels','Aloft','Autograph Collection','Bvlgari Hotels','Courtyard','Delta Hotels','Design Hotels','Edition','Element','Fairfield','Four Points','JW Marriott','Le Meridien','Luxury Collection','Marriott','Moxy','Renaissance','Ritz-Carlton','Sheraton','St. Regis','Tribute Portfolio','W Hotels','Westin'];
+
+window.BRAND_LOGO_URLS={
+  'Aloft':'https://commons.wikimedia.org/wiki/Special:FilePath/Aloft_Hotels_logo.svg',
+  'Courtyard':'https://commons.wikimedia.org/wiki/Special:FilePath/Courtyard_by_Marriott_logo.svg',
+  'Design Hotels':'https://commons.wikimedia.org/wiki/Special:FilePath/Design_Hotels_Wordmark_Logo.svg',
+  'Element':'https://commons.wikimedia.org/wiki/Special:FilePath/Element_inspired_by_westin_Logo.svg',
+  'Fairfield':'https://commons.wikimedia.org/wiki/Special:FilePath/Fairfield_by_Marriott_logo.png',
+  'Four Points':'https://commons.wikimedia.org/wiki/Special:FilePath/Four_Points_Logo_neu.svg',
+  'Marriott':'https://commons.wikimedia.org/wiki/Special:FilePath/Marriott_Logo.svg',
+  'Moxy':'https://commons.wikimedia.org/wiki/Special:FilePath/Moxy_Hotels_logo.svg',
+  'Renaissance':'https://commons.wikimedia.org/wiki/Special:FilePath/RenaissanceHotelsNew.svg',
+  'Sheraton':'https://commons.wikimedia.org/wiki/Special:FilePath/Sheraton_Hotels_and_Resorts.svg',
+  'St. Regis':'https://commons.wikimedia.org/wiki/Special:FilePath/St._Regis_Hotels_%26_Resorts_logo.svg',
+  'Tribute Portfolio':'https://commons.wikimedia.org/wiki/Special:FilePath/Tribute_Portfolio_logo.svg',
+  'Westin':'https://commons.wikimedia.org/wiki/Special:FilePath/Westin_Hotels_%26_Resorts_logo.svg',
+};
+
+window.renderBrandMark=function(brand){
+  const safeBrand=window.escapeHtml(brand||'');
+  const logoUrl=window.BRAND_LOGO_URLS[brand];
+  if(!logoUrl){
+    const initials=(brand||'?').split(/\s+/).map(part=>part[0]).join('').slice(0,2).toUpperCase();
+    return `<span class="stay-brand-mark" aria-hidden="true"><span class="stay-brand-mark-text">${window.escapeHtml(initials)}</span></span><span>${safeBrand}</span>`;
+  }
+  return `<span class="stay-brand-mark" aria-hidden="true"><img src="${logoUrl}" alt="" loading="lazy" decoding="async" onerror="this.replaceWith(document.createTextNode(''))"></span><span>${safeBrand}</span>`;
+};
 
 function populateBrandSelect(id){
   const sel=document.getElementById(id);
@@ -1164,7 +1203,7 @@ function render2025(){
       if(!filteredQ1Started && d>=Q1_START_2025){filteredQ1Started=true;filteredHtml+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
       if(!filteredQ1Ended && filteredQ1Started && d>Q1_END_2025){filteredQ1Ended=true;filteredHtml+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
       const dateStr=window.formatShortDate(s.date);
-      filteredHtml+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.escapeHtml(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
+      filteredHtml+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.renderBrandMark(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
       if(s.date===PLATINUM_DATE){filteredHtml+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;}
       if(s.date===TITANIUM_DATE){filteredHtml+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;}
     }
@@ -1295,7 +1334,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.05.03.21';
+const APP_VERSION='v2026.05.11.9';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1322,6 +1361,8 @@ const BRAND_KEYWORDS=[
   {brand:'W Hotels',keywords:['W酒店','w酒店','W Hotel','W Hotels']},
   {brand:'Westin',keywords:['威斯汀','Westin']},
 ];
+
+const BRAND_LOGO_URLS=window.BRAND_LOGO_URLS;
 
 const DEFAULT_STAYS=[
   {date:'2026-01-09',name:'香港柏宁酒店，傲途格精选',brand:'Autograph Collection',nights:1,redeem:false},
@@ -1419,6 +1460,8 @@ function updateInsightCards(stays,total,left){
 
   const q1Value=document.getElementById('q1WindowValue');
   const q1Meta=document.getElementById('q1WindowMeta');
+  const q1Card=document.getElementById('q1WindowCard');
+  q1Card.classList.toggle('hidden',today>Q1_END);
   if(today<Q1_START){
     const days=daysBetween(today,Q1_START);
     q1Value.textContent=`${days}日後開始`;
@@ -1570,6 +1613,31 @@ function calcAnnualChoiceBonus(preAnnualTotal){
 
 function getBrandOptions(){return BRAND_OPTIONS;}
 
+function createBrandLogoChip(brand){
+  const chip=document.createElement('div');
+  chip.className='brand-logo-chip';
+  chip.dataset.brand=brand;
+  const logoUrl=BRAND_LOGO_URLS[brand];
+  if(!logoUrl){
+    chip.classList.add('fallback');
+    chip.textContent=brand;
+    return chip;
+  }
+  const image=document.createElement('img');
+  image.src=logoUrl;
+  image.alt=`${brand} logo`;
+  image.loading='lazy';
+  image.decoding='async';
+  image.onerror=()=>{
+    chip.classList.add('fallback');
+    chip.replaceChildren(document.createTextNode(brand));
+  };
+  chip.appendChild(image);
+  return chip;
+}
+
+const renderBrandMark=window.renderBrandMark;
+
 function render2026(stays){
   window._currentStays=stays;
   const sorted=[...stays].sort((a,b)=>a.date.localeCompare(b.date));
@@ -1629,10 +1697,29 @@ function render2026(stays){
   const q1BrandsList=[...new Set(q1Stays.map(s=>s.brand))].sort();
   const allBrands=getBrandOptions();
   const remainingBrands=allBrands.filter(brand=>!q1BrandsList.includes(brand));
-  document.getElementById('brandCount').textContent=`已用 ${usedBrands.size} 個品牌獎勵`;
-  document.getElementById('q1SectionSummary').textContent=`${q1BrandsList.length} 個品牌 · ${remainingBrands.length} 個未住`;
+  const q1Finished=new Date()>Q1_END;
+  document.getElementById('q1SectionCard').classList.toggle('q1-review',q1Finished);
+  document.getElementById('q1SectionTitle').textContent=q1Finished?'Q1 回顧':'Q1 品牌追蹤';
+  document.getElementById('q1SectionDesc').innerHTML=q1Finished
+    ? `Q1期間現金入住嘅品牌 · 已計入 ${usedBrands.size} 個品牌獎勵`
+    : `Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span>`;
+  const brandCount=document.getElementById('brandCount');
+  if(brandCount)brandCount.textContent=`已用 ${usedBrands.size} 個品牌獎勵`;
+  document.getElementById('q1SectionSummary').textContent=q1Finished
+    ? `${q1BrandsList.length} 個品牌 · ${bonus} 晚獎勵`
+    : `${q1BrandsList.length} 個品牌 · ${remainingBrands.length} 個未住`;
+  document.getElementById('remainingBrandsBlock').style.display=q1Finished?'none':'block';
   const brandsGrid=document.getElementById('brandsGrid');
   const remainingBrandsGrid=document.getElementById('remainingBrandsGrid');
+  if(q1Finished){
+    brandsGrid.removeAttribute('style');
+    brandsGrid.className='brand-logo-grid';
+  }else{
+    brandsGrid.className='';
+    brandsGrid.style.display='grid';
+    brandsGrid.style.gridTemplateColumns='repeat(auto-fill,minmax(110px,1fr))';
+    brandsGrid.style.gap='8px';
+  }
   brandsGrid.replaceChildren();
   remainingBrandsGrid.replaceChildren();
   if(q1BrandsList.length===0){
@@ -1643,7 +1730,14 @@ function render2026(stays){
     empty.textContent='暫無Q1期間住宿';
     brandsGrid.appendChild(empty);
   }else{
-    q1BrandsList.forEach(b=>{
+    const balanceTailStart=q1BrandsList.length%3===1&&q1BrandsList.length>=4?q1BrandsList.length-4:q1BrandsList.length;
+    q1BrandsList.forEach((b,index)=>{
+      if(q1Finished){
+        const logoChip=createBrandLogoChip(b);
+        if(index>=balanceTailStart)logoChip.classList.add('balanced-tail');
+        brandsGrid.appendChild(logoChip);
+        return;
+      }
       const brandChip=document.createElement('div');
       brandChip.style.background='var(--surface2)';
       brandChip.style.border='1px solid rgba(128,128,128,0.1)';
@@ -1732,12 +1826,11 @@ function render2026(stays){
     }
     const monthOrder=Object.keys(filteredMonthGroups).sort((a,b)=>staySort2026==='oldest'?(a-b):(b-a));
     for(const m of monthOrder){
-      const q1Ended=now>Q1_END;
       const hasQ1Stays=filteredMonthGroups[m].some(s=>isQ1Eligible(s));
       const isQ1EndMonth=parseInt(m)===Q1_END.getMonth();
       const hasNonQ1Stays=filteredMonthGroups[m].some(s=>!isQ1Eligible(s));
       const q1EndInMonth=isQ1EndMonth&&hasQ1Stays&&hasNonQ1Stays;
-      const q1TagText=q1EndInMonth?'Q1 期間（至 5/10）':(q1Ended?'Q1 已結束':'Q1 期間');
+      const q1TagText=q1EndInMonth?'Q1 期間（至 10/5）':'Q1 期間';
       const q1TagHtml=hasQ1Stays?`<span class="q1-tag">${q1TagText}</span>`:'';
       html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
       let q1DividerShown=false;
@@ -1767,7 +1860,7 @@ function render2026(stays){
         const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
         const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
         const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.escapeHtml(s.brand)}${s.redeem?' · 兌換':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
       }
     }
   }else{
@@ -1793,7 +1886,7 @@ function render2026(stays){
       const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
       const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
       const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.escapeHtml(s.brand)}${s.redeem?' · 兌換':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
     }
   }
   stayList.innerHTML=html;
