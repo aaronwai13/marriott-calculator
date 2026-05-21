@@ -1500,7 +1500,7 @@ function updateInsightCards(stays,total,left){
           if(s.redeem&&s.redeemPoints>0)netChg-=s.redeemPoints;
         }
       }
-      const estNts=Math.floor((_pointsBase+netChg)/avgPts);
+      const estNts=Math.round((_pointsBase+netChg)/avgPts);
       redeemValueEl.textContent=`估可換 ${estNts} 晚`;
     }else{
       redeemValueEl.textContent=`已換 ${totalNts} 晚`;
