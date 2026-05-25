@@ -294,7 +294,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.05.26.1</div>
+    <div class="app-version" id="appVersion">v2026.05.26.2</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1334,7 +1334,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.05.26.1';
+const APP_VERSION='v2026.05.26.2';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1425,7 +1425,7 @@ function updateInsightGridLayout(){
   grid.classList.toggle('two-cards',visibleCards===2);
 }
 
-function updateInsightCards(stays,total,left,preAnnualTotal){
+function updateInsightCards(stays,total,left){
   const today=new Date();
   const todayKey=formatLocalDate(today);
   const nextStay=[...stays]
@@ -1451,12 +1451,11 @@ function updateInsightCards(stays,total,left,preAnnualTotal){
     paceValue.textContent='已達標';
     paceMeta.textContent=`全年已累計 ${total} 晚`;
   }else{
-    const anticipatedLeft=(preAnnualTotal!=null&&preAnnualTotal<ANNUAL_CHOICE_THRESHOLD)?Math.max(0,left-ANNUAL_CHOICE_BONUS):left;
     const monthsLeft=Math.max(1,12-today.getMonth());
-    const monthlyPace=Math.ceil(anticipatedLeft/monthsLeft);
+    const monthlyPace=Math.ceil(left/monthsLeft);
     const monthRange=`${today.getMonth()+1}-12月`;
     paceValue.textContent=`每月約 ${monthlyPace} 晚`;
-    paceMeta.textContent=`${monthRange} 平均 · 尚欠 ${anticipatedLeft} 晚`;
+    paceMeta.textContent=`${monthRange} 平均 · 尚欠 ${left} 晚`;
   }
 
   const q1Value=document.getElementById('q1WindowValue');
@@ -1644,6 +1643,7 @@ function render2026(stays){
   const preAnnualTotal=actualNights+bonus;
   const annualBonus=calcAnnualChoiceBonus(preAnnualTotal);
   const total=preAnnualTotal+annualBonus,left=Math.max(0,TARGET-total),pct=Math.min(100,(total/TARGET)*100);
+  const anticipatedLeft=preAnnualTotal<ANNUAL_CHOICE_THRESHOLD?Math.max(0,left-ANNUAL_CHOICE_BONUS):left;
 
   document.getElementById('totalDisplay').textContent=total;
   document.getElementById('statActual').textContent=actualNights;
@@ -1657,7 +1657,7 @@ function render2026(stays){
     `<span class="progress-chip">Q1 <strong>+${bonus}</strong></span>`,
     annualChip
   ].join('');
-  updateInsightCards(stays,total,left,preAnnualTotal);
+  updateInsightCards(stays,total,anticipatedLeft);
   setTimeout(()=>{document.getElementById('progressFill').style.width=pct+'%';},100);
 
   let earned2026=0;
@@ -1680,7 +1680,7 @@ function render2026(stays){
 
   const remainEl=document.getElementById('nightsRemainingEl');
   if(total>=TARGET){remainEl.className='nights-remaining achieved';remainEl.innerHTML='已達標 🎉';}
-  else{remainEl.className='nights-remaining';remainEl.innerHTML=`<span>距離75晚仲需</span><strong>${left}</strong><span>晚</span><span style="color:var(--gold);">${Math.round(pct)}%</span>`;}
+  else{remainEl.className='nights-remaining';remainEl.innerHTML=`<span>距離75晚仲需</span><strong>${anticipatedLeft}</strong><span>晚</span><span style="color:var(--gold);">${Math.round(pct)}%</span>`;}
 
   const q1Stays=stays.filter(s=>isQ1Eligible(s));
   const q1BrandsList=[...new Set(q1Stays.map(s=>s.brand))].sort();
