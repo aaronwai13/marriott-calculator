@@ -294,7 +294,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.05.21.1</div>
+    <div class="app-version" id="appVersion">v2026.05.26.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -428,7 +428,7 @@
       </button>
       <div class="insight-card hidden" id="redeemCard">
         <div>
-          <div class="insight-kicker">兌換餘力</div>
+          <div class="insight-kicker">兌換統計</div>
           <div class="insight-value red" id="redeemValue">—</div>
         </div>
         <div class="insight-meta" id="redeemMeta">載入中...</div>
@@ -1334,7 +1334,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.05.21.1';
+const APP_VERSION='v2026.05.26.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1492,19 +1492,7 @@ function updateInsightCards(stays,total,left){
     const totalNts=redeemStays.reduce((sum,s)=>sum+s.nights,0);
     const avgPts=Math.round(totalPts/totalNts);
     redeemCard.classList.remove('hidden');
-    if(_hasPointsBase&&avgPts>0){
-      let netChg=0;
-      for(const s of stays){
-        if(!_pointsBaseStays.includes(s._key)){
-          if(s.pointsEarned>0)netChg+=s.pointsEarned;
-          if(s.redeem&&s.redeemPoints>0)netChg-=s.redeemPoints;
-        }
-      }
-      const estNts=Math.round((_pointsBase+netChg)/avgPts);
-      redeemValueEl.textContent=`估可換 ${estNts} 晚`;
-    }else{
-      redeemValueEl.textContent=`已換 ${totalNts} 晚`;
-    }
+    redeemValueEl.textContent=`已換 ${totalNts} 晚`;
     redeemMetaEl.textContent=`已用 ${totalPts.toLocaleString()} 分 · 均 ${avgPts.toLocaleString()}/晚`;
   }else{
     redeemCard.classList.add('hidden');
