@@ -1425,7 +1425,7 @@ function updateInsightGridLayout(){
   grid.classList.toggle('two-cards',visibleCards===2);
 }
 
-function updateInsightCards(stays,total,left){
+function updateInsightCards(stays,total,left,preAnnualTotal){
   const today=new Date();
   const todayKey=formatLocalDate(today);
   const nextStay=[...stays]
@@ -1451,11 +1451,12 @@ function updateInsightCards(stays,total,left){
     paceValue.textContent='已達標';
     paceMeta.textContent=`全年已累計 ${total} 晚`;
   }else{
+    const anticipatedLeft=(preAnnualTotal!=null&&preAnnualTotal<ANNUAL_CHOICE_THRESHOLD)?Math.max(0,left-ANNUAL_CHOICE_BONUS):left;
     const monthsLeft=Math.max(1,12-today.getMonth());
-    const monthlyPace=Math.ceil(left/monthsLeft);
+    const monthlyPace=Math.ceil(anticipatedLeft/monthsLeft);
     const monthRange=`${today.getMonth()+1}-12月`;
     paceValue.textContent=`每月約 ${monthlyPace} 晚`;
-    paceMeta.textContent=`${monthRange} 平均 · 尚欠 ${left} 晚`;
+    paceMeta.textContent=`${monthRange} 平均 · 尚欠 ${anticipatedLeft} 晚`;
   }
 
   const q1Value=document.getElementById('q1WindowValue');
@@ -1656,7 +1657,7 @@ function render2026(stays){
     `<span class="progress-chip">Q1 <strong>+${bonus}</strong></span>`,
     annualChip
   ].join('');
-  updateInsightCards(stays,total,left);
+  updateInsightCards(stays,total,left,preAnnualTotal);
   setTimeout(()=>{document.getElementById('progressFill').style.width=pct+'%';},100);
 
   let earned2026=0;
