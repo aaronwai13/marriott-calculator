@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.05.11.9 -->
+<!-- VERSION: 2026.06.30.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -87,7 +87,8 @@
   .progress-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
   .progress-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.25em;color:var(--gold);text-transform:uppercase;margin-bottom:4px;}
   .progress-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
-  .nights-big{font-family:'Playfair Display',serif;font-size:46px;font-weight:900;color:var(--gold);line-height:1;letter-spacing:-2px;text-align:right;}
+  .progress-total{min-width:104px;min-height:82px;padding:10px 12px;border-radius:14px;border:1px solid rgba(201,168,76,0.28);background:linear-gradient(160deg,rgba(201,168,76,0.18),rgba(201,168,76,0.05));box-shadow:0 14px 34px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;text-align:center;}
+  .nights-big{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;font-size:60px;font-weight:800;color:var(--gold-light);line-height:1;letter-spacing:0;text-align:center;text-shadow:0 0 24px rgba(201,168,76,0.24);font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1;transform:translateY(-0.02em);}
   .progress-track{background:var(--surface2);border-radius:100px;height:7px;overflow:hidden;margin-bottom:7px;}
   .progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));transition:width 1s cubic-bezier(0.16,1,0.3,1);width:0%;}
   .progress-ticks{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:10px;}
@@ -274,7 +275,8 @@
     .insight-grid,.insight-grid.two-cards{display:flex;overflow-x:auto;gap:8px;max-width:none;margin-left:-20px;margin-right:-20px;padding:0 20px 2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
     .insight-card{min-width:156px;min-height:76px;padding:12px;scroll-snap-align:start;}
     .insight-grid::-webkit-scrollbar{display:none;}
-    .nights-big{font-size:38px}
+    .progress-total{min-width:88px;min-height:72px;padding:9px 10px}
+    .nights-big{font-size:52px}
     .card,.add-form{padding:18px}
     .top-bar{padding:0 12px}
     .top-bar-title-wrap{gap:6px}
@@ -294,7 +296,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.05.26.2</div>
+    <div class="app-version" id="appVersion">v2026.06.30.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -389,7 +391,7 @@
     <div class="card">
       <div class="progress-header">
         <div><div class="progress-label">年度進度</div><div class="progress-title">鈦金精英保級</div></div>
-        <div><div class="nights-big" id="totalDisplay">—</div></div>
+        <div class="progress-total"><div class="nights-big" id="totalDisplay">—</div></div>
       </div>
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-ticks"><span>0</span><span>75</span></div>
@@ -428,8 +430,8 @@
       </button>
       <div class="insight-card hidden" id="redeemCard">
         <div>
-          <div class="insight-kicker">兌換統計</div>
-          <div class="insight-value red" id="redeemValue">—</div>
+          <div class="insight-kicker">兌換紀錄</div>
+          <div class="insight-value gold" id="redeemValue">—</div>
         </div>
         <div class="insight-meta" id="redeemMeta">載入中...</div>
       </div>
@@ -1334,7 +1336,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.05.26.2';
+const APP_VERSION='v2026.06.30.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1492,8 +1494,8 @@ function updateInsightCards(stays,total,left){
     const totalNts=redeemStays.reduce((sum,s)=>sum+s.nights,0);
     const avgPts=Math.round(totalPts/totalNts);
     redeemCard.classList.remove('hidden');
-    redeemValueEl.textContent=`已換 ${totalNts} 晚`;
-    redeemMetaEl.textContent=`已用 ${totalPts.toLocaleString()} 分 · 均 ${avgPts.toLocaleString()}/晚`;
+    redeemValueEl.textContent=`已用 ${totalPts.toLocaleString()} 分`;
+    redeemMetaEl.textContent=`${totalNts} 晚 · 均 ${avgPts.toLocaleString()}/晚`;
   }else{
     redeemCard.classList.add('hidden');
   }
