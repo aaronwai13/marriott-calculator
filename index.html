@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.19.1 -->
+<!-- VERSION: 2026.10.19.2 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -296,7 +296,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.19.1</div>
+    <div class="app-version" id="appVersion">v2026.10.19.2</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1029,12 +1029,12 @@ function createStayJumpButton(stay, year){
   button.textContent=stay.name;
   button.onclick=e=>{
     e.stopPropagation();
-    jumpToStayDetail(year, stay.name);
+    jumpToStayDetail(year, stay.name, stay.date);
   };
   return button;
 }
 
-window.jumpToStayDetail=function(year, hotelName){
+window.jumpToStayDetail=function(year, hotelName, stayDate){
   switchTab(year);
   if(year==='2026'){
     stayFilter2026='all';
@@ -1056,7 +1056,7 @@ window.jumpToStayDetail=function(year, hotelName){
   const listId=year==='2025'?'stayList2025':'stayList';
   requestAnimationFrame(()=>{
     const list=document.getElementById(listId);
-    const target=list?[...list.querySelectorAll('.stay-item[data-stay-name]')].find(item=>item.dataset.stayName===hotelName):null;
+    const target=list?[...list.querySelectorAll('.stay-item[data-stay-name]')].find(item=>item.dataset.stayName===hotelName&&(!stayDate||item.dataset.stayDate===stayDate)):null;
     if(target){
       target.scrollIntoView({behavior:'smooth',block:'center'});
       list.querySelectorAll('.stay-item.jump-highlight').forEach(item=>item.classList.remove('jump-highlight'));
@@ -1205,7 +1205,7 @@ function render2025(){
       if(!filteredQ1Started && d>=Q1_START_2025){filteredQ1Started=true;filteredHtml+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
       if(!filteredQ1Ended && filteredQ1Started && d>Q1_END_2025){filteredQ1Ended=true;filteredHtml+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
       const dateStr=window.formatShortDate(s.date);
-      filteredHtml+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.renderBrandMark(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
+      filteredHtml+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}"><div class="stay-date">${dateStr}</div><div><div class="stay-name">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${window.renderBrandMark(s.brand)}</div></div><div class="stay-nights-tag">${s.nights}晚</div><div></div></div>`;
       if(s.date===PLATINUM_DATE){filteredHtml+=`<div class="milestone-row platinum"><span class="milestone-badge platinum">🏆 第50晚 升級白金</span></div>`;}
       if(s.date===TITANIUM_DATE){filteredHtml+=`<div class="milestone-row titanium"><span class="milestone-badge titanium">🏆 第75晚 升級鈦金</span></div>`;}
     }
@@ -1336,7 +1336,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.10.19.1';
+const APP_VERSION='v2026.10.19.2';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1859,7 +1859,7 @@ function render2026(stays){
         const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
         const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
         const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
       }
     }
   }else{
@@ -1885,7 +1885,7 @@ function render2026(stays){
       const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
       const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
       const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
     }
   }
   stayList.innerHTML=html;
