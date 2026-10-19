@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.20.1 -->
+<!-- VERSION: 2026.10.20.2 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -296,7 +296,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.20.1</div>
+    <div class="app-version" id="appVersion">v2026.10.20.2</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -465,7 +465,7 @@
       </div>
       <div class="form-group" style="margin-bottom:12px;">
         <label>品牌 <span id="brandHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
-        <select class="brand-select" id="inputBrand" onchange="checkQ1Hint()"></select>
+        <select class="brand-select" id="inputBrand" onchange="onBrandChange()"></select>
       </div>
       <div class="form-group" style="margin-bottom:12px;">
         <label>地區 <span id="regionHint" style="color:var(--text-muted);font-size:9px;letter-spacing:0.05em;text-transform:none;margin-left:4px;"></span></label>
@@ -719,8 +719,8 @@ const STAYS_2025=[
 
 const PLATINUM_DATE='2025-04-21';
 const TITANIUM_DATE='2025-06-05';
-const Q1_START_2025=new Date('2025-02-11');
-const Q1_END_2025=new Date('2025-04-28');
+const Q1_START_2025=new Date('2025-02-11T00:00:00');
+const Q1_END_2025=new Date('2025-04-28T23:59:59');
 const Q1_START_2026_FILTER=new Date('2026-02-25T00:00:00');
 const Q1_END_2026_FILTER=new Date('2026-05-10T23:59:59');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
@@ -977,7 +977,7 @@ function matchesStayFilter2026(stay){
     case 'redeem':
       return !!stay.redeem;
     case 'q1':
-      return !stay.redeem && new Date(stay.date)>=Q1_START_2026_FILTER && new Date(stay.date)<=Q1_END_2026_FILTER;
+      return !stay.redeem && new Date(stay.date+'T00:00:00')>=Q1_START_2026_FILTER && new Date(stay.date+'T00:00:00')<=Q1_END_2026_FILTER;
     case 'missing-points':
       return window.isMissingPointsStay(stay);
     default:
@@ -1162,7 +1162,7 @@ function render2025(){
   const q1MonthBonus2025={};
   let q1Total2025=0;
   STAYS_2025.forEach(stay=>{
-    const d=new Date(stay.date);
+    const d=new Date(stay.date+'T00:00:00');
     if(!stay.redeem&&d>=Q1_START_2025&&d<=Q1_END_2025){
       const monthIndex=parseInt(stay.date.split('-')[1])-1;
       q1MonthBonus2025[monthIndex]=(q1MonthBonus2025[monthIndex]||0)+stay.nights;
@@ -1199,7 +1199,7 @@ function render2025(){
     else if(mInt===3)q1Tag='<span class="q1-tag">Q1 期間（至4/28）</span>';
     filteredHtml+=`<div class="month-header">${MONTH_NAMES[m]}${q1Tag}</div>`;
     for(const s of filteredGroups2025[m]){
-      const d=new Date(s.date);
+      const d=new Date(s.date+'T00:00:00');
       if(!filteredQ1Started && d>=Q1_START_2025){filteredQ1Started=true;filteredHtml+=`<div class="q1-divider">── Q1 開始 ──</div>`;}
       if(!filteredQ1Ended && filteredQ1Started && d>Q1_END_2025){filteredQ1Ended=true;filteredHtml+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
       const dateStr=window.formatShortDate(s.date);
@@ -1333,7 +1333,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.10.20.1';
+const APP_VERSION='v2026.10.20.2';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1376,7 +1376,7 @@ const DEFAULT_STAYS=[
   {date:'2026-04-02',name:'广州天河合景福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
 ];
 
-let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=false,editKey=null,dbInitialized=false,deleteTargetKey=null,toastTimer=null;
+let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=false,editKey=null,dbInitialized=false,deleteTargetKey=null,toastTimer=null,brandAutoFilled=false;
 
 function normalizeText(value=''){
   return value.toLowerCase().normalize('NFKC').replace(/[\s\-_/.,，。、（）()]+/g,' ').trim();
@@ -1585,7 +1585,7 @@ onValue(staysRef,(snapshot)=>{
   updateSyncStatus();
 });
 
-function isQ1Eligible(stay){if(stay.redeem)return false;const d=new Date(stay.date);return d>=Q1_START&&d<=Q1_END;}
+function isQ1Eligible(stay){if(stay.redeem)return false;const d=new Date(stay.date+'T00:00:00');return d>=Q1_START&&d<=Q1_END;}
 
 function isFirstQ1StayForBrand(candidate, stays){
   if(!isQ1Eligible(candidate))return false;
@@ -1852,7 +1852,7 @@ function render2026(stays){
           const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
           pointsHtml=`<span style="color:var(--green);font-size:10px;">${base}</span>`;
         }
-        const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
+        const d=new Date(s.date+'T00:00:00'),inQ1r=d>=Q1_START&&d<=Q1_END;
         const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
         const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
         html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
@@ -1878,7 +1878,7 @@ function render2026(stays){
         const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
         pointsHtml=`<span style="color:var(--green);font-size:10px;">${base}</span>`;
       }
-      const d=new Date(s.date),inQ1r=d>=Q1_START&&d<=Q1_END;
+      const d=new Date(s.date+'T00:00:00'),inQ1r=d>=Q1_START&&d<=Q1_END;
       const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
       const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
       html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
@@ -1892,20 +1892,31 @@ window.render2026=render2026;
 window.onNameInput=function(val){
   setTimeout(checkQ1Hint,100);
   document.getElementById('clearName').classList.toggle('visible',val.length>0);
+  const brandSel=document.getElementById('inputBrand');
+  // 只喺品牌係空或者上次由自動匹配填入，先會覆蓋；手動揀咗就保留
+  const canOverwrite=!brandSel.value||brandAutoFilled;
   if(val.length===0){
-    document.getElementById('inputBrand').value='';
-    document.getElementById('brandHint').textContent='';
+    if(canOverwrite){brandSel.value='';brandAutoFilled=false;document.getElementById('brandHint').textContent='';}
     updateRegionHint('inputName','regionHint');
     return;
   }
   const inferredBrand=inferBrandFromName(val);
-  document.getElementById('inputBrand').value=inferredBrand;
-  document.getElementById('brandHint').textContent=inferredBrand?'自動匹配':'';
+  if(canOverwrite){
+    brandSel.value=inferredBrand;
+    brandAutoFilled=!!inferredBrand;
+    document.getElementById('brandHint').textContent=inferredBrand?'自動匹配':'';
+  }
   updateRegionHint('inputName','regionHint');
+};
+window.onBrandChange=function(){
+  brandAutoFilled=false;
+  document.getElementById('brandHint').textContent='';
+  checkQ1Hint();
 };
 window.clearName=function(){
   document.getElementById('inputName').value='';
-  document.getElementById('inputBrand').value='';
+  if(brandAutoFilled)document.getElementById('inputBrand').value='';
+  brandAutoFilled=false;
   document.getElementById('brandHint').textContent='';
   document.getElementById('clearName').classList.remove('visible');
   updateRegionHint('inputName','regionHint');
@@ -1943,7 +1954,7 @@ window.addStay=async function(){
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     updateSyncStatus();
     document.getElementById('inputDate').value=formatLocalDate();
-    document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';
+    document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';brandAutoFilled=false;
     document.getElementById('brandHint').textContent='';document.getElementById('clearName').classList.remove('visible');
     document.getElementById('inputRegion').value='';updateRegionHint('inputName','regionHint');
     nightsCount=1;document.getElementById('nightsVal').textContent='1';
