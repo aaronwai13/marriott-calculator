@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.19.3 -->
+<!-- VERSION: 2026.10.19.4 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -296,7 +296,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.19.3</div>
+    <div class="app-version" id="appVersion">v2026.10.19.4</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1314,7 +1314,6 @@ onValue(pointsBaseRef,(snap)=>{
   _hasPointsBase=snap.exists();
   _pointsBase=_hasPointsBase?Number(snap.val()):0;
   hasLoadedPointsBase=true;
-  if(pendingSyncWrites>0)pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
   hasSyncError=false;
   updateSyncStatus();
   if(window._currentStays&&window.render2026)window.render2026(window._currentStays);
@@ -1334,7 +1333,7 @@ onValue(pointsBaseStaysRef,(snap)=>{
 });
 
 const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.10.19.3';
+const APP_VERSION='v2026.10.19.4';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1578,7 +1577,6 @@ onValue(staysRef,(snapshot)=>{
   }
   dbInitialized=true;
   hasLoadedStays=true;
-  if(pendingSyncWrites>0)pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
   hasSyncError=false;
   updateSyncStatus();
   render2026(stays);
@@ -1942,6 +1940,8 @@ window.addStay=async function(){
     hasSyncError=false;
     updateSyncStatus();
     await push(staysRef,{date,name,brand,region,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0});
+    pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+    updateSyncStatus();
     document.getElementById('inputDate').value=formatLocalDate();
     document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';
     document.getElementById('brandHint').textContent='';document.getElementById('clearName').classList.remove('visible');
@@ -1974,6 +1974,8 @@ window.confirmDelete=async function(){
       hasSyncError=false;
       updateSyncStatus();
       await remove(ref(db,`stays2026/${deleteTargetKey}`));
+      pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+      updateSyncStatus();
       showToast('✓ 已刪除');
     }
     catch(e){
@@ -2030,6 +2032,8 @@ window.saveEdit=async function(){
     hasSyncError=false;
     updateSyncStatus();
     await update(ref(db,`stays2026/${editKey}`),{date,name,brand,region,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});
+    pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+    updateSyncStatus();
     closeModal();
     showToast('✓ 已更新');
   }
@@ -2056,6 +2060,8 @@ window.savePointsBase=async function(){
     hasSyncError=false;
     updateSyncStatus();
     await update(ref(db,'config'),{pointsBase:val,pointsBaseStayIds:ids});
+    pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+    updateSyncStatus();
     closePointsModal();
     showToast('✓ 積分餘額已更新並同步');
   }catch(e){
