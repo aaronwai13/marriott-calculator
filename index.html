@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.20.4 -->
+<!-- VERSION: 2026.10.20.5 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -296,7 +296,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.20.4</div>
+    <div class="app-version" id="appVersion">v2026.10.20.5</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -476,6 +476,13 @@
         <label>使用積分</label>
         <div class="input-wrap"><input type="number" id="inputRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>每晚房價（選填）</label>
+        <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
+          <div class="input-wrap"><input type="number" id="inputPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+          <select class="brand-select" id="inputCurrency"></select>
+        </div>
+      </div>
       <div id="q1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
       <button class="btn-add" id="btnAdd" onclick="addStay()">＋ 新增住宿</button>
     </div>
@@ -636,6 +643,13 @@
     <div class="form-group" id="editRedeemPointsGroup" style="margin-bottom:12px;display:none;">
       <label>使用積分</label>
       <div class="input-wrap"><input type="number" id="editRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>每晚房價（選填）</label>
+      <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
+        <div class="input-wrap"><input type="number" id="editPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+        <select class="brand-select" id="editCurrency"></select>
+      </div>
     </div>
     <div id="editQ1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
     <div class="form-group" style="margin-bottom:14px;">
@@ -806,6 +820,13 @@ window.renderBrandMark=function(brand){
     return `<span class="stay-brand-mark" aria-hidden="true"><span class="stay-brand-mark-text">${window.escapeHtml(initials)}</span></span><span>${safeBrand}</span>`;
   }
   return `<span class="stay-brand-mark" aria-hidden="true"><img src="${logoUrl}" alt="" loading="lazy" decoding="async" onerror="this.replaceWith(document.createTextNode(''))"></span><span>${safeBrand}</span>`;
+};
+
+window.CURRENCIES=['HKD','CNY','USD','EUR','JPY','THB','KRW','SGD','GBP','TWD'];
+window.populateCurrencySelect=function(id,selected='HKD'){
+  const sel=document.getElementById(id);
+  sel.replaceChildren(...window.CURRENCIES.map(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;return o;}));
+  sel.value=window.CURRENCIES.includes(selected)?selected:'HKD';
 };
 
 function populateBrandSelect(id){
@@ -1395,7 +1416,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.20.4';
+const APP_VERSION='v2026.10.20.5';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1743,6 +1764,12 @@ function createBrandLogoChip(brand){
 
 const renderBrandMark=window.renderBrandMark;
 
+function formatPriceHtml(stay){
+  const price=Number(stay.price);
+  if(!(price>0))return '';
+  return `<div style="margin-top:2px;font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">${window.escapeHtml(stay.currency||'HKD')} ${price.toLocaleString()}/晚</div>`;
+}
+
 function render2026(stays){
   applyQ1Context();
   window._activeYear=activeYear;
@@ -1959,7 +1986,7 @@ function render2026(stays){
           if(trigger){q1DividerShown=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
         }
         const dateStr=window.formatShortDate(s.date);
-        const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
+        const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0},${Number(s.price)>0?Number(s.price):0},'${s.currency||''}')">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
         let pointsHtml='';
         const isFirstQ1ForBrand=q1BonusKeys.has(s._key);
         if(s.redeem){
@@ -1979,13 +2006,13 @@ function render2026(stays){
         const d=new Date(s.date+'T00:00:00'),inQ1r=Q1_CONFIGURED&&d>=Q1_START&&d<=Q1_END;
         const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
         const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div>${formatPriceHtml(s)}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
       }
     }
   }else{
     for(const s of filteredStays){
       const dateStr=window.formatShortDate(s.date);
-      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
+      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0},${Number(s.price)>0?Number(s.price):0},'${s.currency||''}')">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
       let pointsHtml='';
       const isFirstQ1ForBrand=q1BonusKeys.has(s._key);
       if(s.redeem){
@@ -2005,7 +2032,7 @@ function render2026(stays){
       const d=new Date(s.date+'T00:00:00'),inQ1r=Q1_CONFIGURED&&d>=Q1_START&&d<=Q1_END;
       const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
       const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div>${formatPriceHtml(s)}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
     }
   }
   stayList.innerHTML=html;
@@ -2078,7 +2105,10 @@ window.addStay=async function(){
     pendingSyncWrites+=1;
     hasSyncError=false;
     updateSyncStatus();
-    await push(staysRefs[stayYear],{date,name,brand,region,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0});
+    const stayData={date,name,brand,region,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0};
+    const price=Math.round(parseFloat(document.getElementById('inputPrice').value)*100)/100;
+    if(price>0){stayData.price=price;stayData.currency=document.getElementById('inputCurrency').value;}
+    await push(staysRefs[stayYear],stayData);
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     updateSyncStatus();
     const todayKey=formatLocalDate();
@@ -2090,6 +2120,7 @@ window.addStay=async function(){
     isRedeem=false;document.getElementById('redeemToggle').classList.remove('active');
     document.getElementById('redeemPointsGroup').style.display='none';
     document.getElementById('inputRedeemPoints').value='';
+    document.getElementById('inputPrice').value='';
     document.getElementById('q1Hint').style.display='none';
     showToast(stayYear===activeYear?'✓ 住宿已新增並同步':`✓ 住宿已新增到 ${stayYear} 年並同步`);
   }catch(e){
@@ -2128,7 +2159,7 @@ window.confirmDelete=async function(){
   }
 };
 
-window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,redeemPoints){
+window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,redeemPoints,price,currency){
   if(!isAdmin)return;
   editKey=key;editNightsCount=nights;editIsRedeem=redeem;
   document.getElementById('editDate').value=date;
@@ -2141,6 +2172,8 @@ window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,r
   document.getElementById('editRedeemToggle').classList.toggle('active',redeem);
   document.getElementById('editPointsEarned').value=pointsEarned||'';
   document.getElementById('editRedeemPoints').value=redeemPoints||'';
+  document.getElementById('editPrice').value=price>0?price:'';
+  populateCurrencySelect('editCurrency',currency||'HKD');
   document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
   updateRegionHint('editName','editRegionHint');
   checkEditQ1Hint();
@@ -2170,11 +2203,13 @@ window.saveEdit=async function(){
   if(!date.startsWith(String(activeYear))){showToast(`日期要喺 ${activeYear} 年內`,'#F87171');return;}
   const pointsEarned=parseInt(document.getElementById('editPointsEarned').value)||0;
   const redeemPoints=editIsRedeem?parseInt(document.getElementById('editRedeemPoints').value)||0:0;
+  const editPriceVal=Math.round(parseFloat(document.getElementById('editPrice').value)*100)/100;
+  const hasPrice=editPriceVal>0;
   try{
     pendingSyncWrites+=1;
     hasSyncError=false;
     updateSyncStatus();
-    await update(ref(db,`stays${activeYear}/${editKey}`),{date,name,brand,region,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});
+    await update(ref(db,`stays${activeYear}/${editKey}`),{date,name,brand,region,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints,price:hasPrice?editPriceVal:null,currency:hasPrice?document.getElementById('editCurrency').value:null});
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     updateSyncStatus();
     closeModal();
@@ -2261,6 +2296,8 @@ document.getElementById('inputDate').value=formatLocalDate();
 populateBrandSelect('inputBrand');
 populateBrandSelect('editBrand');
 populateRegionSelect('inputRegion');
+populateCurrencySelect('inputCurrency');
+populateCurrencySelect('editCurrency');
 populateRegionSelect('editRegion');
 updateRegionHint('inputName','regionHint');
 updateSyncStatus();
