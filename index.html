@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.20.5 -->
+<!-- VERSION: 2026.10.20.6 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -20,10 +20,12 @@
     --border:rgba(201,168,76,0.15);--text:#F0EDE8;--text-muted:#8A8580;
     --green:#4ADE80;--red:#F87171;--grey:#6B7280;
     --tab-h:60px;
+    --viz-muted:#6B7280;--viz-earned:#3987e5;--viz-used:#d95926;
   }
   @media(prefers-color-scheme:light){:root{
     --bg:#F5F3EE;--surface:#FFFFFF;--surface2:#EDE9E0;
     --border:rgba(180,140,50,0.2);--text:#1A1714;--text-muted:#7A7268;--grey:#9CA3AF;
+    --viz-muted:#6B7280;--viz-earned:#2a78d6;--viz-used:#eb6834;
   }}
   *{margin:0;padding:0;box-sizing:border-box;max-width:100%;}
   body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:var(--tab-h);overflow-x:hidden;}
@@ -121,6 +123,36 @@
   .stat-value.gold{color:var(--gold);}
   .stat-value.green{color:var(--green);}
   .stat-label{font-size:11px;color:var(--text-muted);}
+
+  /* 圖表（年度對比／積分流水） */
+  .viz-wrap{position:relative;}
+  .viz-svg{display:block;width:100%;height:auto;overflow:visible;}
+  .viz-grid{stroke:rgba(128,128,128,0.22);stroke-width:1;fill:none;}
+  .viz-axis-text{fill:var(--text-muted);font-family:'DM Mono',monospace;font-size:9px;}
+  .viz-hit{fill:transparent;cursor:default;outline:none;}
+  .viz-hover{fill:rgba(128,128,128,0.10);opacity:0;pointer-events:none;transition:opacity .12s;}
+  .viz-legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 10px;font-size:11px;color:var(--text-muted);}
+  .viz-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .viz-swatch{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .viz-tip{position:absolute;top:0;left:0;z-index:5;pointer-events:none;opacity:0;transition:opacity .1s;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;font-size:11px;color:var(--text);box-shadow:0 6px 18px rgba(0,0,0,0.18);min-width:112px;}
+  .viz-tip-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:5px;}
+  .viz-tip-row{display:flex;align-items:center;gap:7px;margin-top:3px;white-space:nowrap;}
+  .viz-tip-key{width:10px;height:3px;border-radius:2px;flex:none;}
+  .viz-tip-val{font-weight:700;margin-left:auto;padding-left:10px;}
+  .viz-tip-name{color:var(--text-muted);}
+  .viz-note{font-size:10px;color:var(--text-muted);margin-top:8px;line-height:1.5;}
+  .viz-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 0 8px;}
+  .viz-subtitle{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--gold);text-transform:uppercase;}
+  .viz-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .viz-table th{font-family:'DM Mono',monospace;font-size:10px;font-weight:400;color:var(--text-muted);text-align:right;padding:6px 4px;border-bottom:1px solid rgba(128,128,128,0.22);}
+  .viz-table th:first-child,.viz-table td:first-child{text-align:left;}
+  .viz-table td{text-align:right;padding:7px 4px;border-bottom:1px solid rgba(128,128,128,0.12);font-variant-numeric:tabular-nums;}
+  .viz-table td:first-child{color:var(--text-muted);}
+  .viz-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px;}
+  .viz-kpi{background:var(--surface2);border-radius:12px;padding:10px 12px;}
+  .viz-kpi-label{font-size:10px;color:var(--text-muted);}
+  .viz-kpi-value{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-top:4px;}
+  .viz-empty{font-size:12px;color:var(--text-muted);padding:10px 0;}
 
   .section-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
@@ -296,7 +328,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.20.5</div>
+    <div class="app-version" id="appVersion">v2026.10.20.6</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -453,7 +485,7 @@
     <div class="add-form" id="addForm">
       <div class="section-header" style="margin-bottom:16px;"><div class="section-title">新增住宿</div></div>
       <div class="form-grid">
-        <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="inputDate" onchange="checkQ1Hint()"></div></div>
+        <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="inputDate" onchange="checkQ1Hint();updateDetailFields()"></div></div>
         <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="btnMinus" aria-label="減少房晚數">−</button><div class="stepper-val" id="nightsVal">1</div><button class="stepper-btn" id="btnPlus" aria-label="增加房晚數">＋</button></div></div>
       </div>
       <div class="form-group" style="margin-bottom:12px;">
@@ -476,11 +508,17 @@
         <label>使用積分</label>
         <div class="input-wrap"><input type="number" id="inputRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
-      <div class="form-group" style="margin-bottom:12px;">
-        <label>每晚房價（選填）</label>
-        <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
-          <div class="input-wrap"><input type="number" id="inputPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
-          <select class="brand-select" id="inputCurrency"></select>
+      <div id="stayDetailFields" style="display:none;">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>房型（選填）</label>
+          <div class="input-wrap"><input type="text" id="inputRoom" list="roomList" maxlength="60" autocomplete="off" placeholder="例如 高級大床房" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>每晚房價（選填）</label>
+          <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
+            <div class="input-wrap"><input type="number" id="inputPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+            <select class="brand-select" id="inputCurrency"></select>
+          </div>
         </div>
       </div>
       <div id="q1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
@@ -507,6 +545,28 @@
           <div id="remainingBrandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
         </div>
       </div>
+    </div>
+
+    <!-- 年度對比 -->
+    <div class="card collapsible-card collapsed" id="compareSectionCard">
+      <div class="section-header">
+        <button class="section-toggle" type="button" onclick="toggleSection('compareSectionCard')" aria-expanded="false">
+          <span class="section-toggle-left"><span class="section-title" id="compareTitle">年度對比</span><span class="section-summary" id="compareSummary">載入中...</span></span>
+          <span class="section-chevron">▼</span>
+        </button>
+      </div>
+      <div class="collapsible-body" id="compareBody"></div>
+    </div>
+
+    <!-- 積分流水 -->
+    <div class="card collapsible-card collapsed" id="pointsFlowCard">
+      <div class="section-header">
+        <button class="section-toggle" type="button" onclick="toggleSection('pointsFlowCard')" aria-expanded="false">
+          <span class="section-toggle-left"><span class="section-title">積分流水</span><span class="section-summary" id="pointsFlowSummary">載入中...</span></span>
+          <span class="section-chevron">▼</span>
+        </button>
+      </div>
+      <div class="collapsible-body" id="pointsFlowBody"></div>
     </div>
 
     <!-- 月度統計 2026 -->
@@ -644,11 +704,17 @@
       <label>使用積分</label>
       <div class="input-wrap"><input type="number" id="editRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
-    <div class="form-group" style="margin-bottom:12px;">
-      <label>每晚房價（選填）</label>
-      <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
-        <div class="input-wrap"><input type="number" id="editPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
-        <select class="brand-select" id="editCurrency"></select>
+    <div id="editDetailFields" style="display:none;">
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>房型（選填）</label>
+        <div class="input-wrap"><input type="text" id="editRoom" list="roomList" maxlength="60" autocomplete="off" placeholder="例如 高級大床房" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>每晚房價（選填）</label>
+        <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
+          <div class="input-wrap"><input type="number" id="editPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+          <select class="brand-select" id="editCurrency"></select>
+        </div>
       </div>
     </div>
     <div id="editQ1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
@@ -692,6 +758,7 @@
   </div>
 </div>
 
+<datalist id="roomList"></datalist>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -820,6 +887,15 @@ window.renderBrandMark=function(brand){
     return `<span class="stay-brand-mark" aria-hidden="true"><span class="stay-brand-mark-text">${window.escapeHtml(initials)}</span></span><span>${safeBrand}</span>`;
   }
   return `<span class="stay-brand-mark" aria-hidden="true"><img src="${logoUrl}" alt="" loading="lazy" decoding="async" onerror="this.replaceWith(document.createTextNode(''))"></span><span>${safeBrand}</span>`;
+};
+
+// 房型同每晚房價由 2027 年起先記錄（2026 唔顯示、唔改動已有資料）
+window.DETAIL_FIELDS_FROM_YEAR=2027;
+window.updateDetailFields=function(){
+  const dateEl=document.getElementById('inputDate');
+  const y=Number((dateEl&&dateEl.value||'').slice(0,4));
+  const box=document.getElementById('stayDetailFields');
+  if(box)box.style.display=y>=window.DETAIL_FIELDS_FROM_YEAR?'':'none';
 };
 
 window.CURRENCIES=['HKD','CNY','USD','EUR','JPY','THB','KRW','SGD','GBP','TWD'];
@@ -1416,7 +1492,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.20.5';
+const APP_VERSION='v2026.10.20.6';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1696,6 +1772,7 @@ window.setActiveYear=function(year){
     const today=formatLocalDate();
     document.getElementById('inputDate').value=today.startsWith(String(year))?today:`${year}-01-01`;
   }
+  updateDetailFields();
   renderActive();
 };
 
@@ -1764,14 +1841,209 @@ function createBrandLogoChip(brand){
 
 const renderBrandMark=window.renderBrandMark;
 
-function formatPriceHtml(stay){
+function formatDetailHtml(stay){
+  if(activeYear<window.DETAIL_FIELDS_FROM_YEAR)return '';
+  const parts=[];
+  if(stay.room)parts.push(window.escapeHtml(stay.room));
   const price=Number(stay.price);
-  if(!(price>0))return '';
-  return `<div style="margin-top:2px;font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">${window.escapeHtml(stay.currency||'HKD')} ${price.toLocaleString()}/晚</div>`;
+  if(price>0)parts.push(`${window.escapeHtml(stay.currency||'HKD')} ${price.toLocaleString()}/晚`);
+  if(!parts.length)return '';
+  return `<div style="margin-top:2px;font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">${parts.join(' · ')}</div>`;
+}
+
+// ===== 圖表：每月柱狀圖（grouped / signed）=====
+const SVG_NS='http://www.w3.org/2000/svg';
+function svgEl(tag,attrs={}){const e=document.createElementNS(SVG_NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function niceMax(v){if(!(v>0))return 1;const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return (n<=1?1:n<=2?2:n<=5?5:10)*p;}
+function compactNum(v){const a=Math.abs(v);if(a>=1000){const k=a/1000;return (v<0?'-':'')+(Number.isInteger(k)?k:k.toFixed(1))+'K';}return String(v);}
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
+function roundedBar(x,y,w,h,r,up){
+  r=Math.min(r,h/2,w/2);
+  // up=true：上端圓角、底部貼住基線；up=false：下端圓角
+  return up
+    ? `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`
+    : `M${x},${y}V${y+h-r}Q${x},${y+h} ${x+r},${y+h}H${x+w-r}Q${x+w},${y+h} ${x+w},${y+h-r}V${y}Z`;
+}
+// series: [{name,color,values[12]}]；signed=true：值有正有負（柱向上／向下）
+function buildMonthlyChart({series,signed=false,fmt=v=>String(v),extraRow=null,tableCols=null}){
+  const wrap=el('div','viz-wrap');
+  const hasData=series.some(sr=>sr.values.some(v=>v!==0));
+  if(!hasData){wrap.appendChild(el('div','viz-empty','未有資料'));return wrap;}
+  if(series.length>=2){
+    const legend=el('div','viz-legend');
+    series.forEach(sr=>{const item=el('span');const sw=el('i','viz-swatch');sw.style.background=sr.color;item.append(sw,document.createTextNode(sr.name));legend.appendChild(item);});
+    wrap.appendChild(legend);
+  }
+  const W=360,H=170,L=36,R=6,T=8,B=22,plotW=W-L-R,plotH=H-T-B,band=plotW/12;
+  const maxPos=Math.max(0,...series.flatMap(sr=>sr.values));
+  const maxNeg=Math.max(0,...series.flatMap(sr=>sr.values.map(v=>-v)));
+  const top=niceMax(maxPos),bottom=signed&&maxNeg>0?-niceMax(maxNeg):0;
+  const y=v=>T+plotH*(1-(v-bottom)/(top-bottom));
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${H}`,class:'viz-svg',role:'img'});
+  const ticks=signed&&bottom<0?[bottom,0,top]:[0,top/2,top];
+  ticks.forEach(t=>{
+    svg.appendChild(svgEl('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),class:'viz-grid'}));
+    const tx=svgEl('text',{x:L-6,y:y(t)+3,'text-anchor':'end',class:'viz-axis-text'});tx.textContent=compactNum(Math.round(t*10)/10);svg.appendChild(tx);
+  });
+  const tip=el('div','viz-tip');
+  const showTip=(m,cx)=>{
+    tip.replaceChildren();
+    tip.appendChild(el('div','viz-tip-title',`${m+1}月`));
+    series.forEach(sr=>{
+      const row=el('div','viz-tip-row');const key=el('i','viz-tip-key');key.style.background=sr.color;
+      row.append(key,el('span','viz-tip-name',sr.name),el('span','viz-tip-val',fmt(sr.values[m])));
+      tip.appendChild(row);
+    });
+    if(extraRow){const e=extraRow(m);if(e){const row=el('div','viz-tip-row');row.append(el('span','viz-tip-name',e.name),el('span','viz-tip-val',e.value));tip.appendChild(row);}}
+    const wrapW=wrap.clientWidth||W;
+    const px=cx/W*wrapW;
+    tip.style.opacity='1';
+    const tw=tip.offsetWidth;
+    tip.style.left=Math.max(0,Math.min(wrapW-tw,px-tw/2))+'px';
+    tip.style.top=(chartView.offsetTop+4)+'px';
+  };
+  const hovers=[];
+  for(let m=0;m<12;m++){
+    const cx=L+band*(m+0.5);
+    const hv=svgEl('rect',{x:L+band*m,y:T,width:band,height:plotH,class:'viz-hover'});svg.appendChild(hv);hovers.push(hv);
+  }
+  const barW=signed?14:9,gap=2;
+  series.forEach((sr,i)=>{
+    for(let m=0;m<12;m++){
+      const v=sr.values[m];if(!v)continue;
+      const cx=L+band*(m+0.5);
+      const x=signed?cx-barW/2:cx+(i===0?-barW-gap/2:gap/2);
+      const y0=y(0),yv=y(v);
+      const h=Math.max(1,Math.abs(yv-y0)),up=v>0;
+      const bar=svgEl('path',{d:roundedBar(x,up?y0-h:y0,barW,h,4,up)});
+      bar.style.fill=sr.color;
+      svg.appendChild(bar);
+    }
+  });
+  if(signed&&bottom<0)svg.appendChild(svgEl('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),class:'viz-grid'}));
+  for(let m=0;m<12;m++){
+    const cx=L+band*(m+0.5);
+    const tx=svgEl('text',{x:cx,y:H-7,'text-anchor':'middle',class:'viz-axis-text'});tx.textContent=String(m+1);svg.appendChild(tx);
+    const hit=svgEl('rect',{x:L+band*m,y:T,width:band,height:plotH+B-4,class:'viz-hit',tabindex:'0',role:'img','aria-label':`${m+1}月：`+series.map(sr=>`${sr.name} ${fmt(sr.values[m])}`).join('，')});
+    const on=()=>{hovers.forEach((h,j)=>{h.style.opacity=j===m?'1':'0';});showTip(m,cx);};
+    const off=()=>{hovers[m].style.opacity='0';tip.style.opacity='0';};
+    hit.addEventListener('pointerenter',on);hit.addEventListener('pointermove',on);hit.addEventListener('focus',on);
+    hit.addEventListener('pointerleave',off);hit.addEventListener('blur',off);
+    svg.appendChild(hit);
+  }
+  const chartView=el('div');chartView.append(svg);
+  // 表格版（同圖表一樣嘅數據，唔靠 tooltip 都睇到）
+  const table=el('table','viz-table');
+  const cols=tableCols||series.map(sr=>sr.name);
+  const thead=el('thead');const hr=el('tr');hr.appendChild(el('th','','月份'));cols.forEach(c=>hr.appendChild(el('th','',c)));thead.appendChild(hr);table.appendChild(thead);
+  const tbody=el('tbody');
+  for(let m=0;m<12;m++){
+    const tr=el('tr');tr.appendChild(el('td','',`${m+1}月`));
+    series.forEach(sr=>tr.appendChild(el('td','',fmt(sr.values[m]))));
+    if(extraRow){const e=extraRow(m);tr.appendChild(el('td','',e?e.value:''));}
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  const tableView=el('div');tableView.hidden=true;tableView.appendChild(table);
+  const toggle=el('button','filter-chip','表格');toggle.type='button';
+  toggle.addEventListener('click',()=>{const showTable=tableView.hidden;tableView.hidden=!showTable;chartView.hidden=showTable;toggle.textContent=showTable?'圖表':'表格';});
+  wrap.append(chartView,tableView,tip);
+  wrap.toggleButton=toggle;
+  return wrap;
+}
+
+function yearMetrics(stays){
+  const m={count:stays.length,nights:0,cash:0,redeem:0,monthly:Array(12).fill(0)};
+  const brands=new Set(),regions=new Set();
+  for(const st of stays){
+    const n=Number(st.nights)||0;
+    m.nights+=n;
+    if(st.redeem)m.redeem+=n;else m.cash+=n;
+    const mi=parseInt(String(st.date).split('-')[1],10)-1;
+    if(mi>=0&&mi<12)m.monthly[mi]+=n;
+    if(st.brand)brands.add(st.brand);
+    regions.add(getStayRegion(st));
+  }
+  m.brands=brands.size;m.regions=regions.size;
+  return m;
+}
+
+function renderCompare(stays){
+  const card=document.getElementById('compareSectionCard');
+  const prevYear=activeYear-1;
+  const prevStays=prevYear===2025?STAYS_2025:(staysByYear[prevYear]||null);
+  card.style.display=prevStays?'':'none';
+  if(!prevStays)return;
+  const cur=yearMetrics(stays),prev=yearMetrics(prevStays);
+  document.getElementById('compareTitle').textContent='年度對比';
+  document.getElementById('compareSummary').textContent=`${prevYear} ${prev.nights}晚 → ${activeYear} ${cur.nights}晚`;
+  const body=document.getElementById('compareBody');
+  body.replaceChildren();
+  const rows=[['住宿次數','count','次'],['實際晚數','nights','晚'],['現金入住','cash','晚'],['兌換入住','redeem','晚'],['品牌數','brands','個'],['地區數','regions','個']];
+  const table=el('table','viz-table');
+  const hr=el('tr');['',String(prevYear),String(activeYear),'差'].forEach(t=>hr.appendChild(el('th','',t)));
+  const thead=el('thead');thead.appendChild(hr);table.appendChild(thead);
+  const tbody=el('tbody');
+  rows.forEach(([label,key,unit])=>{
+    const diff=cur[key]-prev[key];
+    const tr=el('tr');
+    tr.append(el('td','',label),el('td','',`${prev[key]}${unit}`),el('td','',`${cur[key]}${unit}`),el('td','',diff>0?`+${diff}`:String(diff)));
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  body.appendChild(table);
+  const tools=el('div','viz-tools');
+  tools.appendChild(el('div','viz-subtitle','每月入住晚數'));
+  const chart=buildMonthlyChart({
+    series:[{name:String(prevYear),color:'var(--viz-muted)',values:prev.monthly},{name:String(activeYear),color:'var(--gold)',values:cur.monthly}],
+    fmt:v=>`${v}晚`
+  });
+  if(chart.toggleButton)tools.appendChild(chart.toggleButton);
+  body.append(tools,chart);
+  body.appendChild(el('div','viz-note',`只計實際入住晚數（唔包 Q1 同年度福利獎勵晚）。${prevYear===2025?'2025 係寫死嘅回顧資料。':''}`));
+}
+
+function renderPointsFlow(stays){
+  const earned=Array(12).fill(0),used=Array(12).fill(0);
+  for(const st of stays){
+    const mi=parseInt(String(st.date).split('-')[1],10)-1;
+    if(mi<0||mi>11)continue;
+    if(st.pointsEarned>0)earned[mi]+=st.pointsEarned;
+    if(st.redeem&&st.redeemPoints>0)used[mi]+=st.redeemPoints;
+  }
+  const totalE=earned.reduce((a,b)=>a+b,0),totalU=used.reduce((a,b)=>a+b,0),net=totalE-totalU;
+  const fmtSigned=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toLocaleString();
+  document.getElementById('pointsFlowSummary').textContent=totalE||totalU?`淨 ${fmtSigned(net)} 分`:'未有積分記錄';
+  const body=document.getElementById('pointsFlowBody');
+  body.replaceChildren();
+  const kpis=el('div','viz-kpis');
+  [['賺取',totalE.toLocaleString()],['使用',totalU.toLocaleString()],['淨變化',fmtSigned(net)]].forEach(([label,value])=>{
+    const k=el('div','viz-kpi');k.append(el('div','viz-kpi-label',label),el('div','viz-kpi-value',value));kpis.appendChild(k);
+  });
+  body.appendChild(kpis);
+  const tools=el('div','viz-tools');
+  tools.appendChild(el('div','viz-subtitle','每月賺取／使用'));
+  const chart=buildMonthlyChart({
+    series:[{name:'賺取',color:'var(--viz-earned)',values:earned},{name:'使用',color:'var(--viz-used)',values:used.map(v=>-v)}],
+    signed:true,
+    fmt:v=>(v<0?'−':'')+Math.abs(v).toLocaleString(),
+    extraRow:m=>({name:'淨變化',value:fmtSigned(earned[m]-used[m])}),
+    tableCols:['賺取','使用','淨變化']
+  });
+  if(chart.toggleButton)tools.appendChild(chart.toggleButton);
+  body.append(tools,chart);
+  body.appendChild(el('div','viz-note','按住宿日期嘅月份計；未填賺取積分嘅住宿未計入。向上＝賺取，向下＝使用。'));
+}
+
+function refreshRoomSuggestions(){
+  const rooms=new Set();
+  YEARS.filter(y=>y>=window.DETAIL_FIELDS_FROM_YEAR).forEach(y=>(staysByYear[y]||[]).forEach(st=>{if(st.room)rooms.add(st.room);}));
+  document.getElementById('roomList').replaceChildren(...[...rooms].sort().map(r=>{const o=document.createElement('option');o.value=r;return o;}));
 }
 
 function render2026(stays){
   applyQ1Context();
+  refreshRoomSuggestions();
   window._activeYear=activeYear;
   window._currentStays=stays;
   document.getElementById('liveTitle').innerHTML=`${activeYear} 住宿<span>追蹤</span>`;
@@ -1953,6 +2225,8 @@ function render2026(stays){
 
   buildBrandAccordion(stays,'brandAccordion2026');
   renderRegionAccordion(stays,'regionAccordion2026');
+  renderCompare(stays);
+  renderPointsFlow(stays);
 
   const stayList=document.getElementById('stayList');
   if(sorted.length===0){stayList.innerHTML='<div class="empty-state">未有住宿記錄</div>';return;}
@@ -1986,7 +2260,7 @@ function render2026(stays){
           if(trigger){q1DividerShown=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
         }
         const dateStr=window.formatShortDate(s.date);
-        const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0},${Number(s.price)>0?Number(s.price):0},'${s.currency||''}')">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
+        const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
         let pointsHtml='';
         const isFirstQ1ForBrand=q1BonusKeys.has(s._key);
         if(s.redeem){
@@ -2006,13 +2280,13 @@ function render2026(stays){
         const d=new Date(s.date+'T00:00:00'),inQ1r=Q1_CONFIGURED&&d>=Q1_START&&d<=Q1_END;
         const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
         const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div>${formatPriceHtml(s)}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div>${formatDetailHtml(s)}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
       }
     }
   }else{
     for(const s of filteredStays){
       const dateStr=window.formatShortDate(s.date);
-      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0},${Number(s.price)>0?Number(s.price):0},'${s.currency||''}')">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
+      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
       let pointsHtml='';
       const isFirstQ1ForBrand=q1BonusKeys.has(s._key);
       if(s.redeem){
@@ -2032,7 +2306,7 @@ function render2026(stays){
       const d=new Date(s.date+'T00:00:00'),inQ1r=Q1_CONFIGURED&&d>=Q1_START&&d<=Q1_END;
       const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
       const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div>${formatPriceHtml(s)}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div>${formatDetailHtml(s)}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
     }
   }
   stayList.innerHTML=html;
@@ -2106,8 +2380,12 @@ window.addStay=async function(){
     hasSyncError=false;
     updateSyncStatus();
     const stayData={date,name,brand,region,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0};
-    const price=Math.round(parseFloat(document.getElementById('inputPrice').value)*100)/100;
-    if(price>0){stayData.price=price;stayData.currency=document.getElementById('inputCurrency').value;}
+    if(stayYear>=window.DETAIL_FIELDS_FROM_YEAR){
+      const price=Math.round(parseFloat(document.getElementById('inputPrice').value)*100)/100;
+      const room=document.getElementById('inputRoom').value.trim();
+      if(price>0){stayData.price=price;stayData.currency=document.getElementById('inputCurrency').value;}
+      if(room)stayData.room=room;
+    }
     await push(staysRefs[stayYear],stayData);
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     updateSyncStatus();
@@ -2121,6 +2399,8 @@ window.addStay=async function(){
     document.getElementById('redeemPointsGroup').style.display='none';
     document.getElementById('inputRedeemPoints').value='';
     document.getElementById('inputPrice').value='';
+    document.getElementById('inputRoom').value='';
+    updateDetailFields();
     document.getElementById('q1Hint').style.display='none';
     showToast(stayYear===activeYear?'✓ 住宿已新增並同步':`✓ 住宿已新增到 ${stayYear} 年並同步`);
   }catch(e){
@@ -2159,7 +2439,7 @@ window.confirmDelete=async function(){
   }
 };
 
-window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,redeemPoints,price,currency){
+window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,redeemPoints){
   if(!isAdmin)return;
   editKey=key;editNightsCount=nights;editIsRedeem=redeem;
   document.getElementById('editDate').value=date;
@@ -2172,8 +2452,11 @@ window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,r
   document.getElementById('editRedeemToggle').classList.toggle('active',redeem);
   document.getElementById('editPointsEarned').value=pointsEarned||'';
   document.getElementById('editRedeemPoints').value=redeemPoints||'';
-  document.getElementById('editPrice').value=price>0?price:'';
-  populateCurrencySelect('editCurrency',currency||'HKD');
+  const current=(window._currentStays||[]).find(x=>x._key===key)||{};
+  document.getElementById('editDetailFields').style.display=activeYear>=window.DETAIL_FIELDS_FROM_YEAR?'':'none';
+  document.getElementById('editRoom').value=current.room||'';
+  document.getElementById('editPrice').value=Number(current.price)>0?current.price:'';
+  populateCurrencySelect('editCurrency',current.currency||'HKD');
   document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
   updateRegionHint('editName','editRegionHint');
   checkEditQ1Hint();
@@ -2203,13 +2486,20 @@ window.saveEdit=async function(){
   if(!date.startsWith(String(activeYear))){showToast(`日期要喺 ${activeYear} 年內`,'#F87171');return;}
   const pointsEarned=parseInt(document.getElementById('editPointsEarned').value)||0;
   const redeemPoints=editIsRedeem?parseInt(document.getElementById('editRedeemPoints').value)||0:0;
-  const editPriceVal=Math.round(parseFloat(document.getElementById('editPrice').value)*100)/100;
-  const hasPrice=editPriceVal>0;
+  const payload={date,name,brand,region,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints};
+  if(activeYear>=window.DETAIL_FIELDS_FROM_YEAR){
+    const editPriceVal=Math.round(parseFloat(document.getElementById('editPrice').value)*100)/100;
+    const hasPrice=editPriceVal>0;
+    const room=document.getElementById('editRoom').value.trim();
+    payload.price=hasPrice?editPriceVal:null;
+    payload.currency=hasPrice?document.getElementById('editCurrency').value:null;
+    payload.room=room||null;
+  }
   try{
     pendingSyncWrites+=1;
     hasSyncError=false;
     updateSyncStatus();
-    await update(ref(db,`stays${activeYear}/${editKey}`),{date,name,brand,region,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints,price:hasPrice?editPriceVal:null,currency:hasPrice?document.getElementById('editCurrency').value:null});
+    await update(ref(db,`stays${activeYear}/${editKey}`),payload);
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     updateSyncStatus();
     closeModal();
@@ -2301,6 +2591,7 @@ populateCurrencySelect('editCurrency');
 populateRegionSelect('editRegion');
 updateRegionHint('inputName','regionHint');
 updateSyncStatus();
+updateDetailFields();
 switchTab(String(activeYear));
 </script>
 
