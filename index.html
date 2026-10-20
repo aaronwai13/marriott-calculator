@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.20.3 -->
+<!-- VERSION: 2026.10.20.5 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -296,7 +296,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.20.3</div>
+    <div class="app-version" id="appVersion">v2026.10.20.5</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -381,7 +381,7 @@
 <div class="page active" id="page2026">
   <div class="container" id="container2026" style="padding-top:68px;">
     <div class="header">
-      <h1>2026 住宿<span>追蹤</span></h1>
+      <h1 id="liveTitle">2026 住宿<span>追蹤</span></h1>
       <div class="header-sub">鈦金保級目標 · 75晚</div>
       <div class="header-actions">
         <button class="shortcut-btn" type="button" onclick="jumpToStayList('2026')">住宿明細</button>
@@ -440,7 +440,7 @@
     <div class="stats-grid">
       <div class="stat-card"><span class="stat-icon">🏨</span><div class="stat-value gold" id="statActual">—</div><div class="stat-label">實際住宿晚數</div></div>
       <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value blue" id="statQ1">—</div><div class="stat-label">Q1活動獎勵房晚</div></div>
-      <div class="stat-card"><span class="stat-icon">⭐</span><div class="stat-value green" id="statEarned">—</div><div class="stat-label">2026已賺積分</div></div>
+      <div class="stat-card"><span class="stat-icon">⭐</span><div class="stat-value green" id="statEarned">—</div><div class="stat-label" id="statEarnedLabel">2026已賺積分</div></div>
       <div class="stat-card" style="position:relative;">
         <span class="stat-icon">💎</span>
         <div class="stat-value purple" id="statTotal">—</div>
@@ -476,6 +476,13 @@
         <label>使用積分</label>
         <div class="input-wrap"><input type="number" id="inputRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>每晚房價（選填）</label>
+        <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
+          <div class="input-wrap"><input type="number" id="inputPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+          <select class="brand-select" id="inputCurrency"></select>
+        </div>
+      </div>
       <div id="q1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
       <button class="btn-add" id="btnAdd" onclick="addStay()">＋ 新增住宿</button>
     </div>
@@ -490,7 +497,8 @@
       </div>
       <div class="collapsible-body">
         <div id="q1SectionDesc" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span></div>
-        <div style="margin-bottom:14px;">
+        <button class="shortcut-btn" type="button" id="q1ConfigBtn" onclick="openQ1Config()" style="display:none;margin-bottom:12px;">設定 Q1 日期同計法</button>
+        <div id="q1BrandsBlock" style="margin-bottom:14px;">
           <div class="q1-brand-label" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">已入住品牌</div>
           <div id="brandsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
         </div>
@@ -535,7 +543,7 @@
 
     <!-- 住宿明細 -->
     <div id="staySection2026">
-      <div class="section-header"><div class="section-title">住宿明細</div><div class="badge badge-gold">2026年</div></div>
+      <div class="section-header"><div class="section-title">住宿明細</div><div class="badge badge-gold" id="stayBadge">2026年</div></div>
       <div class="search-box">
         <div class="input-wrap">
           <input class="search-input" type="text" id="search2026" placeholder="搜尋酒店、品牌、地區" oninput="updateStaySearch('2026', this.value)" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -562,6 +570,9 @@
 
 <!-- Tab bar -->
 <div class="tab-bar" role="tablist" aria-label="年份切換">
+  <button class="tab-btn" id="tab2027" onclick="switchTab('2027')" role="tab" aria-selected="false" aria-controls="page2026">
+    <span class="tab-icon">🗓️</span><span class="tab-label">2027</span>
+  </button>
   <button class="tab-btn active" id="tab2026" onclick="switchTab('2026')" role="tab" aria-selected="true" aria-controls="page2026">
     <span class="tab-icon">📍</span><span class="tab-label">2026</span>
   </button>
@@ -633,12 +644,38 @@
       <label>使用積分</label>
       <div class="input-wrap"><input type="number" id="editRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>每晚房價（選填）</label>
+      <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
+        <div class="input-wrap"><input type="number" id="editPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+        <select class="brand-select" id="editCurrency"></select>
+      </div>
+    </div>
     <div id="editQ1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
     <div class="form-group" style="margin-bottom:14px;">
       <label>賺取積分（退房後填寫）</label>
       <div class="input-wrap"><input type="number" id="editPointsEarned" inputmode="numeric" placeholder="例如 4608" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEdit()">儲存</button></div>
+  </div>
+</div>
+
+<!-- Q1 Config Modal -->
+<div class="modal-overlay" id="q1ConfigModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="q1ConfigTitle">
+    <div class="modal-title" id="q1ConfigTitle">Q1 設定</div>
+    <div class="form-grid" style="margin-bottom:12px;">
+      <div class="form-group"><label>開始日</label><div class="input-wrap"><input type="date" id="q1CfgStart"></div></div>
+      <div class="form-group"><label>結束日</label><div class="input-wrap"><input type="date" id="q1CfgEnd"></div></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>計法</label>
+      <select class="brand-select" id="q1CfgRule">
+        <option value="brand">每品牌首次入住加相同房晚</option>
+        <option value="night">窗口內每一晚現金入住都加</option>
+      </select>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:14px;">只計現金入住，積分兌換唔計。設定後所有人都會見到。</div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeQ1Config()">取消</button><button class="btn-save" onclick="saveQ1Config()">儲存</button></div>
   </div>
 </div>
 
@@ -721,8 +758,6 @@ const PLATINUM_DATE='2025-04-21';
 const TITANIUM_DATE='2025-06-05';
 const Q1_START_2025=new Date('2025-02-11T00:00:00');
 const Q1_END_2025=new Date('2025-04-28T23:59:59');
-const Q1_START_2026_FILTER=new Date('2026-02-25T00:00:00');
-const Q1_END_2026_FILTER=new Date('2026-05-10T23:59:59');
 const MONTH_NAMES=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 const staySearchState={2025:'',2026:''};
 let stayFilter2026='all';
@@ -787,6 +822,13 @@ window.renderBrandMark=function(brand){
   return `<span class="stay-brand-mark" aria-hidden="true"><img src="${logoUrl}" alt="" loading="lazy" decoding="async" onerror="this.replaceWith(document.createTextNode(''))"></span><span>${safeBrand}</span>`;
 };
 
+window.CURRENCIES=['HKD','CNY','USD','EUR','JPY','THB','KRW','SGD','GBP','TWD'];
+window.populateCurrencySelect=function(id,selected='HKD'){
+  const sel=document.getElementById(id);
+  sel.replaceChildren(...window.CURRENCIES.map(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;return o;}));
+  sel.value=window.CURRENCIES.includes(selected)?selected:'HKD';
+};
+
 function populateBrandSelect(id){
   const sel=document.getElementById(id);
   const placeholder=document.createElement('option');
@@ -796,7 +838,7 @@ function populateBrandSelect(id){
 }
 
 function buildAccordion(items,containerId,totalMeta){
-  const year=containerId.endsWith('2025')?'2025':'2026';
+  const year=containerId.endsWith('2025')?'2025':String(window._activeYear||2026);
   const container=document.getElementById(containerId);
   const fragment=document.createDocumentFragment();
   items.forEach((item,idx)=>{
@@ -977,7 +1019,12 @@ function matchesStayFilter2026(stay){
     case 'redeem':
       return !!stay.redeem;
     case 'q1':
-      return !stay.redeem && new Date(stay.date+'T00:00:00')>=Q1_START_2026_FILTER && new Date(stay.date+'T00:00:00')<=Q1_END_2026_FILTER;
+      {
+        const w=window.getQ1Window?window.getQ1Window():null;
+        if(!w||!w.configured||stay.redeem)return false;
+        const d=new Date(stay.date+'T00:00:00');
+        return d>=w.start&&d<=w.end;
+      }
     case 'missing-points':
       return window.isMissingPointsStay(stay);
     default:
@@ -1035,8 +1082,9 @@ function createStayJumpButton(stay, year){
 }
 
 window.jumpToStayDetail=function(year, hotelName, stayDate){
+  const domYear=year==='2025'?'2025':'2026';
   switchTab(year);
-  if(year==='2026'){
+  if(year!=='2025'){
     stayFilter2026='all';
     staySort2026='latest';
     document.querySelectorAll('#stayFilterChips2026 .filter-chip').forEach(button=>{
@@ -1046,9 +1094,9 @@ window.jumpToStayDetail=function(year, hotelName, stayDate){
       button.classList.toggle('active',button.dataset.sort==='latest');
     });
   }
-  staySearchState[year]='';
-  const input=document.getElementById(`search${year}`);
-  const clearButton=document.getElementById(`clearSearch${year}`);
+  staySearchState[domYear]='';
+  const input=document.getElementById(`search${domYear}`);
+  const clearButton=document.getElementById(`clearSearch${domYear}`);
   if(input)input.value='';
   if(clearButton)clearButton.classList.remove('visible');
   if(year==='2025')render2025();
@@ -1064,7 +1112,7 @@ window.jumpToStayDetail=function(year, hotelName, stayDate){
       window.setTimeout(()=>target.classList.remove('jump-highlight'),2200);
       return;
     }
-    const section=document.getElementById(`staySection${year}`);
+    const section=document.getElementById(`staySection${domYear}`);
     if(section)section.scrollIntoView({behavior:'smooth',block:'start'});
   });
 };
@@ -1215,17 +1263,20 @@ render2025();
 // Tab switching
 let currentIsAdmin=false;
 function switchTab(year){
-  document.getElementById('page2025').classList.toggle('active',year==='2025');
-  document.getElementById('page2026').classList.toggle('active',year==='2026');
-  document.getElementById('tab2025').classList.toggle('active',year==='2025');
-  document.getElementById('tab2026').classList.toggle('active',year==='2026');
-  document.getElementById('tab2025').setAttribute('aria-selected',String(year==='2025'));
-  document.getElementById('tab2026').setAttribute('aria-selected',String(year==='2026'));
-  const on2026=year==='2026';
-  // 只有 2026 頁先顯示同步、更新、登入相關操作
-  document.getElementById('syncChip').style.display=on2026?'':'none';
-  document.getElementById('loginChip').style.visibility=on2026?'':'hidden';
-  document.getElementById('userAvatar').style.visibility=on2026?'':'hidden';
+  const live=year!=='2025';
+  document.getElementById('page2025').classList.toggle('active',!live);
+  document.getElementById('page2026').classList.toggle('active',live);
+  ['2027','2026','2025'].forEach(y=>{
+    const tab=document.getElementById(`tab${y}`);
+    if(!tab)return;
+    tab.classList.toggle('active',y===year);
+    tab.setAttribute('aria-selected',String(y===year));
+  });
+  // 只有 2026／2027 頁先顯示同步、更新、登入相關操作
+  document.getElementById('syncChip').style.display=live?'':'none';
+  document.getElementById('loginChip').style.visibility=live?'':'hidden';
+  document.getElementById('userAvatar').style.visibility=live?'':'hidden';
+  if(live&&window.setActiveYear)window.setActiveYear(Number(year));
 }
 
 // Modal helpers
@@ -1240,7 +1291,7 @@ window.showLogoutModal=function(){
 window.closeAllModals=function(){
   document.querySelectorAll('.modal-overlay').forEach(el=>el.classList.remove('show'));
 };
-['loginModal','logoutModal','delModal','modalOverlay','pointsModalOverlay'].forEach(id=>{
+['loginModal','logoutModal','delModal','modalOverlay','pointsModalOverlay','q1ConfigModal'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeAllModals();});
 });
 document.getElementById('userAvatar').addEventListener('keydown',e=>{
@@ -1262,7 +1313,11 @@ const firebaseConfig={apiKey:"AIzaSyArG04UcAi4oe4DdDJtJPrRCCv5e20cVVk",authDomai
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 const auth=getAuth(app);
-const staysRef=ref(db,'stays2026');
+// 年度資料各自一個節點：stays2026、stays2027…（新增年份要同時加 database.rules.json）
+const YEARS=[2026,2027];
+const staysRefs={};
+YEARS.forEach(y=>{staysRefs[y]=ref(db,`stays${y}`);});
+const q1ConfigRef=ref(db,'config/q1');
 const pointsBaseRef=ref(db,'config/pointsBase');
 const pointsBaseStaysRef=ref(db,'config/pointsBaseStayIds');
 const connectedRef=ref(db,'.info/connected');
@@ -1271,7 +1326,10 @@ let _pointsBase=0;
 let _hasPointsBase=false;
 let _pointsBaseStays=[];
 let isConnected=null;
-let hasLoadedStays=false;
+let loadedYears=new Set();
+let staysByYear={};
+let hasLoadedQ1=false;
+let _q1Config={};
 let hasLoadedPointsBase=false;
 let hasLoadedPointsBaseStays=false;
 let hasSyncError=false;
@@ -1292,7 +1350,7 @@ function updateSyncStatus(){
     label.textContent='離線';
     return;
   }
-  if(isConnected===null || pendingSyncWrites>0 || !hasLoadedStays || !hasLoadedPointsBase || !hasLoadedPointsBaseStays){
+  if(isConnected===null || pendingSyncWrites>0 || loadedYears.size<YEARS.length || !hasLoadedQ1 || !hasLoadedPointsBase || !hasLoadedPointsBaseStays){
     chip.classList.add('loading');
     label.textContent='同步中';
     return;
@@ -1321,6 +1379,16 @@ onValue(pointsBaseRef,(snap)=>{
   hasSyncError=true;
   updateSyncStatus();
 });
+onValue(q1ConfigRef,(snap)=>{
+  _q1Config=snap.val()||{};
+  hasLoadedQ1=true;
+  hasSyncError=false;
+  updateSyncStatus();
+  renderActive();
+},()=>{
+  hasSyncError=true;
+  updateSyncStatus();
+});
 onValue(pointsBaseStaysRef,(snap)=>{
   _pointsBaseStays=snap.val()||[];
   hasLoadedPointsBaseStays=true;
@@ -1332,8 +1400,23 @@ onValue(pointsBaseStaysRef,(snap)=>{
   updateSyncStatus();
 });
 
-const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5,Q1_START=new Date('2026-02-25T00:00:00'),Q1_END=new Date('2026-05-10T23:59:59');
-const APP_VERSION='v2026.10.20.3';
+const TARGET=75,ANNUAL_CHOICE_THRESHOLD=50,ANNUAL_CHOICE_BONUS=5;
+
+// Q1 活動窗口同計法按年份設定：rule 'brand'＝每品牌首次入住加相同房晚；'night'＝窗口內每一晚現金入住都加
+const DEFAULT_Q1={2026:{start:'2026-02-25',end:'2026-05-10',rule:'brand'}};
+let Q1_START=null,Q1_END=null,Q1_RULE='brand',Q1_CONFIGURED=false;
+function getQ1ForYear(year){
+  const cfg=_q1Config&&_q1Config[year]&&_q1Config[year].start&&_q1Config[year].end?_q1Config[year]:DEFAULT_Q1[year];
+  if(!cfg)return{start:null,end:null,rule:'brand',configured:false,cfg:null};
+  return{start:new Date(`${cfg.start}T00:00:00`),end:new Date(`${cfg.end}T23:59:59`),rule:cfg.rule==='night'?'night':'brand',configured:true,cfg};
+}
+function applyQ1Context(){
+  const q=getQ1ForYear(activeYear);
+  Q1_START=q.start;Q1_END=q.end;Q1_RULE=q.rule;Q1_CONFIGURED=q.configured;
+}
+window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
+function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
+const APP_VERSION='v2026.10.20.5';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1376,6 +1459,8 @@ const DEFAULT_STAYS=[
   {date:'2026-04-02',name:'广州天河合景福朋喜来登酒店',brand:'Four Points',nights:1,redeem:false},
 ];
 
+const _nowYear=new Date().getFullYear();
+let activeYear=YEARS.includes(_nowYear)?_nowYear:(_nowYear>YEARS[YEARS.length-1]?YEARS[YEARS.length-1]:YEARS[0]);
 let isAdmin=false,nightsCount=1,isRedeem=false,editNightsCount=1,editIsRedeem=false,editKey=null,dbInitialized=false,deleteTargetKey=null,toastTimer=null,brandAutoFilled=false;
 
 function normalizeText(value=''){
@@ -1446,13 +1531,18 @@ function updateInsightCards(stays,total,left){
 
   const paceValue=document.getElementById('paceValue');
   const paceMeta=document.getElementById('paceMeta');
+  const thisYear=today.getFullYear();
   if(left<=0){
     paceValue.textContent='已達標';
     paceMeta.textContent=`全年已累計 ${total} 晚`;
+  }else if(activeYear<thisYear){
+    paceValue.textContent=`尚欠 ${left} 晚`;
+    paceMeta.textContent=`${activeYear} 年度已結束`;
   }else{
-    const monthsLeft=Math.max(1,12-today.getMonth());
+    const startMonth=activeYear>thisYear?0:today.getMonth();
+    const monthsLeft=Math.max(1,12-startMonth);
     const monthlyPace=Math.ceil(left/monthsLeft);
-    const monthRange=`${today.getMonth()+1}-12月`;
+    const monthRange=`${startMonth+1}-12月`;
     paceValue.textContent=`每月約 ${monthlyPace} 晚`;
     paceMeta.textContent=`${monthRange} 平均 · 尚欠 ${left} 晚`;
   }
@@ -1460,18 +1550,21 @@ function updateInsightCards(stays,total,left){
   const q1Value=document.getElementById('q1WindowValue');
   const q1Meta=document.getElementById('q1WindowMeta');
   const q1Card=document.getElementById('q1WindowCard');
-  q1Card.classList.toggle('hidden',today>Q1_END);
-  if(today<Q1_START){
+  q1Card.classList.toggle('hidden',!Q1_CONFIGURED||today>Q1_END);
+  if(!Q1_CONFIGURED){
+    q1Value.textContent='—';
+    q1Meta.textContent='未設定 Q1 日期';
+  }else if(today<Q1_START){
     const days=daysBetween(today,Q1_START);
     q1Value.textContent=`${days}日後開始`;
-    q1Meta.textContent='首個合資格品牌可額外加房晚';
+    q1Meta.textContent=Q1_RULE==='night'?'期間現金入住每晚都額外加房晚':'首個合資格品牌可額外加房晚';
   }else if(today<=Q1_END){
     const days=daysBetween(today,Q1_END);
     q1Value.textContent=`仲有 ${days} 日`;
-    q1Meta.textContent='10/5 前現金入住新品牌先計獎勵';
+    q1Meta.textContent=Q1_RULE==='night'?`${formatDayMonth(Q1_END)} 前現金入住每晚計獎勵`:`${formatDayMonth(Q1_END)} 前現金入住新品牌先計獎勵`;
   }else{
     q1Value.textContent='已結束';
-    q1Meta.textContent='品牌獎勵已按首次合資格入住計算';
+    q1Meta.textContent=Q1_RULE==='night'?'品牌獎勵已按窗口內每晚現金入住計算':'品牌獎勵已按首次合資格入住計算';
   }
 
   const missingStays=stays.filter(stay=>isMissingPointsStay(stay,todayKey));
@@ -1534,6 +1627,7 @@ onAuthStateChanged(auth,(user)=>{
       signOut(auth);
     }
   }
+  renderActive();
 });
 
 window.doLogin=async function(){
@@ -1565,40 +1659,78 @@ function setupStepper(mId,pId,vId,getV,setV){
 setupStepper('btnMinus','btnPlus','nightsVal',()=>nightsCount,v=>{nightsCount=v;});
 setupStepper('editBtnMinus','editBtnPlus','editNightsVal',()=>editNightsCount,v=>{editNightsCount=v;});
 
-onValue(staysRef,(snapshot)=>{
-  const data=snapshot.val();let stays=[];
-  if(data){stays=Object.entries(data).map(([key,val])=>({...val,_key:key}));}
-  else if(!dbInitialized){
-    dbInitialized=true;
-    if(isAdmin){
-      DEFAULT_STAYS.forEach(s=>push(staysRef,s));
-      return;
+YEARS.forEach(year=>{
+  onValue(staysRefs[year],(snapshot)=>{
+    const data=snapshot.val();let stays=[];
+    if(data){stays=Object.entries(data).map(([key,val])=>({...val,_key:key}));}
+    else if(year===2026&&!dbInitialized){
+      dbInitialized=true;
+      if(isAdmin){
+        DEFAULT_STAYS.forEach(s=>push(staysRefs[2026],s));
+        return;
+      }
     }
-  }
-  dbInitialized=true;
-  hasLoadedStays=true;
-  hasSyncError=false;
-  updateSyncStatus();
-  render2026(stays);
-},()=>{
-  hasSyncError=true;
-  updateSyncStatus();
+    if(year===2026)dbInitialized=true;
+    staysByYear[year]=stays;
+    loadedYears.add(year);
+    hasSyncError=false;
+    updateSyncStatus();
+    renderActive();
+  },()=>{
+    hasSyncError=true;
+    updateSyncStatus();
+  });
 });
 
-function isQ1Eligible(stay){if(stay.redeem)return false;const d=new Date(stay.date+'T00:00:00');return d>=Q1_START&&d<=Q1_END;}
+function renderActive(){
+  if(loadedYears.has(activeYear))render2026(staysByYear[activeYear]);
+}
+
+// 分頁切換（switchTab 會呼叫）：同一個頁面按年份重新渲染
+window.setActiveYear=function(year){
+  if(!YEARS.includes(year))return;
+  const changed=year!==activeYear;
+  activeYear=year;
+  if(changed){
+    // 預設新增日期：今年就用今日，否則用該年 1/1
+    const today=formatLocalDate();
+    document.getElementById('inputDate').value=today.startsWith(String(year))?today:`${year}-01-01`;
+  }
+  renderActive();
+};
+
+function isQ1Eligible(stay){
+  if(!Q1_CONFIGURED||stay.redeem)return false;
+  const d=new Date(stay.date+'T00:00:00');
+  return d>=Q1_START&&d<=Q1_END;
+}
 
 function isFirstQ1StayForBrand(candidate, stays){
   if(!isQ1Eligible(candidate))return false;
+  if(Q1_RULE==='night')return true;
   const sorted=[...stays,candidate].filter(s=>isQ1Eligible(s)).sort((a,b)=>a.date.localeCompare(b.date)||(a._key||'').localeCompare(b._key||''));
   const first=sorted.find(s=>s.brand===candidate.brand);
   return !!first&&first._key===candidate._key;
 }
 
+// 獲得 Q1 獎勵嘅住宿 key：'brand' 每品牌第一筆；'night' 窗口內全部現金入住
+function getQ1BonusKeys(stays){
+  const keys=new Set();
+  const eligible=[...stays].filter(s=>isQ1Eligible(s)).sort((a,b)=>a.date.localeCompare(b.date)||(a._key||'').localeCompare(b._key||''));
+  if(Q1_RULE==='night'){eligible.forEach(s=>keys.add(s._key));return keys;}
+  const seen=new Set();
+  for(const s of eligible){if(!seen.has(s.brand)){seen.add(s.brand);keys.add(s._key);}}
+  return keys;
+}
+
 function calcQ1(stays){
   const usedBrands=new Set();let bonus=0;
-  const sorted=[...stays].sort((a,b)=>a.date.localeCompare(b.date));
-  for(const s of sorted){if(isQ1Eligible(s)&&!usedBrands.has(s.brand)){usedBrands.add(s.brand);bonus+=s.nights;}}
-  return{bonus,usedBrands};
+  const bonusKeys=getQ1BonusKeys(stays);
+  for(const s of stays){
+    if(isQ1Eligible(s))usedBrands.add(s.brand);
+    if(bonusKeys.has(s._key))bonus+=s.nights;
+  }
+  return{bonus,usedBrands,bonusKeys};
 }
 
 function calcAnnualChoiceBonus(preAnnualTotal){
@@ -1632,14 +1764,24 @@ function createBrandLogoChip(brand){
 
 const renderBrandMark=window.renderBrandMark;
 
+function formatPriceHtml(stay){
+  const price=Number(stay.price);
+  if(!(price>0))return '';
+  return `<div style="margin-top:2px;font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">${window.escapeHtml(stay.currency||'HKD')} ${price.toLocaleString()}/晚</div>`;
+}
+
 function render2026(stays){
+  applyQ1Context();
+  window._activeYear=activeYear;
   window._currentStays=stays;
+  document.getElementById('liveTitle').innerHTML=`${activeYear} 住宿<span>追蹤</span>`;
+  document.getElementById('statEarnedLabel').textContent=`${activeYear}已賺積分`;
+  document.getElementById('stayBadge').textContent=`${activeYear}年`;
+  document.querySelector('#stayFilterChips2026 [data-filter="q1"]').style.display=Q1_CONFIGURED?'':'none';
+  if(!Q1_CONFIGURED&&stayFilter2026==='q1'){stayFilter2026='all';document.querySelectorAll('#stayFilterChips2026 .filter-chip').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));}
+  document.getElementById('q1ConfigBtn').style.display=isAdmin?'':'none';
   const sorted=[...stays].sort((a,b)=>a.date.localeCompare(b.date));
-  const allQ1Sorted=[...stays].filter(s=>isQ1Eligible(s)).sort((a,b)=>a.date.localeCompare(b.date)||a._key.localeCompare(b._key));
-  const firstQ1KeyByBrand={};
-  for(const s of allQ1Sorted){
-    if(!firstQ1KeyByBrand[s.brand])firstQ1KeyByBrand[s.brand]=s._key;
-  }
+  const q1BonusKeys=getQ1BonusKeys(stays);
   const filteredStays=sortFilteredStays2026(
     sorted.filter(stay=>matchesStaySearch(stay,'2026')&&matchesStayFilter2026(stay)&&matchesStaySortScope2026(stay))
   );
@@ -1672,17 +1814,19 @@ function render2026(stays){
 
   const pointsBase=_pointsBase;
   const pointsBaseStays=_pointsBaseStays;
+  const allYearsLoaded=loadedYears.size===YEARS.length;
   let netChange=0;
-  // 要知道每個品牌嘅「第一次Q1住宿」係咪喺pointsBase snapshot之前
-  // 先建立所有Q1住宿按日期排序，找出每個品牌第一次
-  for(const s of stays){
-    if(!pointsBaseStays.includes(s._key)){
-      if(s.pointsEarned>0)netChange+=s.pointsEarned;
-      if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
+  // 積分餘額係跨年度嘅戶口餘額：pointsBase 之後新增（唔喺 snapshot 入面）嘅所有年份住宿都計入
+  for(const y of YEARS){
+    for(const s of (staysByYear[y]||[])){
+      if(!pointsBaseStays.includes(s._key)){
+        if(s.pointsEarned>0)netChange+=s.pointsEarned;
+        if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
+      }
     }
   }
   const currentPoints=_hasPointsBase?pointsBase+netChange:0;
-  document.getElementById('statTotal').textContent=_hasPointsBase?currentPoints.toLocaleString():'—';
+  document.getElementById('statTotal').textContent=_hasPointsBase&&allYearsLoaded?currentPoints.toLocaleString():'—';
 
   const remainEl=document.getElementById('nightsRemainingEl');
   if(total>=TARGET){remainEl.className='nights-remaining achieved';remainEl.innerHTML='已達標 🎉';}
@@ -1692,18 +1836,27 @@ function render2026(stays){
   const q1BrandsList=[...new Set(q1Stays.map(s=>s.brand))].sort();
   const allBrands=getBrandOptions();
   const remainingBrands=allBrands.filter(brand=>!q1BrandsList.includes(brand));
-  const q1Finished=new Date()>Q1_END;
+  const q1Finished=Q1_CONFIGURED&&new Date()>Q1_END;
   document.getElementById('q1SectionCard').classList.toggle('q1-review',q1Finished);
   document.getElementById('q1SectionTitle').textContent=q1Finished?'Q1 回顧':'Q1 品牌追蹤';
-  document.getElementById('q1SectionDesc').innerHTML=q1Finished
-    ? `Q1期間現金入住嘅品牌 · 已計入 ${usedBrands.size} 個品牌獎勵`
-    : `Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span>`;
+  const q1Configured=Q1_CONFIGURED;
+  const q1WindowText=q1Configured?`${formatDayMonth(Q1_START)}–${formatDayMonth(Q1_END)}`:'';
+  document.getElementById('q1SectionDesc').innerHTML=!q1Configured
+    ? '未設定 Q1 日期。萬豪公佈後，admin 可以按下面掣輸入開始日、結束日同計法。'
+    : Q1_RULE==='night'
+      ? `Q1（${q1WindowText}）期間每晚現金入住都計獎勵 · 已計入 ${bonus} 晚`
+      : q1Finished
+        ? `Q1期間現金入住嘅品牌 · 已計入 ${usedBrands.size} 個品牌獎勵`
+        : `Q1期間現金入住嘅品牌 · 刪除線 = 獎勵已用 <span id="brandCount" style="margin-left:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;"></span>`;
   const brandCount=document.getElementById('brandCount');
   if(brandCount)brandCount.textContent=`已用 ${usedBrands.size} 個品牌獎勵`;
-  document.getElementById('q1SectionSummary').textContent=q1Finished
-    ? `${q1BrandsList.length} 個品牌 · ${bonus} 晚獎勵`
-    : `${q1BrandsList.length} 個品牌 · ${remainingBrands.length} 個未住`;
-  document.getElementById('remainingBrandsBlock').style.display=q1Finished?'none':'block';
+  document.getElementById('q1SectionSummary').textContent=!q1Configured
+    ? '未設定'
+    : q1Finished
+      ? `${q1BrandsList.length} 個品牌 · ${bonus} 晚獎勵`
+      : `${q1BrandsList.length} 個品牌 · ${remainingBrands.length} 個未住`;
+  document.getElementById('q1BrandsBlock').style.display=q1Configured?'':'none';
+  document.getElementById('remainingBrandsBlock').style.display=(q1Configured&&!q1Finished)?'block':'none';
   const brandsGrid=document.getElementById('brandsGrid');
   const remainingBrandsGrid=document.getElementById('remainingBrandsGrid');
   if(q1Finished){
@@ -1775,10 +1928,8 @@ function render2026(stays){
   document.getElementById('brandSectionSummary').textContent=`${new Set(stays.map(s=>s.brand)).size} 個品牌`;
   document.getElementById('regionSectionSummary').textContent=`${new Set(stays.map(s=>getStayRegion(s))).size} 個地區`;
   const q1BonusByMonth={};
-  const usedForBonus=new Set();
   for(const s of sorted){
-    if(isQ1Eligible(s)&&!usedForBonus.has(s.brand)){
-      usedForBonus.add(s.brand);
+    if(q1BonusKeys.has(s._key)){
       const m=parseInt(s.date.split('-')[1])-1;
       q1BonusByMonth[m]=(q1BonusByMonth[m]||0)+s.nights;
     }
@@ -1822,10 +1973,10 @@ function render2026(stays){
     const monthOrder=Object.keys(filteredMonthGroups).sort((a,b)=>staySort2026==='oldest'?(a-b):(b-a));
     for(const m of monthOrder){
       const hasQ1Stays=filteredMonthGroups[m].some(s=>isQ1Eligible(s));
-      const isQ1EndMonth=parseInt(m)===Q1_END.getMonth();
+      const isQ1EndMonth=Q1_CONFIGURED&&parseInt(m)===Q1_END.getMonth();
       const hasNonQ1Stays=filteredMonthGroups[m].some(s=>!isQ1Eligible(s));
       const q1EndInMonth=isQ1EndMonth&&hasQ1Stays&&hasNonQ1Stays;
-      const q1TagText=q1EndInMonth?'Q1 期間（至 10/5）':'Q1 期間';
+      const q1TagText=q1EndInMonth?`Q1 期間（至 ${formatDayMonth(Q1_END)}）`:'Q1 期間';
       const q1TagHtml=hasQ1Stays?`<span class="q1-tag">${q1TagText}</span>`:'';
       html+=`<div class="month-header">${MONTH_NAMES[m]}${q1TagHtml}</div>`;
       let q1DividerShown=false;
@@ -1835,9 +1986,9 @@ function render2026(stays){
           if(trigger){q1DividerShown=true;html+=`<div class="q1-divider">── Q1 結束 ──</div>`;}
         }
         const dateStr=window.formatShortDate(s.date);
-        const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
+        const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0},${Number(s.price)>0?Number(s.price):0},'${s.currency||''}')">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
         let pointsHtml='';
-        const isFirstQ1ForBrand=isQ1Eligible(s)&&firstQ1KeyByBrand[s.brand]===s._key;
+        const isFirstQ1ForBrand=q1BonusKeys.has(s._key);
         if(s.redeem){
           const redPart=s.redeemPoints>0?`<span style="color:var(--red);font-size:10px;">−${s.redeemPoints.toLocaleString()}</span>`:`<span style="color:var(--red);font-size:10px;">−?</span>`;
           const earnPart=s.pointsEarned>0?`<span style="color:var(--green);font-size:10px;">+${s.pointsEarned.toLocaleString()}</span>`:`<span style="color:var(--green);font-size:10px;">+?</span>`;
@@ -1852,18 +2003,18 @@ function render2026(stays){
           const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
           pointsHtml=`<span style="color:var(--green);font-size:10px;">${base}</span>`;
         }
-        const d=new Date(s.date+'T00:00:00'),inQ1r=d>=Q1_START&&d<=Q1_END;
+        const d=new Date(s.date+'T00:00:00'),inQ1r=Q1_CONFIGURED&&d>=Q1_START&&d<=Q1_END;
         const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
         const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+        html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div>${formatPriceHtml(s)}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
       }
     }
   }else{
     for(const s of filteredStays){
       const dateStr=window.formatShortDate(s.date);
-      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0})">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
+      const actions=isAdmin?`<div class="stay-actions"><button class="btn-icon edit" onclick="openEdit('${s._key}','${s.date}','${encodeURIComponent(s.name)}','${encodeURIComponent(s.brand)}','${encodeURIComponent(s.region||'')}',${s.nights},${s.redeem},${s.pointsEarned||0},${s.redeemPoints||0},${Number(s.price)>0?Number(s.price):0},'${s.currency||''}')">✎</button><button class="btn-icon del" onclick="window._askDelete('${s._key}')">✕</button></div>`:'<div></div>';
       let pointsHtml='';
-      const isFirstQ1ForBrand=isQ1Eligible(s)&&firstQ1KeyByBrand[s.brand]===s._key;
+      const isFirstQ1ForBrand=q1BonusKeys.has(s._key);
       if(s.redeem){
         const redPart=s.redeemPoints>0?`<span style="color:var(--red);font-size:10px;">−${s.redeemPoints.toLocaleString()}</span>`:`<span style="color:var(--red);font-size:10px;">−?</span>`;
         const earnPart=s.pointsEarned>0?`<span style="color:var(--green);font-size:10px;">+${s.pointsEarned.toLocaleString()}</span>`:`<span style="color:var(--green);font-size:10px;">+?</span>`;
@@ -1878,10 +2029,10 @@ function render2026(stays){
         const base=s.pointsEarned>0?`+${s.pointsEarned.toLocaleString()}`:`+?`;
         pointsHtml=`<span style="color:var(--green);font-size:10px;">${base}</span>`;
       }
-      const d=new Date(s.date+'T00:00:00'),inQ1r=d>=Q1_START&&d<=Q1_END;
+      const d=new Date(s.date+'T00:00:00'),inQ1r=Q1_CONFIGURED&&d>=Q1_START&&d<=Q1_END;
       const redeemStyle=s.redeem&&inQ1r?'opacity:0.4;':s.redeem?'opacity:0.65;':'';
       const nameStyle=s.redeem&&inQ1r?'text-decoration:line-through;text-decoration-color:var(--text-muted);':'';
-      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div></div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
+      html+=`<div class="stay-item" data-stay-name="${window.escapeHtml(s.name)}" data-stay-date="${s.date}" style="${redeemStyle}"><div class="stay-date">${dateStr}</div><div><div class="stay-name" style="${nameStyle}">${window.escapeHtml(s.name)}</div><div class="stay-brand-tag">${renderBrandMark(s.brand)}${s.redeem?' <span>· 兌換</span>':''}</div><div style="margin-top:2px;">${pointsHtml}</div>${formatPriceHtml(s)}</div><div class="stay-nights-tag">${s.nights}晚</div>${actions}</div>`;
     }
   }
   stayList.innerHTML=html;
@@ -1937,23 +2088,31 @@ window.checkQ1Hint=function(){
   if(!date||!brand||isRedeem){document.getElementById('q1Hint').style.display='none';return;}
   const candidate={_key:'__new__',date,brand,redeem:false};
   const existingStays=(window._currentStays||[]).filter(s=>s._key!==candidate._key);
-  document.getElementById('q1Hint').style.display=isFirstQ1StayForBrand(candidate,existingStays)?'block':'none';
+  const q1Hint=document.getElementById('q1Hint');
+  q1Hint.textContent=Q1_RULE==='night'?'🎁 符合Q1獎勵':'🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數';
+  q1Hint.style.display=isFirstQ1StayForBrand(candidate,existingStays)?'block':'none';
 };
 
 window.addStay=async function(){
   if(!isAdmin)return;
   const date=document.getElementById('inputDate').value,name=document.getElementById('inputName').value.trim(),brand=document.getElementById('inputBrand').value,region=document.getElementById('inputRegion').value;
   if(!date||!name||!brand){showToast('請填寫日期、酒店名稱及品牌','#F87171');return;}
+  const stayYear=Number(date.slice(0,4));
+  if(!YEARS.includes(stayYear)){showToast(`只支援 ${YEARS[0]}–${YEARS[YEARS.length-1]} 年住宿`,'#F87171');return;}
   const btn=document.getElementById('btnAdd');btn.disabled=true;
   try{
     const redeemPts=isRedeem?parseInt(document.getElementById('inputRedeemPoints').value)||0:0;
     pendingSyncWrites+=1;
     hasSyncError=false;
     updateSyncStatus();
-    await push(staysRef,{date,name,brand,region,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0});
+    const stayData={date,name,brand,region,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0};
+    const price=Math.round(parseFloat(document.getElementById('inputPrice').value)*100)/100;
+    if(price>0){stayData.price=price;stayData.currency=document.getElementById('inputCurrency').value;}
+    await push(staysRefs[stayYear],stayData);
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     updateSyncStatus();
-    document.getElementById('inputDate').value=formatLocalDate();
+    const todayKey=formatLocalDate();
+    document.getElementById('inputDate').value=todayKey.startsWith(String(activeYear))?todayKey:`${activeYear}-01-01`;
     document.getElementById('inputName').value='';document.getElementById('inputBrand').value='';brandAutoFilled=false;
     document.getElementById('brandHint').textContent='';document.getElementById('clearName').classList.remove('visible');
     document.getElementById('inputRegion').value='';updateRegionHint('inputName','regionHint');
@@ -1961,8 +2120,9 @@ window.addStay=async function(){
     isRedeem=false;document.getElementById('redeemToggle').classList.remove('active');
     document.getElementById('redeemPointsGroup').style.display='none';
     document.getElementById('inputRedeemPoints').value='';
+    document.getElementById('inputPrice').value='';
     document.getElementById('q1Hint').style.display='none';
-    showToast('✓ 住宿已新增並同步');
+    showToast(stayYear===activeYear?'✓ 住宿已新增並同步':`✓ 住宿已新增到 ${stayYear} 年並同步`);
   }catch(e){
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     hasSyncError=true;
@@ -1984,7 +2144,7 @@ window.confirmDelete=async function(){
       pendingSyncWrites+=1;
       hasSyncError=false;
       updateSyncStatus();
-      await remove(ref(db,`stays2026/${deleteTargetKey}`));
+      await remove(ref(db,`stays${activeYear}/${deleteTargetKey}`));
       pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
       updateSyncStatus();
       showToast('✓ 已刪除');
@@ -1999,7 +2159,7 @@ window.confirmDelete=async function(){
   }
 };
 
-window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,redeemPoints){
+window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,redeemPoints,price,currency){
   if(!isAdmin)return;
   editKey=key;editNightsCount=nights;editIsRedeem=redeem;
   document.getElementById('editDate').value=date;
@@ -2012,6 +2172,8 @@ window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,r
   document.getElementById('editRedeemToggle').classList.toggle('active',redeem);
   document.getElementById('editPointsEarned').value=pointsEarned||'';
   document.getElementById('editRedeemPoints').value=redeemPoints||'';
+  document.getElementById('editPrice').value=price>0?price:'';
+  populateCurrencySelect('editCurrency',currency||'HKD');
   document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
   updateRegionHint('editName','editRegionHint');
   checkEditQ1Hint();
@@ -2030,25 +2192,63 @@ window.checkEditQ1Hint=function(){
   if(!editKey||!date||!brand||editIsRedeem){document.getElementById('editQ1Hint').style.display='none';return;}
   const candidate={_key:editKey,date,brand,redeem:false};
   const existingStays=(window._currentStays||[]).filter(s=>s._key!==editKey);
-  document.getElementById('editQ1Hint').style.display=isFirstQ1StayForBrand(candidate,existingStays)?'block':'none';
+  const editQ1Hint=document.getElementById('editQ1Hint');
+  editQ1Hint.textContent=Q1_RULE==='night'?'🎁 符合Q1獎勵':'🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數';
+  editQ1Hint.style.display=isFirstQ1StayForBrand(candidate,existingStays)?'block':'none';
 };
 window.saveEdit=async function(){
   if(!isAdmin)return;
   const date=document.getElementById('editDate').value,name=document.getElementById('editName').value.trim(),brand=document.getElementById('editBrand').value,region=document.getElementById('editRegion').value;
   if(!date||!name||!brand){showToast('請填寫所有欄位','#F87171');return;}
+  if(!date.startsWith(String(activeYear))){showToast(`日期要喺 ${activeYear} 年內`,'#F87171');return;}
   const pointsEarned=parseInt(document.getElementById('editPointsEarned').value)||0;
   const redeemPoints=editIsRedeem?parseInt(document.getElementById('editRedeemPoints').value)||0:0;
+  const editPriceVal=Math.round(parseFloat(document.getElementById('editPrice').value)*100)/100;
+  const hasPrice=editPriceVal>0;
   try{
     pendingSyncWrites+=1;
     hasSyncError=false;
     updateSyncStatus();
-    await update(ref(db,`stays2026/${editKey}`),{date,name,brand,region,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints});
+    await update(ref(db,`stays${activeYear}/${editKey}`),{date,name,brand,region,nights:editNightsCount,redeem:editIsRedeem,pointsEarned,redeemPoints,price:hasPrice?editPriceVal:null,currency:hasPrice?document.getElementById('editCurrency').value:null});
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     updateSyncStatus();
     closeModal();
     showToast('✓ 已更新');
   }
   catch(e){
+    pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+    hasSyncError=true;
+    updateSyncStatus();
+    showToast('更新失敗','#F87171');
+  }
+};
+
+window.openQ1Config=function(){
+  if(!isAdmin)return;
+  const q=getQ1ForYear(activeYear);
+  document.getElementById('q1ConfigTitle').textContent=`${activeYear} Q1 設定`;
+  document.getElementById('q1CfgStart').value=q.configured?q.cfg.start:'';
+  document.getElementById('q1CfgEnd').value=q.configured?q.cfg.end:'';
+  document.getElementById('q1CfgRule').value=q.rule;
+  document.getElementById('q1ConfigModal').classList.add('show');
+};
+window.closeQ1Config=function(){document.getElementById('q1ConfigModal').classList.remove('show');};
+window.saveQ1Config=async function(){
+  if(!isAdmin)return;
+  const start=document.getElementById('q1CfgStart').value;
+  const end=document.getElementById('q1CfgEnd').value;
+  const rule=document.getElementById('q1CfgRule').value==='night'?'night':'brand';
+  if(!start||!end||start>end){showToast('請輸入有效嘅開始同結束日期','#F87171');return;}
+  try{
+    pendingSyncWrites+=1;
+    hasSyncError=false;
+    updateSyncStatus();
+    await update(ref(db,`config/q1/${activeYear}`),{start,end,rule});
+    pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
+    updateSyncStatus();
+    closeQ1Config();
+    showToast('✓ Q1 設定已更新並同步');
+  }catch(e){
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     hasSyncError=true;
     updateSyncStatus();
@@ -2066,7 +2266,7 @@ window.savePointsBase=async function(){
   const val=Number.parseInt(rawValue,10);
   if(rawValue===''||Number.isNaN(val)||val<0){showToast('請輸入有效積分','#F87171');return;}
   try{
-    const ids=window._currentStays?window._currentStays.map(s=>s._key).filter(Boolean):[];
+    const ids=YEARS.flatMap(y=>(staysByYear[y]||[]).map(s=>s._key)).filter(Boolean);
     pendingSyncWrites+=1;
     hasSyncError=false;
     updateSyncStatus();
@@ -2096,9 +2296,12 @@ document.getElementById('inputDate').value=formatLocalDate();
 populateBrandSelect('inputBrand');
 populateBrandSelect('editBrand');
 populateRegionSelect('inputRegion');
+populateCurrencySelect('inputCurrency');
+populateCurrencySelect('editCurrency');
 populateRegionSelect('editRegion');
 updateRegionHint('inputName','regionHint');
 updateSyncStatus();
+switchTab(String(activeYear));
 </script>
 
 <script>
