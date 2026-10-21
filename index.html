@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.20.6 -->
+<!-- VERSION: 2026.10.21.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -328,7 +328,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.20.6</div>
+    <div class="app-version" id="appVersion">v2026.10.21.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -506,17 +506,17 @@
       <div class="toggle-row" id="redeemToggle" onclick="toggleRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
       <div class="form-group" id="redeemPointsGroup" style="margin-bottom:12px;display:none;">
         <label>使用積分</label>
-        <div class="input-wrap"><input type="number" id="inputRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+        <div class="input-wrap"><input type="number" id="inputRedeemPoints" inputmode="numeric" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
       <div id="stayDetailFields" style="display:none;">
         <div class="form-group" style="margin-bottom:12px;">
           <label>房型（選填）</label>
-          <div class="input-wrap"><input type="text" id="inputRoom" list="roomList" maxlength="60" autocomplete="off" placeholder="例如 高級大床房" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+          <div class="input-wrap"><input type="text" id="inputRoom" list="roomList" maxlength="60" autocomplete="off" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
         </div>
         <div class="form-group" style="margin-bottom:12px;">
           <label>每晚房價（選填）</label>
           <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
-            <div class="input-wrap"><input type="number" id="inputPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+            <div class="input-wrap"><input type="number" id="inputPrice" inputmode="decimal" min="0" step="any" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
             <select class="brand-select" id="inputCurrency"></select>
           </div>
         </div>
@@ -702,17 +702,17 @@
     <div class="toggle-row" id="editRedeemToggle" onclick="toggleEditRedeem()"><span class="toggle-label">積分兌換</span><div class="toggle-switch"></div></div>
     <div class="form-group" id="editRedeemPointsGroup" style="margin-bottom:12px;display:none;">
       <label>使用積分</label>
-      <div class="input-wrap"><input type="number" id="editRedeemPoints" inputmode="numeric" placeholder="例如 15000" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div class="input-wrap"><input type="number" id="editRedeemPoints" inputmode="numeric" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
     <div id="editDetailFields" style="display:none;">
       <div class="form-group" style="margin-bottom:12px;">
         <label>房型（選填）</label>
-        <div class="input-wrap"><input type="text" id="editRoom" list="roomList" maxlength="60" autocomplete="off" placeholder="例如 高級大床房" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+        <div class="input-wrap"><input type="text" id="editRoom" list="roomList" maxlength="60" autocomplete="off" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
       </div>
       <div class="form-group" style="margin-bottom:12px;">
         <label>每晚房價（選填）</label>
         <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
-          <div class="input-wrap"><input type="number" id="editPrice" inputmode="decimal" min="0" step="any" placeholder="例如 1200" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+          <div class="input-wrap"><input type="number" id="editPrice" inputmode="decimal" min="0" step="any" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
           <select class="brand-select" id="editCurrency"></select>
         </div>
       </div>
@@ -720,7 +720,7 @@
     <div id="editQ1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:'DM Mono',monospace;">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
     <div class="form-group" style="margin-bottom:14px;">
       <label>賺取積分（退房後填寫）</label>
-      <div class="input-wrap"><input type="number" id="editPointsEarned" inputmode="numeric" placeholder="例如 4608" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div class="input-wrap"><input type="number" id="editPointsEarned" inputmode="numeric" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEdit()">儲存</button></div>
   </div>
@@ -751,7 +751,7 @@
     <div class="modal-title" id="pointsModalTitle">更新積分餘額</div>
     <div class="form-group" style="margin-bottom:14px;">
       <label>目前積分（手動設定）</label>
-      <div class="input-wrap"><input type="number" id="pointsBaseInput" inputmode="numeric" placeholder="例如 41300" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
+      <div class="input-wrap"><input type="number" id="pointsBaseInput" inputmode="numeric" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
     </div>
     <div style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:14px;">設定後，之後新增住宿嘅積分變動會自動計算</div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closePointsModal()">取消</button><button class="btn-save" onclick="savePointsBase()">儲存</button></div>
@@ -1492,7 +1492,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.20.6';
+const APP_VERSION='v2026.10.21.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
