@@ -34,7 +34,7 @@
   - `redeem`
   - `redeemPoints`
   - `pointsEarned`
-  - `room`、`price`、`currency`（只喺 `2027` 起記錄，選填；`2026` 表單唔顯示、已有資料保留）
+  - `room`、`roomNo`、`price`、`currency`（只喺 `2027` 起記錄，選填；`2026` 表單唔顯示、已有資料保留）
 - `config`
   - `pointsBase`
   - `pointsBaseStayIds`（積分餘額 snapshot 當時所有年份嘅住宿 id）
