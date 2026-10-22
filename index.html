@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.22.1 -->
+<!-- VERSION: 2026.10.22.2 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -328,7 +328,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.22.1</div>
+    <div class="app-version" id="appVersion">v2026.10.22.2</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -518,7 +518,7 @@
           <div class="input-wrap"><input type="text" id="inputRoomNo" maxlength="20" autocomplete="off" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
         </div>
         <div class="form-group" style="margin-bottom:12px;">
-          <label>每晚房價（選填）</label>
+          <label>總房價（選填）</label>
           <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
             <div class="input-wrap"><input type="number" id="inputPrice" inputmode="decimal" min="0" step="any" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
             <select class="brand-select" id="inputCurrency"></select>
@@ -718,7 +718,7 @@
         <div class="input-wrap"><input type="text" id="editRoomNo" maxlength="20" autocomplete="off" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
       </div>
       <div class="form-group" style="margin-bottom:12px;">
-        <label>每晚房價（選填）</label>
+        <label>總房價（選填）</label>
         <div style="display:grid;grid-template-columns:1fr 96px;gap:8px;">
           <div class="input-wrap"><input type="number" id="editPrice" inputmode="decimal" min="0" step="any" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;"></div>
           <select class="brand-select" id="editCurrency"></select>
@@ -897,7 +897,7 @@ window.renderBrandMark=function(brand){
   return `<span class="stay-brand-mark" aria-hidden="true"><img src="${logoUrl}" alt="" loading="lazy" decoding="async" onerror="this.replaceWith(document.createTextNode(''))"></span><span>${safeBrand}</span>`;
 };
 
-// 房型同每晚房價由 2027 年起先記錄（2026 唔顯示、唔改動已有資料）
+// 房型、房號同總房價由 2027 年起先記錄（2026 唔顯示、唔改動已有資料）
 window.DETAIL_FIELDS_FROM_YEAR=2027;
 window.updateDetailFields=function(){
   const dateEl=document.getElementById('inputDate');
@@ -1500,7 +1500,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.22.1';
+const APP_VERSION='v2026.10.22.2';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1854,8 +1854,16 @@ function formatDetailHtml(stay){
   const parts=[];
   if(stay.room)parts.push(window.escapeHtml(stay.room));
   if(stay.roomNo)parts.push(`房號 ${window.escapeHtml(stay.roomNo)}`);
-  const price=Number(stay.price);
-  if(price>0)parts.push(`${window.escapeHtml(stay.currency||'HKD')} ${price.toLocaleString()}/晚`);
+  const cur=window.escapeHtml(stay.currency||'HKD');
+  const total=Number(stay.priceTotal),nights=Number(stay.nights)||1;
+  if(total>0){
+    // 每晚＝總房價÷晚數，自動計
+    const perNight=Math.round(total/nights*100)/100;
+    parts.push(nights>1?`${cur} ${total.toLocaleString()} · 每晚 ${perNight.toLocaleString()}`:`${cur} ${total.toLocaleString()}`);
+  }else if(Number(stay.price)>0){
+    // 舊格式：當時填嘅係每晚房價
+    parts.push(`${cur} ${Number(stay.price).toLocaleString()}/晚`);
+  }
   if(!parts.length)return '';
   return `<div style="margin-top:2px;font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">${parts.join(' · ')}</div>`;
 }
@@ -2390,9 +2398,9 @@ window.addStay=async function(){
     updateSyncStatus();
     const stayData={date,name,brand,region,nights:nightsCount,redeem:isRedeem,redeemPoints:redeemPts,pointsEarned:0};
     if(stayYear>=window.DETAIL_FIELDS_FROM_YEAR){
-      const price=Math.round(parseFloat(document.getElementById('inputPrice').value)*100)/100;
+      const priceTotal=Math.round(parseFloat(document.getElementById('inputPrice').value)*100)/100;
       const room=document.getElementById('inputRoom').value.trim();
-      if(price>0){stayData.price=price;stayData.currency=document.getElementById('inputCurrency').value;}
+      if(priceTotal>0){stayData.priceTotal=priceTotal;stayData.currency=document.getElementById('inputCurrency').value;}
       if(room)stayData.room=room;
       const roomNo=document.getElementById('inputRoomNo').value.trim();
       if(roomNo)stayData.roomNo=roomNo;
@@ -2468,7 +2476,9 @@ window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,r
   document.getElementById('editDetailFields').style.display=activeYear>=window.DETAIL_FIELDS_FROM_YEAR?'':'none';
   document.getElementById('editRoom').value=current.room||'';
   document.getElementById('editRoomNo').value=current.roomNo||'';
-  document.getElementById('editPrice').value=Number(current.price)>0?current.price:'';
+  // 舊記錄（每晚房價）換算成總房價預填，儲存時轉做 priceTotal
+  const currentTotal=Number(current.priceTotal)>0?Number(current.priceTotal):(Number(current.price)>0?Math.round(Number(current.price)*(Number(current.nights)||1)*100)/100:0);
+  document.getElementById('editPrice').value=currentTotal>0?currentTotal:'';
   populateCurrencySelect('editCurrency',current.currency||'HKD');
   document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
   updateRegionHint('editName','editRegionHint');
@@ -2504,7 +2514,8 @@ window.saveEdit=async function(){
     const editPriceVal=Math.round(parseFloat(document.getElementById('editPrice').value)*100)/100;
     const hasPrice=editPriceVal>0;
     const room=document.getElementById('editRoom').value.trim();
-    payload.price=hasPrice?editPriceVal:null;
+    payload.priceTotal=hasPrice?editPriceVal:null;
+    payload.price=null;
     payload.currency=hasPrice?document.getElementById('editCurrency').value:null;
     payload.room=room||null;
     payload.roomNo=document.getElementById('editRoomNo').value.trim()||null;
