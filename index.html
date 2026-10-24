@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.22.2 -->
+<!-- VERSION: 2026.10.24.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -328,7 +328,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.22.2</div>
+    <div class="app-version" id="appVersion">v2026.10.24.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1043,8 +1043,34 @@ const REGION_KEYWORDS=[
   {region:'雅加達',keywords:['雅加达','雅加達','jakarta']},
   {region:'卡薩布蘭卡',keywords:['casablanca','卡萨布兰卡','卡薩布蘭卡']},
   {region:'伊斯坦堡',keywords:['伊斯坦布尔','伊斯坦堡','istanbul']},
+  {region:'長沙',keywords:['长沙','長沙','changsha']},
+  {region:'武漢',keywords:['武汉','武漢','wuhan']},
+  {region:'成都',keywords:['成都','chengdu']},
+  {region:'南京',keywords:['南京市','南京','nanjing']},
+  {region:'蘇州',keywords:['苏州','蘇州','suzhou']},
+  {region:'無錫',keywords:['无锡','無錫','wuxi']},
+  {region:'寧波',keywords:['宁波','寧波','ningbo']},
+  {region:'天津',keywords:['天津','tianjin']},
+  {region:'青島',keywords:['青岛','青島','qingdao']},
+  {region:'濟南',keywords:['济南','濟南','jinan']},
+  {region:'大連',keywords:['大连','大連','dalian']},
+  {region:'長春',keywords:['长春','長春','changchun']},
+  {region:'哈爾濱',keywords:['哈尔滨','哈爾濱','harbin']},
+  {region:'合肥',keywords:['合肥','hefei']},
+  {region:'南昌',keywords:['南昌','nanchang']},
+  {region:'南寧',keywords:['南宁','南寧','nanning']},
+  {region:'桂林',keywords:['桂林','guilin']},
+  {region:'海口',keywords:['海口','haikou']},
+  {region:'三亞',keywords:['三亚','三亞','sanya']},
+  {region:'澳門',keywords:['澳门','澳門','macau','macao']},
+  {region:'台北',keywords:['台北','臺北','taipei']},
+  {region:'大阪',keywords:['大阪','osaka']},
+  {region:'京都',keywords:['京都','kyoto']},
+  {region:'吉隆坡',keywords:['吉隆坡','kuala lumpur']},
+  {region:'峇里',keywords:['巴厘','峇里','bali']},
+  {region:'普吉',keywords:['普吉','phuket']},
 ];
-const REGION_OPTIONS=['香港','深圳','廣州','珠海','北京','上海','杭州','佛山','中山','東莞','順德','汕頭','福州','惠州','廈門','鄭州','西安','瀋陽','重慶','貴陽','柳州','昆明','札幌','東京','首爾','曼谷','新加坡','雅加達','卡薩布蘭卡','伊斯坦堡','其他'];
+const REGION_OPTIONS=['香港','深圳','廣州','珠海','北京','上海','杭州','佛山','中山','東莞','順德','汕頭','福州','惠州','廈門','鄭州','西安','瀋陽','重慶','貴陽','柳州','昆明','札幌','東京','首爾','曼谷','新加坡','雅加達','卡薩布蘭卡','伊斯坦堡','長沙','武漢','成都','南京','蘇州','無錫','寧波','天津','青島','濟南','大連','長春','哈爾濱','合肥','南昌','南寧','桂林','海口','三亞','澳門','台北','大阪','京都','吉隆坡','峇里','普吉','其他'];
 
 function inferRegionFromName(name=''){
   const normalizeRegionText=value=>String(value||'').toLowerCase().normalize('NFKC').replace(/[\s\-_/.,，。、（）()]+/g,' ').trim();
@@ -1500,7 +1526,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.22.2';
+const APP_VERSION='v2026.10.24.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
