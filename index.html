@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.24.1 -->
+<!-- VERSION: 2026.10.25.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -328,7 +328,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.24.1</div>
+    <div class="app-version" id="appVersion">v2026.10.25.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1435,6 +1435,7 @@ const connectedRef=ref(db,'.info/connected');
 let _pointsBase=0;
 let _hasPointsBase=false;
 let _pointsBaseStays=[];
+let _displayedPoints=null; // 外面「目前積分」顯示緊嘅數，更新視窗用嚟預填
 let isConnected=null;
 let loadedYears=new Set();
 let staysByYear={};
@@ -1526,7 +1527,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.24.1';
+const APP_VERSION='v2026.10.25.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -2141,7 +2142,8 @@ function render2026(stays){
     }
   }
   const currentPoints=_hasPointsBase?pointsBase+netChange:0;
-  document.getElementById('statTotal').textContent=_hasPointsBase&&allYearsLoaded?currentPoints.toLocaleString():'—';
+  _displayedPoints=_hasPointsBase&&allYearsLoaded?currentPoints:null;
+  document.getElementById('statTotal').textContent=_displayedPoints!==null?currentPoints.toLocaleString():'—';
 
   const remainEl=document.getElementById('nightsRemainingEl');
   if(total>=TARGET){remainEl.className='nights-remaining achieved';remainEl.innerHTML='已達標 🎉';}
@@ -2598,7 +2600,9 @@ window.saveQ1Config=async function(){
 };
 
 window.openPointsModal=function(){
-  document.getElementById('pointsBaseInput').value=_hasPointsBase?String(_pointsBase):'';
+  // 預填外面顯示緊嘅目前積分（上次設定 + 之後住宿嘅賺取 − 兌換），唔係上次手動設定嘅數
+  const prefill=_displayedPoints!==null?_displayedPoints:(_hasPointsBase?_pointsBase:null);
+  document.getElementById('pointsBaseInput').value=prefill!==null?String(prefill):'';
   document.getElementById('pointsModalOverlay').classList.add('show');
 };
 window.closePointsModal=function(){document.getElementById('pointsModalOverlay').classList.remove('show');};
