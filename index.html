@@ -1430,11 +1430,13 @@ YEARS.forEach(y=>{staysRefs[y]=ref(db,`stays${y}`);});
 const q1ConfigRef=ref(db,'config/q1');
 const pointsBaseRef=ref(db,'config/pointsBase');
 const pointsBaseStaysRef=ref(db,'config/pointsBaseStayIds');
+const pointsBaseSnapshotRef=ref(db,'config/pointsBaseSnapshot');
 const connectedRef=ref(db,'.info/connected');
 
 let _pointsBase=0;
 let _hasPointsBase=false;
 let _pointsBaseStays=[];
+let _pointsBaseSnapshot=null; // {stayKey:{e:賺取,r:兌換}}：設定餘額嗰刻每筆住宿嘅積分；null＝舊格式（只有 id）
 let _displayedPoints=null; // 外面「目前積分」顯示緊嘅數，更新視窗用嚟預填
 let isConnected=null;
 let loadedYears=new Set();
@@ -1443,6 +1445,7 @@ let hasLoadedQ1=false;
 let _q1Config={};
 let hasLoadedPointsBase=false;
 let hasLoadedPointsBaseStays=false;
+let hasLoadedPointsBaseSnapshot=false;
 let hasSyncError=false;
 let pendingSyncWrites=0;
 
@@ -1461,7 +1464,7 @@ function updateSyncStatus(){
     label.textContent='離線';
     return;
   }
-  if(isConnected===null || pendingSyncWrites>0 || loadedYears.size<YEARS.length || !hasLoadedQ1 || !hasLoadedPointsBase || !hasLoadedPointsBaseStays){
+  if(isConnected===null || pendingSyncWrites>0 || loadedYears.size<YEARS.length || !hasLoadedQ1 || !hasLoadedPointsBase || !hasLoadedPointsBaseStays || !hasLoadedPointsBaseSnapshot){
     chip.classList.add('loading');
     label.textContent='同步中';
     return;
@@ -1496,6 +1499,16 @@ onValue(q1ConfigRef,(snap)=>{
   hasSyncError=false;
   updateSyncStatus();
   renderActive();
+},()=>{
+  hasSyncError=true;
+  updateSyncStatus();
+});
+onValue(pointsBaseSnapshotRef,(snap)=>{
+  _pointsBaseSnapshot=snap.exists()?(snap.val()||{}):null;
+  hasLoadedPointsBaseSnapshot=true;
+  hasSyncError=false;
+  updateSyncStatus();
+  if(window._currentStays&&window.render2026)window.render2026(window._currentStays);
 },()=>{
   hasSyncError=true;
   updateSyncStatus();
@@ -2132,12 +2145,19 @@ function render2026(stays){
   const pointsBaseStays=_pointsBaseStays;
   const allYearsLoaded=loadedYears.size===YEARS.length;
   let netChange=0;
-  // 積分餘額係跨年度嘅戶口餘額：pointsBase 之後新增（唔喺 snapshot 入面）嘅所有年份住宿都計入
+  // 積分餘額係跨年度嘅戶口餘額。
+  // 新格式：按設定餘額嗰刻每筆住宿嘅積分做基準，之後補填／修改按差額計；新增住宿全數計。
+  // 舊格式（只有 id）：snapshot 入面嘅住宿一律唔計。
+  const snapshot=_pointsBaseSnapshot;
   for(const y of YEARS){
     for(const s of (staysByYear[y]||[])){
-      if(!pointsBaseStays.includes(s._key)){
-        if(s.pointsEarned>0)netChange+=s.pointsEarned;
-        if(s.redeem&&s.redeemPoints>0)netChange-=s.redeemPoints;
+      const earned=s.pointsEarned>0?s.pointsEarned:0;
+      const used=s.redeem&&s.redeemPoints>0?s.redeemPoints:0;
+      if(snapshot){
+        const base=snapshot[s._key];
+        netChange+=base?(earned-(base.e||0))-(used-(base.r||0)):earned-used;
+      }else if(!pointsBaseStays.includes(s._key)){
+        netChange+=earned-used;
       }
     }
   }
@@ -2611,11 +2631,15 @@ window.savePointsBase=async function(){
   const val=Number.parseInt(rawValue,10);
   if(rawValue===''||Number.isNaN(val)||val<0){showToast('請輸入有效積分','#F87171');return;}
   try{
-    const ids=YEARS.flatMap(y=>(staysByYear[y]||[]).map(s=>s._key)).filter(Boolean);
+    const allStays=YEARS.flatMap(y=>staysByYear[y]||[]).filter(s=>s._key);
+    const ids=allStays.map(s=>s._key);
+    // 記低而家每筆住宿嘅積分，之後補填／修改只計差額
+    const snapshot={};
+    allStays.forEach(s=>{snapshot[s._key]={e:s.pointsEarned>0?s.pointsEarned:0,r:s.redeem&&s.redeemPoints>0?s.redeemPoints:0};});
     pendingSyncWrites+=1;
     hasSyncError=false;
     updateSyncStatus();
-    await update(ref(db,'config'),{pointsBase:val,pointsBaseStayIds:ids});
+    await update(ref(db,'config'),{pointsBase:val,pointsBaseStayIds:ids,pointsBaseSnapshot:snapshot});
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
     updateSyncStatus();
     closePointsModal();

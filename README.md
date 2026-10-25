@@ -38,6 +38,7 @@
 - `config`
   - `pointsBase`
   - `pointsBaseStayIds`（積分餘額 snapshot 當時所有年份嘅住宿 id）
+  - `pointsBaseSnapshot/{stayId}`：`e`（賺取）、`r`（兌換）＝設定餘額嗰刻每筆住宿嘅積分；之後補填或修改只按差額加減，新增住宿全數計入
   - `q1/{year}`：`start`、`end`（`YYYY-MM-DD`）、`rule`（`brand` 或 `night`）
 
 ## 權限模型
