@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.2 -->
+<!-- VERSION: 2026.10.26.4 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -327,6 +327,11 @@
     .insight-grid,.insight-grid.two-cards{display:flex;overflow-x:auto;gap:8px;max-width:none;margin-left:-20px;margin-right:-20px;padding:0 20px 2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
     .insight-card{min-width:156px;min-height:76px;padding:12px;scroll-snap-align:start;}
     .insight-grid::-webkit-scrollbar{display:none;}
+    /* 3 張或以上：每行 2 張，待補積分獨佔一行放最底，單數嘅最後一張都佔一行 */
+    .insight-grid.wrap-cards{flex-wrap:wrap;overflow:visible;}
+    .insight-grid.wrap-cards .insight-card{flex:1 1 calc(50% - 4px);min-width:0;}
+    .insight-grid.wrap-cards .insight-card.full-row{flex-basis:100%;}
+    .insight-grid.wrap-cards #missingPointsCard{order:1;}
     .progress-total{min-width:88px;min-height:72px;padding:9px 10px}
     .nights-big{font-size:52px}
     .card,.add-form{padding:18px}
@@ -348,7 +353,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.2</div>
+    <div class="app-version" id="appVersion">v2026.10.26.4</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1560,7 +1565,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.2';
+const APP_VERSION='v2026.10.26.4';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1649,8 +1654,16 @@ function formatShortStayDate(dateString){
 function updateInsightGridLayout(){
   const grid=document.querySelector('#page2026 .insight-grid');
   if(!grid)return;
-  const visibleCards=grid.querySelectorAll('.insight-card:not(.hidden)').length;
-  grid.classList.toggle('two-cards',visibleCards===2);
+  const visible=[...grid.querySelectorAll('.insight-card:not(.hidden)')];
+  grid.classList.toggle('two-cards',visible.length===2);
+  grid.classList.toggle('wrap-cards',visible.length>=3);
+  grid.querySelectorAll('.insight-card').forEach(card=>card.classList.remove('full-row'));
+  if(visible.length>=3){
+    const missing=visible.find(card=>card.id==='missingPointsCard');
+    if(missing)missing.classList.add('full-row');
+    const others=visible.filter(card=>card!==missing);
+    if(others.length%2===1)others[others.length-1].classList.add('full-row');
+  }
 }
 
 function updateInsightCards(stays,total,left){
