@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.27.2 -->
+<!-- VERSION: 2026.10.27.3 -->
 <style>
   :root{
     --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
@@ -371,7 +371,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.27.2</div>
+    <div class="app-version" id="appVersion">v2026.10.27.3</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -571,6 +571,7 @@
       <div id="q1Hint" style="display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#4ADE80;font-family:var(--font);">🎁 符合Q1獎勵 · 賺取積分請填已包含 +2,500 嘅總數</div>
       <button class="btn-add" id="btnAdd" onclick="addStay()">＋ 新增住宿</button>
     </div>
+    <script>/* 上次係 admin 就即刻顯示新增住宿，唔使等登入狀態先彈出嚟 */try{if(localStorage.getItem('wasAdmin')==='1')document.getElementById('addForm').classList.add('show');}catch(e){}</script>
 
     <!-- Q1 brands -->
     <div class="card collapsible-card collapsed" id="q1SectionCard" style="display:none;">
@@ -1620,7 +1621,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.27.2';
+const APP_VERSION='v2026.10.27.3';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1813,6 +1814,7 @@ onAuthStateChanged(auth,(user)=>{
   isAdmin=!!(user&&ADMIN_EMAILS.includes(user.email));
   currentIsAdmin=isAdmin;
   document.getElementById('addForm').classList.toggle('show',isAdmin);
+  try{localStorage.setItem('wasAdmin',isAdmin?'1':'0');}catch(e){}
 
   const chip=document.getElementById('loginChip');
   const avatar=document.getElementById('userAvatar');
