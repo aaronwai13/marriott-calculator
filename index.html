@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.27.1 -->
+<!-- VERSION: 2026.10.27.2 -->
 <style>
   :root{
     --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
@@ -371,7 +371,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.27.1</div>
+    <div class="app-version" id="appVersion">v2026.10.27.2</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -489,7 +489,7 @@
         </div>
         <div class="insight-meta" id="paceMeta">載入中...</div>
       </div>
-      <div class="insight-card" id="q1WindowCard">
+      <div class="insight-card hidden" id="q1WindowCard">
         <div>
           <div class="insight-kicker">Q1 活動</div>
           <div class="insight-value green" id="q1WindowValue">—</div>
@@ -573,7 +573,7 @@
     </div>
 
     <!-- Q1 brands -->
-    <div class="card collapsible-card collapsed" id="q1SectionCard">
+    <div class="card collapsible-card collapsed" id="q1SectionCard" style="display:none;">
       <div class="section-header">
         <button class="section-toggle" type="button" onclick="toggleSection('q1SectionCard')" aria-expanded="false">
           <span class="section-toggle-left"><span class="section-title" id="q1SectionTitle">Q1 品牌追蹤</span><span class="section-summary" id="q1SectionSummary">載入中...</span></span>
@@ -1620,7 +1620,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.27.1';
+const APP_VERSION='v2026.10.27.2';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
