@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.11 -->
+<!-- VERSION: 2026.10.26.12 -->
 <style>
   :root{
     --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
@@ -371,7 +371,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.11</div>
+    <div class="app-version" id="appVersion">v2026.10.26.12</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -471,7 +471,7 @@
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-ticks"><span>0</span><span>75</span></div>
       <div class="nights-remaining" id="nightsRemainingEl">距離75晚目標，仲需 <strong>—</strong> 晚</div>
-      <div class="progress-breakdown" id="progressBreakdown" aria-label="房晚組成"></div>
+      <div class="progress-breakdown" id="progressBreakdown" aria-label="房晚組成"><span class="progress-chip">實際 <strong>—</strong></span><span class="progress-chip">Q1 <strong>—</strong></span><span class="progress-chip">50晚 <strong>—</strong></span></div>
     </div>
 
     <div class="insight-grid" aria-label="保級摘要">
@@ -1516,6 +1516,7 @@ let _pointsBaseStays=[];
 let _pointsBaseSnapshot=null; // {stayKey:{e:賺取,r:兌換}}：設定餘額嗰刻每筆住宿嘅積分；null＝舊格式（只有 id）
 let _displayedPoints=null; // 外面「目前積分」顯示緊嘅數，更新視窗用嚟預填
 let isConnected=null;
+let hasEverConnected=false,connectGraceOver=false;
 let loadedYears=new Set();
 let staysByYear={};
 let hasLoadedQ1=false;
@@ -1536,12 +1537,13 @@ function updateSyncStatus(){
     label.textContent='同步失敗';
     return;
   }
-  if(isConnected===false){
+  // 啟動時 Firebase 會即刻報一次未連線，頭 3 秒當同步中，之後或者曾經連過再斷先顯示離線
+  if(isConnected===false&&(hasEverConnected||connectGraceOver)){
     chip.classList.add('offline');
     label.textContent='離線';
     return;
   }
-  if(isConnected===null || pendingSyncWrites>0 || loadedYears.size<YEARS.length || !hasLoadedQ1 || !hasLoadedPointsBase || !hasLoadedPointsBaseStays || !hasLoadedPointsBaseSnapshot){
+  if(!isConnected || pendingSyncWrites>0 || loadedYears.size<YEARS.length || !hasLoadedQ1 || !hasLoadedPointsBase || !hasLoadedPointsBaseStays || !hasLoadedPointsBaseSnapshot){
     chip.classList.add('loading');
     label.textContent='同步中';
     return;
@@ -1550,9 +1552,10 @@ function updateSyncStatus(){
   label.textContent='已同步';
 }
 
+setTimeout(()=>{connectGraceOver=true;updateSyncStatus();},3000);
 onValue(connectedRef,(snap)=>{
   isConnected=!!snap.val();
-  if(isConnected)hasSyncError=false;
+  if(isConnected){hasSyncError=false;hasEverConnected=true;}
   updateSyncStatus();
 },()=>{
   hasSyncError=true;
@@ -1617,7 +1620,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.11';
+const APP_VERSION='v2026.10.26.12';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
