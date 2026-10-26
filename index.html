@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.25.1 -->
+<!-- VERSION: 2026.10.26.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -153,6 +153,15 @@
   .viz-kpi-label{font-size:10px;color:var(--text-muted);}
   .viz-kpi-value{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-top:4px;}
   .viz-empty{font-size:12px;color:var(--text-muted);padding:10px 0;}
+  .viz-row-toggle{cursor:pointer;}
+  .viz-row-toggle td:first-child::after{content:' ▸';font-size:10px;}
+  .viz-row-toggle.open td:first-child::after{content:' ▾';}
+  .viz-detail td{padding:4px 4px 12px;text-align:left!important;color:var(--text)!important;}
+  .viz-diff-group{margin-top:8px;}
+  .viz-diff-label{font-size:10px;color:var(--text-muted);margin-bottom:5px;font-family:'DM Mono',monospace;}
+  .viz-diff-chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .viz-diff-chip{font-size:11px;padding:4px 9px;border-radius:999px;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);}
+  .viz-diff-chip.dim{color:var(--text-muted);}
 
   .section-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
@@ -328,7 +337,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.25.1</div>
+    <div class="app-version" id="appVersion">v2026.10.26.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1540,7 +1549,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.25.1';
+const APP_VERSION='v2026.10.26.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -2022,9 +2031,11 @@ function yearMetrics(stays){
     regions.add(getStayRegion(st));
   }
   m.brands=brands.size;m.regions=regions.size;
+  m.brandSet=brands;m.regionSet=regions;
   return m;
 }
 
+const compareExpanded=new Set();
 function renderCompare(stays){
   const card=document.getElementById('compareSectionCard');
   const prevYear=activeYear-1;
@@ -2041,11 +2052,41 @@ function renderCompare(stays){
   const hr=el('tr');['',String(prevYear),String(activeYear),'差'].forEach(t=>hr.appendChild(el('th','',t)));
   const thead=el('thead');thead.appendChild(hr);table.appendChild(thead);
   const tbody=el('tbody');
+  // 品牌數／地區數可以撳開，睇邊啲係新增、邊啲冇再住
+  const setKeys={brands:['brandSet','品牌'],regions:['regionSet','地區']};
   rows.forEach(([label,key,unit])=>{
     const diff=cur[key]-prev[key];
     const tr=el('tr');
     tr.append(el('td','',label),el('td','',`${prev[key]}${unit}`),el('td','',`${cur[key]}${unit}`),el('td','',diff>0?`+${diff}`:String(diff)));
     tbody.appendChild(tr);
+    if(!setKeys[key])return;
+    const [setKey,noun]=setKeys[key];
+    const prevSet=prev[setKey],curSet=cur[setKey];
+    const sortZh=arr=>arr.sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+    const added=sortZh([...curSet].filter(x=>!prevSet.has(x)));
+    const dropped=sortZh([...prevSet].filter(x=>!curSet.has(x)));
+    const both=sortZh([...curSet].filter(x=>prevSet.has(x)));
+    const detail=el('tr','viz-detail');const td=el('td');td.colSpan=4;detail.appendChild(td);
+    const group=(title,items,dim)=>{
+      const g=el('div','viz-diff-group');g.appendChild(el('div','viz-diff-label',`${title}（${items.length}）`));
+      const chips=el('div','viz-diff-chips');
+      if(!items.length)chips.appendChild(el('span','viz-diff-chip dim','冇'));
+      items.forEach(x=>chips.appendChild(el('span','viz-diff-chip'+(dim?' dim':''),x)));
+      g.appendChild(chips);return g;
+    };
+    td.append(
+      group(`${activeYear} 新增${noun}`,added,false),
+      group(`${activeYear} 冇再住嘅${noun}`,dropped,false),
+      group(`兩年都有`,both,true)
+    );
+    const open=compareExpanded.has(key);
+    tr.classList.add('viz-row-toggle');tr.classList.toggle('open',open);
+    tr.tabIndex=0;tr.setAttribute('role','button');tr.setAttribute('aria-expanded',String(open));
+    detail.hidden=!open;
+    const toggle=()=>{const now=detail.hidden;detail.hidden=!now;tr.classList.toggle('open',now);tr.setAttribute('aria-expanded',String(now));if(now)compareExpanded.add(key);else compareExpanded.delete(key);};
+    tr.addEventListener('click',toggle);
+    tr.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+    tbody.appendChild(detail);
   });
   table.appendChild(tbody);
   body.appendChild(table);
@@ -2057,7 +2098,7 @@ function renderCompare(stays){
   });
   if(chart.toggleButton)tools.appendChild(chart.toggleButton);
   body.append(tools,chart);
-  body.appendChild(el('div','viz-note',`只計實際入住晚數（唔包 Q1 同年度福利獎勵晚）。${prevYear===2025?'2025 係寫死嘅回顧資料。':''}`));
+  body.appendChild(el('div','viz-note',`只計實際入住晚數（唔包 Q1 同年度福利獎勵晚）。撳「品牌數」或「地區數」可以睇新增同冇再住嘅明細。${prevYear===2025?'2025 係寫死嘅回顧資料。':''}`));
 }
 
 function renderPointsFlow(stays){
