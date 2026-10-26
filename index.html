@@ -1742,12 +1742,17 @@ function updateInsightCards(stays,total,left){
     paceValue.textContent=`尚欠 ${left} 晚`;
     paceMeta.textContent=`${activeYear} 年度已結束`;
   }else{
-    const startMonth=activeYear>thisYear?0:today.getMonth();
-    const monthsLeft=Math.max(1,12-startMonth);
-    const monthlyPace=Math.ceil(left/monthsLeft);
-    const monthRange=`${startMonth+1}-12月`;
-    paceValue.textContent=`每月約 ${monthlyPace} 晚`;
-    paceMeta.textContent=`${monthRange} 平均 · 尚欠 ${left} 晚`;
+    // 剩餘日數連今日計，到 12 月 31 日；未嚟嘅年份由 1 月 1 日計
+    const start=activeYear>thisYear?new Date(activeYear,0,1):new Date(thisYear,today.getMonth(),today.getDate());
+    const daysLeft=Math.round((new Date(activeYear,11,31)-start)/86400000)+1;
+    if(daysLeft<=31){
+      paceValue.textContent=`尚欠 ${left} 晚`;
+      paceMeta.textContent=`剩 ${daysLeft} 日`;
+    }else{
+      const monthlyPace=Math.min(left,Math.ceil(left*(365.25/12)/daysLeft));
+      paceValue.textContent=`每月約 ${monthlyPace} 晚`;
+      paceMeta.textContent=`剩 ${daysLeft} 日 · 尚欠 ${left} 晚`;
+    }
   }
 
   const q1Value=document.getElementById('q1WindowValue');
