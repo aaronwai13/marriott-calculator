@@ -11,7 +11,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.5 -->
+<!-- VERSION: 2026.10.26.6 -->
+<script>
+// 字體預覽：撳版本號切換 iPhone 原生字體（記住喺 localStorage）；喺 CSS 載入前套用，避免閃一下
+try{if(localStorage.getItem('fontMode')==='system')document.documentElement.classList.add('font-system');}catch(e){}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -49,7 +53,9 @@
   .top-bar{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;z-index:150;height:48px;}
   .top-bar-title-wrap{display:flex;align-items:baseline;gap:8px;min-width:0;}
   .top-bar-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;white-space:nowrap;}
-  .app-version{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.04em;color:var(--text-muted);white-space:nowrap;opacity:0.9;}
+  /* 原生字體預覽：所有文字改用 iPhone 系統字體（SF Pro + 蘋方） */
+  html.font-system body,html.font-system body *{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','PingFang HK','PingFang TC',sans-serif!important;}
+  .app-version{cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.04em;color:var(--text-muted);white-space:nowrap;opacity:0.9;}
   .top-bar-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
   .sync-chip{display:none;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;border:1px solid rgba(128,128,128,0.16);background:rgba(128,128,128,0.08);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.04em;color:var(--text-muted);white-space:nowrap;}
   .sync-chip.show{display:inline-flex;}
@@ -361,7 +367,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.5</div>
+    <div class="app-version" id="appVersion" role="button" tabindex="0" aria-label="切換字體預覽" onclick="toggleFontMode()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFontMode();}">v2026.10.26.6</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1297,6 +1303,13 @@ window.showMissingPoints=function(){
   jumpToStayList('2026');
 };
 
+window.toggleFontMode=function(){
+  const on=document.documentElement.classList.toggle('font-system');
+  try{localStorage.setItem('fontMode',on?'system':'default');}catch(e){}
+  const t=document.getElementById('toast');
+  if(t){t.textContent=on?'字體：iPhone 原生':'字體：原本';t.style.color='#4ADE80';t.classList.remove('show');void t.offsetWidth;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+};
+
 window.setAddFormOpen=function(open){
   const form=document.getElementById('addForm');
   if(!form)return;
@@ -1583,7 +1596,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.5';
+const APP_VERSION='v2026.10.26.6';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
