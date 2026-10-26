@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.9 -->
+<!-- VERSION: 2026.10.26.10 -->
 <style>
   :root{
     --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
@@ -362,7 +362,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.9</div>
+    <div class="app-version" id="appVersion">v2026.10.26.10</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1583,7 +1583,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.9';
+const APP_VERSION='v2026.10.26.10';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -2302,6 +2302,7 @@ function render2026(stays){
   const remainingBrands=allBrands.filter(brand=>!q1BrandsList.includes(brand));
   const q1Finished=Q1_CONFIGURED&&new Date()>Q1_END;
   document.getElementById('q1SectionCard').classList.toggle('q1-review',q1Finished);
+  document.getElementById('q1SectionCard').style.display=q1Finished?'none':'';
   document.getElementById('q1SectionTitle').textContent=q1Finished?'Q1 回顧':'Q1 品牌追蹤';
   const q1Configured=Q1_CONFIGURED;
   const q1WindowText=q1Configured?`${formatDayMonth(Q1_START)}–${formatDayMonth(Q1_END)}`:'';
