@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.7 -->
+<!-- VERSION: 2026.10.26.8 -->
 <style>
   :root{
     --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
@@ -117,10 +117,10 @@
   .insight-value.green{color:var(--green);}
   .insight-meta{font-size:11px;color:var(--text-muted);line-height:1.35;margin-top:6px;}
 
-  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}.stat-value.blue{color:#60A5FA;}.stat-value.purple{color:#C084FC;}
-  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;}
+  .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px;}.stat-value.blue{color:#60A5FA;}.stat-value.purple{color:#C084FC;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;min-width:0;}
   .stat-icon{font-size:18px;margin-bottom:8px;display:block;}
-  .stat-value{font-family:var(--font);font-size:34px;font-weight:700;line-height:1;margin-bottom:4px;}
+  .stat-value{font-family:var(--font);font-size:34px;font-weight:700;line-height:1;margin-bottom:4px;white-space:nowrap;}
   .stat-value.gold{color:var(--gold);}
   .stat-value.green{color:var(--green);}
   .stat-label{font-size:11px;color:var(--text-muted);}
@@ -362,7 +362,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.7</div>
+    <div class="app-version" id="appVersion">v2026.10.26.8</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1584,7 +1584,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.7';
+const APP_VERSION='v2026.10.26.8';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -2212,6 +2212,17 @@ function refreshRoomSuggestions(){
   document.getElementById('roomList').replaceChildren(...[...rooms].sort().map(r=>{const o=document.createElement('option');o.value=r;return o;}));
 }
 
+// 數字太長（例如 106,196）就逐步縮細字，唔好撐闊卡片
+function fitStatValues(){
+  document.querySelectorAll('.stat-value').forEach(el=>{
+    el.style.fontSize='';
+    if(!el.clientWidth)return; // 未顯示（例如喺其他分頁）就唔計
+    let size=parseFloat(getComputedStyle(el).fontSize);
+    while(el.scrollWidth>el.clientWidth&&size>20){size-=1;el.style.fontSize=size+'px';}
+  });
+}
+window.addEventListener('resize',fitStatValues);
+
 function render2026(stays){
   applyQ1Context();
   refreshRoomSuggestions();
@@ -2406,6 +2417,7 @@ function render2026(stays){
   renderRegionAccordion(stays,'regionAccordion2026');
   renderCompare(stays);
   renderPointsFlow(stays);
+  fitStatValues();
 
   const stayList=document.getElementById('stayList');
   if(sorted.length===0){stayList.innerHTML='<div class="empty-state">未有住宿記錄</div>';return;}
