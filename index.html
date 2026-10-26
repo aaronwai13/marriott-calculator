@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.4 -->
+<!-- VERSION: 2026.10.26.5 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -188,6 +188,14 @@
   /* Add form */
   .add-form{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:14px;display:none;}
   .add-form.show{display:block;}
+  /* 新增表單平時收埋，只顯示「新增住宿 ＋」 */
+  .add-form.collapsed-form{padding-top:14px;padding-bottom:14px;}
+  .add-form.collapsed-form > :not(.add-form-toggle){display:none;}
+  .add-form:not(.collapsed-form) .add-form-toggle{display:none;}
+  .add-form-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;color:var(--text);font:inherit;text-align:left;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent;}
+  .add-form-toggle-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
+  .add-form-plus{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:#0A0A0F;font-size:20px;font-weight:700;flex:none;}
+  .add-form-close{margin-left:auto;background:none;border:none;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;padding:4px 0;}
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
   .form-group{display:flex;flex-direction:column;gap:6px;}
   label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;}
@@ -353,7 +361,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.4</div>
+    <div class="app-version" id="appVersion">v2026.10.26.5</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -507,8 +515,9 @@
     </div>
 
     <!-- Add form -->
-    <div class="add-form" id="addForm">
-      <div class="section-header" style="margin-bottom:16px;"><div class="section-title">新增住宿</div></div>
+    <div class="add-form collapsed-form" id="addForm">
+      <button class="add-form-toggle" type="button" onclick="setAddFormOpen(true)" aria-expanded="false" aria-controls="addForm"><span class="add-form-toggle-title">新增住宿</span><span class="add-form-plus" aria-hidden="true">＋</span></button>
+      <div class="section-header" style="margin-bottom:16px;"><div class="section-title">新增住宿</div><button class="add-form-close" type="button" onclick="setAddFormOpen(false)">收起</button></div>
       <div class="form-grid">
         <div class="form-group"><label>日期</label><div class="input-wrap"><input type="date" id="inputDate" onchange="checkQ1Hint();updateDetailFields()"></div></div>
         <div class="form-group"><label>房晚數</label><div class="stepper"><button class="stepper-btn" id="btnMinus" aria-label="減少房晚數">−</button><div class="stepper-val" id="nightsVal">1</div><button class="stepper-btn" id="btnPlus" aria-label="增加房晚數">＋</button></div></div>
@@ -1288,6 +1297,15 @@ window.showMissingPoints=function(){
   jumpToStayList('2026');
 };
 
+window.setAddFormOpen=function(open){
+  const form=document.getElementById('addForm');
+  if(!form)return;
+  form.classList.toggle('collapsed-form',!open);
+  const toggle=form.querySelector('.add-form-toggle');
+  if(toggle)toggle.setAttribute('aria-expanded',String(open));
+  if(open)form.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
 window.toggleSection=function(cardId){
   const card=document.getElementById(cardId);
   if(!card)return;
@@ -1565,7 +1583,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.4';
+const APP_VERSION='v2026.10.26.5';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -2565,6 +2583,7 @@ window.addStay=async function(){
     document.getElementById('inputRoomNo').value='';
     updateDetailFields();
     document.getElementById('q1Hint').style.display='none';
+    setAddFormOpen(false);
     showToast(stayYear===activeYear?'✓ 住宿已新增並同步':`✓ 住宿已新增到 ${stayYear} 年並同步`);
   }catch(e){
     pendingSyncWrites=Math.max(0,pendingSyncWrites-1);
