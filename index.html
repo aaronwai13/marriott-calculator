@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.1 -->
+<!-- VERSION: 2026.10.26.2 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -162,6 +162,17 @@
   .viz-diff-chips{display:flex;flex-wrap:wrap;gap:6px;}
   .viz-diff-chip{font-size:11px;padding:4px 9px;border-radius:999px;background:var(--surface2);border:1px solid rgba(128,128,128,0.15);}
   .viz-diff-chip.dim{color:var(--text-muted);}
+  button.viz-diff-chip{font:inherit;font-size:11px;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  button.viz-diff-chip.dim{color:var(--text-muted);}
+  button.viz-diff-chip.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.12);}
+  .viz-stay-panel{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--surface2);}
+  .viz-stay-panel-title{font-size:12px;font-weight:600;margin-bottom:6px;}
+  .viz-stay-year{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);margin:8px 0 2px;}
+  .viz-stay-row{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(128,128,128,0.12);font-size:12px;}
+  .viz-stay-row:last-child{border-bottom:none;}
+  .viz-stay-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);}
+  .viz-stay-nights{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap;}
+  .viz-stay-row .stay-jump-btn{text-align:left;}
 
   .section-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
@@ -337,7 +348,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.1</div>
+    <div class="app-version" id="appVersion">v2026.10.26.2</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1549,7 +1560,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.1';
+const APP_VERSION='v2026.10.26.2';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -2036,6 +2047,7 @@ function yearMetrics(stays){
 }
 
 const compareExpanded=new Set();
+const compareSelected={brands:null,regions:null};
 function renderCompare(stays){
   const card=document.getElementById('compareSectionCard');
   const prevYear=activeYear-1;
@@ -2067,18 +2079,47 @@ function renderCompare(stays){
     const dropped=sortZh([...prevSet].filter(x=>!curSet.has(x)));
     const both=sortZh([...curSet].filter(x=>prevSet.has(x)));
     const detail=el('tr','viz-detail');const td=el('td');td.colSpan=4;detail.appendChild(td);
+    // 撳品牌／地區 → 下面列出兩年嘅入住記錄（撳酒店名跳去住宿明細）
+    const matchFn=key==='brands'?(st,x)=>st.brand===x:(st,x)=>getStayRegion(st)===x;
+    const panel=el('div','viz-stay-panel');
+    const chipButtons=[];
+    const renderPanel=()=>{
+      const x=compareSelected[key];
+      chipButtons.forEach(b=>{const on=b.dataset.value===x;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
+      panel.replaceChildren();panel.hidden=!x;
+      if(!x)return;
+      panel.appendChild(el('div','viz-stay-panel-title',`${x} 嘅入住記錄`));
+      [[prevYear,prevStays],[activeYear,stays]].forEach(([yr,list])=>{
+        const matched=list.filter(st=>matchFn(st,x)).sort((a,b)=>a.date.localeCompare(b.date));
+        const nights=matched.reduce((sum,st)=>sum+(Number(st.nights)||0),0);
+        panel.appendChild(el('div','viz-stay-year',`${yr}（${matched.length}次 · ${nights}晚）`));
+        if(!matched.length){panel.appendChild(el('div','viz-empty','冇入住'));return;}
+        matched.forEach(st=>{
+          const row=el('div','viz-stay-row');
+          row.append(el('span','viz-stay-date',window.formatShortDate(st.date)),createStayJumpButton(st,String(yr)),el('span','viz-stay-nights',`${st.nights}晚${st.redeem?' · 兌換':''}`));
+          panel.appendChild(row);
+        });
+      });
+    };
     const group=(title,items,dim)=>{
       const g=el('div','viz-diff-group');g.appendChild(el('div','viz-diff-label',`${title}（${items.length}）`));
       const chips=el('div','viz-diff-chips');
       if(!items.length)chips.appendChild(el('span','viz-diff-chip dim','冇'));
-      items.forEach(x=>chips.appendChild(el('span','viz-diff-chip'+(dim?' dim':''),x)));
+      items.forEach(x=>{
+        const b=el('button','viz-diff-chip'+(dim?' dim':''),x);b.type='button';b.dataset.value=x;
+        b.addEventListener('click',e=>{e.stopPropagation();compareSelected[key]=compareSelected[key]===x?null:x;renderPanel();});
+        chipButtons.push(b);chips.appendChild(b);
+      });
       g.appendChild(chips);return g;
     };
     td.append(
       group(`${activeYear} 新增${noun}`,added,false),
       group(`${activeYear} 冇再住嘅${noun}`,dropped,false),
-      group(`兩年都有`,both,true)
+      group(`兩年都有`,both,true),
+      panel
     );
+    if(compareSelected[key]&&!prevSet.has(compareSelected[key])&&!curSet.has(compareSelected[key]))compareSelected[key]=null;
+    renderPanel();
     const open=compareExpanded.has(key);
     tr.classList.add('viz-row-toggle');tr.classList.toggle('open',open);
     tr.tabIndex=0;tr.setAttribute('role','button');tr.setAttribute('aria-expanded',String(open));
@@ -2098,7 +2139,7 @@ function renderCompare(stays){
   });
   if(chart.toggleButton)tools.appendChild(chart.toggleButton);
   body.append(tools,chart);
-  body.appendChild(el('div','viz-note',`只計實際入住晚數（唔包 Q1 同年度福利獎勵晚）。撳「品牌數」或「地區數」可以睇新增同冇再住嘅明細。${prevYear===2025?'2025 係寫死嘅回顧資料。':''}`));
+  body.appendChild(el('div','viz-note',`只計實際入住晚數（唔包 Q1 同年度福利獎勵晚）。撳「品牌數」或「地區數」可以睇新增同冇再住嘅明細，再撳個別品牌／地區睇入住記錄。${prevYear===2025?'2025 係寫死嘅回顧資料。':''}`));
 }
 
 function renderPointsFlow(stays){
