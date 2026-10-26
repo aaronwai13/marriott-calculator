@@ -294,7 +294,10 @@
   .brand-logo-chip img{width:100%;max-width:92px;max-height:30px;object-fit:contain;display:block;filter:grayscale(1) invert(1) brightness(1.35);opacity:0.9;}
   .brand-logo-chip[data-brand="Courtyard"] img,.brand-logo-chip[data-brand="Four Points"] img,.brand-logo-chip[data-brand="Tribute Portfolio"] img{max-width:104px;}
   .brand-logo-chip.fallback{font-size:10px;color:var(--text-muted);letter-spacing:0.02em;}
-  #q1SectionCard.q1-review .q1-brand-label{display:none;}
+  #q1SectionCard.q1-review .q1-brand-label,#q1ReviewModal.q1-review .q1-brand-label{display:none;}
+  .stat-card.tappable{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .stat-card.tappable:active{opacity:0.7;}
+  #q1ReviewModal .modal{max-height:85vh;overflow-y:auto;}
   @media(prefers-color-scheme:light){
     .brand-logo-chip img{filter:grayscale(1) brightness(0.5);opacity:0.86;}
   }
@@ -505,7 +508,7 @@
 
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-value gold" id="statActual">—</div><div class="stat-label">實際住宿晚數</div></div>
-      <div class="stat-card"><div class="stat-value blue" id="statQ1">—</div><div class="stat-label">Q1活動獎勵房晚</div></div>
+      <div class="stat-card tappable" role="button" tabindex="0" onclick="openQ1Review()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openQ1Review();}"><div class="stat-value blue" id="statQ1">—</div><div class="stat-label">Q1活動獎勵房晚 ›</div></div>
       <div class="stat-card"><div class="stat-value green" id="statEarned">—</div><div class="stat-label" id="statEarnedLabel">2026已賺積分</div></div>
       <div class="stat-card" style="position:relative;">
         <div class="stat-value purple" id="statTotal">—</div>
@@ -769,6 +772,15 @@
 </div>
 
 <!-- Q1 Config Modal -->
+<div class="modal-overlay" id="q1ReviewModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="q1ReviewTitle">
+    <div class="modal-title" id="q1ReviewTitle">Q1 回顧</div>
+    <div class="modal-body-text" id="q1ReviewSummary" style="margin-bottom:12px;"></div>
+    <div id="q1ReviewBody"></div>
+    <div class="modal-actions" style="grid-template-columns:1fr;"><button class="btn-cancel" onclick="closeAllModals()">關閉</button></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="q1ConfigModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="q1ConfigTitle">
     <div class="modal-title" id="q1ConfigTitle">Q1 設定</div>
@@ -1443,8 +1455,24 @@ window.showLogoutModal=function(){
 };
 window.closeAllModals=function(){
   document.querySelectorAll('.modal-overlay').forEach(el=>el.classList.remove('show'));
+  restoreQ1Body();
 };
-['loginModal','logoutModal','delModal','modalOverlay','pointsModalOverlay','q1ConfigModal'].forEach(id=>{
+// Q1 內容只有一份：彈出時搬入 modal，關閉時搬返張卡度
+function restoreQ1Body(){
+  const body=document.querySelector('#q1ReviewBody > .collapsible-body');
+  if(body)document.getElementById('q1SectionCard').appendChild(body);
+}
+window.openQ1Review=function(){
+  const card=document.getElementById('q1SectionCard');
+  const body=card.querySelector(':scope > .collapsible-body');
+  if(body)document.getElementById('q1ReviewBody').appendChild(body);
+  const modal=document.getElementById('q1ReviewModal');
+  modal.classList.toggle('q1-review',card.classList.contains('q1-review'));
+  document.getElementById('q1ReviewTitle').textContent=document.getElementById('q1SectionTitle').textContent;
+  document.getElementById('q1ReviewSummary').textContent=document.getElementById('q1SectionSummary').textContent;
+  modal.classList.add('show');
+};
+['q1ReviewModal','loginModal','logoutModal','delModal','modalOverlay','pointsModalOverlay','q1ConfigModal'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeAllModals();});
 });
 document.getElementById('userAvatar').addEventListener('keydown',e=>{
