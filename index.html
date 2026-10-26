@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.11 -->
+<!-- VERSION: 2026.10.26.12 -->
 <style>
   :root{
     --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
@@ -371,7 +371,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.11</div>
+    <div class="app-version" id="appVersion">v2026.10.26.12</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -471,7 +471,7 @@
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-ticks"><span>0</span><span>75</span></div>
       <div class="nights-remaining" id="nightsRemainingEl">距離75晚目標，仲需 <strong>—</strong> 晚</div>
-      <div class="progress-breakdown" id="progressBreakdown" aria-label="房晚組成"></div>
+      <div class="progress-breakdown" id="progressBreakdown" aria-label="房晚組成"><span class="progress-chip">實際 <strong>—</strong></span><span class="progress-chip">Q1 <strong>—</strong></span><span class="progress-chip">50晚 <strong>—</strong></span></div>
     </div>
 
     <div class="insight-grid" aria-label="保級摘要">
@@ -1617,7 +1617,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.11';
+const APP_VERSION='v2026.10.26.12';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
