@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.2 -->
+<!-- VERSION: 2026.10.26.3 -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -348,7 +348,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.2</div>
+    <div class="app-version" id="appVersion">v2026.10.26.3</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -437,6 +437,7 @@
       <div class="header-sub">鈦金保級目標 · 75晚</div>
       <div class="header-actions">
         <button class="shortcut-btn" type="button" onclick="jumpToStayList('2026')">住宿明細</button>
+        <button class="shortcut-btn" type="button" id="shareBtn" onclick="openShareCard()">分享</button>
       </div>
     </div>
 
@@ -751,6 +752,17 @@
       <div class="input-wrap"><input type="number" id="editPointsEarned" inputmode="numeric" style="background:var(--surface2);border:1px solid rgba(128,128,128,0.15);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%;-webkit-appearance:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
     </div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEdit()">儲存</button></div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+    <div class="modal-title" id="shareModalTitle">分享年度總結</div>
+    <div id="shareStatus" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">生成中…</div>
+    <img id="shareImage" alt="年度總結圖" style="display:none;width:100%;border-radius:12px;margin-bottom:12px;border:1px solid var(--border);">
+    <div style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:14px;">唔包積分餘額。分享唔到嘅話，可以長按圖片儲存。</div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeAllModals()">關閉</button><button class="btn-save" id="shareSendBtn" onclick="shareCardNow()" disabled>分享／儲存</button></div>
   </div>
 </div>
 
@@ -1421,7 +1433,7 @@ window.showLogoutModal=function(){
 window.closeAllModals=function(){
   document.querySelectorAll('.modal-overlay').forEach(el=>el.classList.remove('show'));
 };
-['loginModal','logoutModal','delModal','modalOverlay','pointsModalOverlay','q1ConfigModal'].forEach(id=>{
+['loginModal','logoutModal','delModal','modalOverlay','pointsModalOverlay','q1ConfigModal','shareModal'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeAllModals();});
 });
 document.getElementById('userAvatar').addEventListener('keydown',e=>{
@@ -1560,7 +1572,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.2';
+const APP_VERSION='v2026.10.26.3';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -1877,6 +1889,125 @@ function calcQ1(stays){
   }
   return{bonus,usedBrands,bonusKeys};
 }
+
+// ===== 分享圖：用 canvas 生成 1080×1350 年度總結 PNG =====
+function yearSummary(year){
+  const stays=staysByYear[year]||[];
+  const actual=stays.reduce((sum,st)=>sum+(Number(st.nights)||0),0);
+  const {bonus}=calcQ1(stays);
+  const preAnnual=actual+bonus;
+  const annual=calcAnnualChoiceBonus(preAnnual);
+  const total=preAnnual+annual;
+  const brandNights={},regionNights={};
+  let redeemNights=0,earned=0;
+  stays.forEach(st=>{
+    const n=Number(st.nights)||0;
+    brandNights[st.brand]=(brandNights[st.brand]||0)+n;
+    const r=getStayRegion(st);regionNights[r]=(regionNights[r]||0)+n;
+    if(st.redeem)redeemNights+=n;
+    if(st.pointsEarned>0)earned+=st.pointsEarned;
+  });
+  const top=obj=>Object.entries(obj).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,3);
+  const left=Math.max(0,TARGET-total);
+  return{year,stays:stays.length,actual,bonus,annual,total,left:preAnnual<ANNUAL_CHOICE_THRESHOLD?Math.max(0,left-ANNUAL_CHOICE_BONUS):left,redeemNights,earned,
+    brands:Object.keys(brandNights).length,regions:Object.keys(regionNights).length,topBrands:top(brandNights),topRegions:top(regionNights)};
+}
+
+function drawShareCard(sum){
+  const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;
+  const g=c.getContext('2d');
+  const GOLD='#C9A84C',GOLD_L='#E8C97A',TEXT='#F0EDE8',MUTED='#8A8580',SURF='#16161F',LINE='rgba(201,168,76,0.22)';
+  const SANS="'DM Sans','PingFang HK','PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif";
+  const SERIF="'Playfair Display','PingFang HK','Noto Serif TC',serif";
+  const MONO="'DM Mono','PingFang HK',monospace";
+  const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();};
+  const text=(t,x,y,font,color,align='left')=>{g.font=font;g.fillStyle=color;g.textAlign=align;g.textBaseline='alphabetic';g.fillText(t,x,y);};
+  const fit=(t,font,maxW)=>{g.font=font;if(g.measureText(t).width<=maxW)return t;let s=t;while(s.length>1&&g.measureText(s+'…').width>maxW)s=s.slice(0,-1);return s+'…';};
+  // 背景
+  const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#14141C');bg.addColorStop(1,'#0A0A0F');g.fillStyle=bg;g.fillRect(0,0,W,H);
+  const glow=g.createRadialGradient(W/2,0,0,W/2,0,700);glow.addColorStop(0,'rgba(201,168,76,0.16)');glow.addColorStop(1,'rgba(201,168,76,0)');g.fillStyle=glow;g.fillRect(0,0,W,700);
+  const P=80;
+  // 標題
+  text('萬豪住宿追蹤',P,130,`500 26px ${MONO}`,GOLD);
+  text(`${sum.year} 年度總結`,P,215,`700 76px ${SERIF}`,TEXT);
+  // 主數字
+  const titanium=sum.total>=TARGET;
+  text(String(sum.total),P,400,`700 170px ${SERIF}`,GOLD_L);
+  g.font=`700 170px ${SERIF}`;const numW=g.measureText(String(sum.total)).width;
+  text(`/ ${TARGET} 晚`,P+numW+20,400,`500 44px ${SANS}`,MUTED);
+  text(titanium?'鈦金精英保級 · 已達標':`鈦金精英保級 · 仲差 ${sum.left} 晚`,P,460,`600 34px ${SANS}`,titanium?GOLD_L:TEXT);
+  // 進度條
+  const barY=500,barW=W-P*2;
+  rr(P,barY,barW,18,9);g.fillStyle='rgba(240,237,232,0.08)';g.fill();
+  const pct=Math.min(1,sum.total/TARGET);
+  if(pct>0){rr(P,barY,Math.max(18,barW*pct),18,9);const bar=g.createLinearGradient(P,0,P+barW,0);bar.addColorStop(0,'#9A7A2E');bar.addColorStop(1,GOLD_L);g.fillStyle=bar;g.fill();}
+  text(`實際 ${sum.actual} ＋ Q1 ${sum.bonus} ＋ 年度福利 ${sum.annual}`,P,570,`400 28px ${SANS}`,MUTED);
+  // 統計格
+  const cells=[['住宿次數',`${sum.stays}`,'次'],['實際晚數',`${sum.actual}`,'晚'],['兌換晚數',`${sum.redeemNights}`,'晚'],
+    ['品牌',`${sum.brands}`,'個'],['地區',`${sum.regions}`,'個'],['已賺積分',sum.earned>0?sum.earned.toLocaleString():'—','']];
+  const gx=P,gy=620,gw=(W-P*2-2*24)/3,gh=150;
+  cells.forEach(([label,val,unit],i)=>{
+    const x=gx+(i%3)*(gw+24),y=gy+Math.floor(i/3)*(gh+24);
+    rr(x,y,gw,gh,22);g.fillStyle=SURF;g.fill();g.strokeStyle=LINE;g.lineWidth=2;g.stroke();
+    text(label,x+28,y+50,`500 26px ${SANS}`,MUTED);
+    g.font=`700 54px ${SERIF}`;const vw=g.measureText(val).width;
+    text(val,x+28,y+118,`700 54px ${SERIF}`,TEXT);
+    if(unit)text(unit,x+28+vw+8,y+118,`500 26px ${SANS}`,MUTED);
+  });
+  // 排行
+  const listY=gy+2*(gh+24)+40,colW=(W-P*2-40)/2;
+  [['最常住品牌',sum.topBrands],['最常去地區',sum.topRegions]].forEach(([title,items],ci)=>{
+    const x=P+ci*(colW+40);
+    text(title,x,listY,`500 24px ${MONO}`,GOLD);
+    if(!items.length)text('—',x,listY+60,`500 32px ${SANS}`,MUTED);
+    items.forEach(([name,n],i)=>{
+      const y=listY+64+i*62;
+      text(`${i+1}`,x,y,`700 34px ${SERIF}`,i===0?GOLD_L:MUTED);
+      text(fit(name,`500 32px ${SANS}`,colW-150),x+44,y,`500 32px ${SANS}`,TEXT);
+      text(`${n}晚`,x+colW,y,`500 28px ${MONO}`,MUTED,'right');
+    });
+  });
+  // 底部
+  g.strokeStyle=LINE;g.lineWidth=2;g.beginPath();g.moveTo(P,H-120);g.lineTo(W-P,H-120);g.stroke();
+  text(`截至 ${formatLocalDate()}`,P,H-70,`400 26px ${MONO}`,MUTED);
+  text('萬豪追蹤',W-P,H-70,`600 28px ${SANS}`,GOLD,'right');
+  return c;
+}
+
+let _shareBlob=null;
+window.openShareCard=async function(){
+  const modal=document.getElementById('shareModal'),img=document.getElementById('shareImage'),status=document.getElementById('shareStatus'),btn=document.getElementById('shareSendBtn');
+  _shareBlob=null;btn.disabled=true;img.style.display='none';status.style.display='';status.textContent='生成中…';
+  modal.classList.add('show');
+  try{
+    if(!loadedYears.has(activeYear))throw new Error('資料未載入完');
+    applyQ1Context();
+    if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+    const canvas=drawShareCard(yearSummary(activeYear));
+    _shareBlob=await new Promise(res=>canvas.toBlob(res,'image/png'));
+    if(!_shareBlob)throw new Error('生成失敗');
+    if(img.src&&img.src.startsWith('blob:'))URL.revokeObjectURL(img.src);
+    img.src=URL.createObjectURL(_shareBlob);img.style.display='block';status.style.display='none';btn.disabled=false;
+  }catch(e){
+    status.textContent=`生成失敗：${e.message||e}`;
+  }
+};
+window.shareCardNow=async function(){
+  if(!_shareBlob)return;
+  const file=new File([_shareBlob],`marriott-${activeYear}-summary.png`,{type:'image/png'});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:`${activeYear} 萬豪年度總結`});
+      return;
+    }
+  }catch(e){
+    if(e&&e.name==='AbortError')return; // 用戶取消分享
+  }
+  // 唔支援分享：下載圖片
+  const a=document.createElement('a');a.href=URL.createObjectURL(_shareBlob);a.download=file.name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+  showToast('已下載圖片');
+};
 
 function calcAnnualChoiceBonus(preAnnualTotal){
   return preAnnualTotal>=ANNUAL_CHOICE_THRESHOLD?ANNUAL_CHOICE_BONUS:0;
