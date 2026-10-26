@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.26.8 -->
+<!-- VERSION: 2026.10.26.9 -->
 <style>
   :root{
     --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
@@ -117,10 +117,10 @@
   .insight-value.green{color:var(--green);}
   .insight-meta{font-size:11px;color:var(--text-muted);line-height:1.35;margin-top:6px;}
 
-  .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px;}.stat-value.blue{color:#60A5FA;}.stat-value.purple{color:#C084FC;}
-  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;min-width:0;}
-  .stat-icon{font-size:18px;margin-bottom:8px;display:block;}
-  .stat-value{font-family:var(--font);font-size:34px;font-weight:700;line-height:1;margin-bottom:4px;white-space:nowrap;}
+  .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;}.stat-value.blue{color:#60A5FA;}.stat-value.purple{color:#C084FC;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;min-width:0;}
+  .stat-value{font-family:var(--font);font-size:28px;font-weight:700;line-height:1;margin-bottom:6px;white-space:nowrap;}
+  #statTotal{padding-right:24px;} /* 預留右上角 ✎ 嘅位，長數字縮字時一齊計 */
   .stat-value.gold{color:var(--gold);}
   .stat-value.green{color:var(--green);}
   .stat-label{font-size:11px;color:var(--text-muted);}
@@ -362,7 +362,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.26.8</div>
+    <div class="app-version" id="appVersion">v2026.10.26.9</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -396,8 +396,8 @@
     </div>
 
     <div class="stats-grid">
-      <div class="stat-card"><span class="stat-icon">🏨</span><div class="stat-value gold">66</div><div class="stat-label">實際住宿晚數</div></div>
-      <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value blue">29</div><div class="stat-label">獎勵房晚（Q1+年度）</div></div>
+      <div class="stat-card"><div class="stat-value gold">66</div><div class="stat-label">實際住宿晚數</div></div>
+      <div class="stat-card"><div class="stat-value blue">29</div><div class="stat-label">獎勵房晚（Q1+年度）</div></div>
     </div>
 
     <div class="card collapsible-card collapsed" id="monthSectionCard2025">
@@ -504,11 +504,10 @@
     </div>
 
     <div class="stats-grid">
-      <div class="stat-card"><span class="stat-icon">🏨</span><div class="stat-value gold" id="statActual">—</div><div class="stat-label">實際住宿晚數</div></div>
-      <div class="stat-card"><span class="stat-icon">🎁</span><div class="stat-value blue" id="statQ1">—</div><div class="stat-label">Q1活動獎勵房晚</div></div>
-      <div class="stat-card"><span class="stat-icon">⭐</span><div class="stat-value green" id="statEarned">—</div><div class="stat-label" id="statEarnedLabel">2026已賺積分</div></div>
+      <div class="stat-card"><div class="stat-value gold" id="statActual">—</div><div class="stat-label">實際住宿晚數</div></div>
+      <div class="stat-card"><div class="stat-value blue" id="statQ1">—</div><div class="stat-label">Q1活動獎勵房晚</div></div>
+      <div class="stat-card"><div class="stat-value green" id="statEarned">—</div><div class="stat-label" id="statEarnedLabel">2026已賺積分</div></div>
       <div class="stat-card" style="position:relative;">
-        <span class="stat-icon">💎</span>
         <div class="stat-value purple" id="statTotal">—</div>
         <div class="stat-label">目前積分</div>
         <button id="btnEditPoints" onclick="openPointsModal()" aria-label="更新積分餘額" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:4px;">✎</button>
@@ -1584,7 +1583,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.26.8';
+const APP_VERSION='v2026.10.26.9';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -2217,8 +2216,11 @@ function fitStatValues(){
   document.querySelectorAll('.stat-value').forEach(el=>{
     el.style.fontSize='';
     if(!el.clientWidth)return; // 未顯示（例如喺其他分頁）就唔計
-    let size=parseFloat(getComputedStyle(el).fontSize);
-    while(el.scrollWidth>el.clientWidth&&size>20){size-=1;el.style.fontSize=size+'px';}
+    const cs=getComputedStyle(el);
+    const avail=el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    const range=document.createRange();range.selectNodeContents(el);
+    let size=parseFloat(cs.fontSize);
+    while(range.getBoundingClientRect().width>avail&&size>20){size-=1;el.style.fontSize=size+'px';}
   });
 }
 window.addEventListener('resize',fitStatValues);
