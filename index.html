@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.28.1 -->
+<!-- VERSION: 2026.10.28.2 -->
 <style>
   :root{
     --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
@@ -372,7 +372,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.28.1</div>
+    <div class="app-version" id="appVersion">v2026.10.28.2</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -960,11 +960,11 @@ window.updateDetailFields=function(){
   if(box)box.style.display=y>=window.DETAIL_FIELDS_FROM_YEAR?'':'none';
 };
 
-window.CURRENCIES=['HKD','CNY','USD','EUR','JPY','THB','KRW','SGD','GBP','TWD'];
-window.populateCurrencySelect=function(id,selected='HKD'){
+window.CURRENCIES=['CNY','HKD','USD','EUR','JPY','THB','KRW','SGD','GBP','TWD'];
+window.populateCurrencySelect=function(id,selected='CNY'){
   const sel=document.getElementById(id);
   sel.replaceChildren(...window.CURRENCIES.map(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;return o;}));
-  sel.value=window.CURRENCIES.includes(selected)?selected:'HKD';
+  sel.value=window.CURRENCIES.includes(selected)?selected:'CNY';
 };
 
 function populateBrandSelect(id){
@@ -1622,7 +1622,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.28.1';
+const APP_VERSION='v2026.10.28.2';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
@@ -2702,7 +2702,7 @@ window.openEdit=function(key,date,name,brand,region,nights,redeem,pointsEarned,r
   // 舊記錄（每晚房價）換算成總房價預填，儲存時轉做 priceTotal
   const currentTotal=Number(current.priceTotal)>0?Number(current.priceTotal):(Number(current.price)>0?Math.round(Number(current.price)*(Number(current.nights)||1)*100)/100:0);
   document.getElementById('editPrice').value=currentTotal>0?currentTotal:'';
-  populateCurrencySelect('editCurrency',current.currency||'HKD');
+  populateCurrencySelect('editCurrency',current.currency||'CNY');
   document.getElementById('editRedeemPointsGroup').style.display=redeem?'block':'none';
   updateRegionHint('editName','editRegionHint');
   checkEditQ1Hint();
