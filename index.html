@@ -11,12 +11,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="萬豪追蹤">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<!-- VERSION: 2026.10.27.3 -->
+<!-- VERSION: 2026.10.28.1 -->
 <style>
   :root{
     --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A2E;
     --bg:#0A0A0F;--surface:#13131A;--surface2:#1C1C26;
-    --border:rgba(201,168,76,0.15);--text:#F0EDE8;--text-muted:#8A8580;
+    --border:rgba(201,168,76,0.15);--text:#F0EDE8;--text-muted:#8A8580;--text-summary:#A8A39D;
     --green:#4ADE80;--red:#F87171;--grey:#6B7280;
     --tab-h:60px;
     --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','PingFang HK','PingFang TC',sans-serif;
@@ -24,7 +24,7 @@
   }
   @media(prefers-color-scheme:light){:root{
     --bg:#F5F3EE;--surface:#FFFFFF;--surface2:#EDE9E0;
-    --border:rgba(180,140,50,0.2);--text:#1A1714;--text-muted:#7A7268;--grey:#9CA3AF;
+    --border:rgba(180,140,50,0.2);--text:#1A1714;--text-muted:#7A7268;--text-summary:#5E574F;--grey:#9CA3AF;
     --viz-muted:#6B7280;--viz-earned:#2a78d6;--viz-used:#eb6834;
   }}
   *{margin:0;padding:0;box-sizing:border-box;max-width:100%;}
@@ -179,10 +179,11 @@
   .section-title{font-family:var(--font);font-size:16px;font-weight:700;}
   .section-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:none;border:none;color:var(--text);font:inherit;text-align:left;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent;}
   .section-toggle-left{display:flex;align-items:center;gap:10px;min-width:0;}
-  .section-summary{font-family:var(--font);font-size:10px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .section-summary{font-family:var(--font);font-size:12px;color:var(--text-summary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .section-chevron{font-size:12px;color:var(--text-muted);transition:transform 0.18s;flex-shrink:0;}
   .collapsible-card.collapsed .section-chevron{transform:rotate(-90deg);}
   .collapsible-card.collapsed .collapsible-body{display:none;}
+  .collapsible-card.collapsed .section-header{margin-bottom:0;}
   .badge{font-family:var(--font);font-size:10px;letter-spacing:0.1em;padding:3px 9px;border-radius:100px;text-transform:uppercase;}
   .badge-gold{background:rgba(201,168,76,0.12);color:var(--gold);border:1px solid rgba(201,168,76,0.25);}
 
@@ -371,7 +372,7 @@
 <div class="top-bar">
   <div class="top-bar-title-wrap">
     <div class="top-bar-title">萬豪追蹤</div>
-    <div class="app-version" id="appVersion">v2026.10.27.3</div>
+    <div class="app-version" id="appVersion">v2026.10.28.1</div>
   </div>
   <div class="top-bar-right">
     <div class="sync-chip show loading" id="syncChip" aria-live="polite">
@@ -1621,7 +1622,7 @@ function applyQ1Context(){
 }
 window.getQ1Window=function(){return{start:Q1_START,end:Q1_END,configured:Q1_CONFIGURED};};
 function formatDayMonth(date){return `${date.getDate()}/${date.getMonth()+1}`;}
-const APP_VERSION='v2026.10.27.3';
+const APP_VERSION='v2026.10.28.1';
 
 const BRAND_KEYWORDS=[
   {brand:'AC Hotels',keywords:['AC酒店','AC Hotels','AC hotel','AC by Marriott','AC ']},
