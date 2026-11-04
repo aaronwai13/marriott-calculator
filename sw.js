@@ -1,4 +1,4 @@
-const CACHE = 'marriott-v2026.10.28.2';
+const CACHE = 'marriott-v2026.11.04.1';
 
 self.addEventListener('install', e => {
   e.waitUntil(
